@@ -38,7 +38,7 @@ El objetivo de este proyecto consiste en diseñar e implementar un sistema de co
     - Hash encadenado para evitar manipulación.
     - Registros inmutables de transacciones.
 
-## 👨🏻‍💻 Organización
+## 👨🏻‍💻 Responsabilidades
 - Pablo Zamora: Autenticación segura
 * [![Linkedin][Linkedin]][Linkedin-pablo]
 * [![GitHub][GitHub]][GitHub-pablo]
@@ -59,6 +59,7 @@ El objetivo de este proyecto consiste en diseñar e implementar un sistema de co
 
 Las principales dependencias del proyecto, incluyen:
 * [![NodeJS][NodeJS]][NodeJS-url]
+* [![MySQL][MySQL]][MySQL-url]
 
 <p align="right">(<a href="#readme-top">Ir al inicio</a>)</p>
 
@@ -74,9 +75,11 @@ Si deseas contribuir al proyecto, por favor sigue los siguientes pasos:
 
 
 
-<!-- MARKDOWN LINKS & IMAGES -->
+<!-- IMAGES -->
 [NodeJS]: https://img.shields.io/badge/node.js-339933?style=flat&logo=Node.js&logoColor=white
 [NodeJS-url]: https://nodejs.org/es
+[MySQL]: https://shields.io/badge/MySQL-lightgrey?logo=mysql&style=plastic&logoColor=white&labelColor=blue
+[MySQL-url]: https://www.mysql.com/
 [Linkedin]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [GitHub]: https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white
 
