@@ -1,10 +1,20 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import http from 'http';
+import { connection } from './db/connection.js';
 import { Server } from 'socket.io';
 import { chatHandler } from './sockets/chat.js';
 import { verifyToken } from './utils/auth.js';
 import indexRoutes from './routes/index.js';
+
+connection.connect((err) => {
+  if (err) {
+    console.error('Error al conectar a la base de datos.', err);
+    return;
+  }
+  console.log('Conexión a la base de datos exitosa.');
+});
 
 const app = express();
 
