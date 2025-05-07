@@ -51,7 +51,7 @@ El objetivo de este proyecto consiste en diseñar e implementar un sistema de co
 - Brandon Sicay: Mini Blockchain para Registro de Mensajes
 * [![Linkedin][Linkedin]][Linkedin-brandon]
 * [![GitHub][GitHub]][GitHub-brandon]
-- Elías Alvarado: Mensajes directors efímeros
+- Elías Alvarado: Mensajes directos efímeros
 * [![Linkedin][Linkedin]][Linkedin-elias]
 * [![GitHub][GitHub]][GitHub-elias]
 
