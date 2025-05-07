@@ -60,5 +60,3 @@ Server->>DB: INSERT nuevo bloque
 
 * **Inmutabilidad local**: si alguien edita un bloque intermedio, todo hash posterior cambia.  
 * **Auditoría fácil**: quién envió y cuándo, sin revelar el mensaje claro.  
-* **No reemplaza** una blockchain descentralizada; depende de la base de datos del servidor.  
-* Recomendación: respaldar periódicamente el hash final en un log externo o servicio de timestamping.
