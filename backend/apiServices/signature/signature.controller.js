@@ -1,9 +1,4 @@
-const {
-    hashData,
-    signData,
-    verifySignature,
-    generateKeyPair
-} = require('./signature.service'); // Asumiendo que tus funciones están en signature.service.js
+import { hashData, signData, verifySignature, generateKeyPair } from '../../utils/signature';
 
 let keyPairCache = null;
 
@@ -56,7 +51,7 @@ async function verifyMessage(req, res) {
     }
 }
 
-module.exports = {
+export default {
     generateKeys,
     signMessage,
     verifyMessage

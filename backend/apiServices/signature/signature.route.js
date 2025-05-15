@@ -1,9 +1,9 @@
-const express = require('express');
-const router = express.Router();
-const signatureController = require('./signature.controller');
+import { Router } from 'express';
+const router = Router();
+import { generateKeys, signMessage, verifyMessage } from './signature.controller';
 
-router.post('/generate-keys', signatureController.generateKeys);
-router.post('/sign', signatureController.signMessage);
-router.post('/verify', signatureController.verifyMessage);
+router.post('/generate-keys', generateKeys);
+router.post('/sign', signMessage);
+router.post('/verify', verifyMessage);
 
-module.exports = router;
+export default router;
