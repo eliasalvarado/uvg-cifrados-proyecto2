@@ -41,3 +41,5 @@ async function generateKeyPair() {
     );
     return keyPair;
 }
+
+export { hashData, signData, verifySignature, generateKeyPair };

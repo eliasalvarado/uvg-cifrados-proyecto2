@@ -1,4 +1,4 @@
-import { hashData, signData, verifySignature, generateKeyPair } from '../../utils/signature';
+import { hashData, signData, verifySignature, generateKeyPair } from '../../utils/signature.js';
 
 let keyPairCache = null;
 
@@ -51,7 +51,7 @@ async function verifyMessage(req, res) {
     }
 }
 
-export default {
+export {
     generateKeys,
     signMessage,
     verifyMessage
