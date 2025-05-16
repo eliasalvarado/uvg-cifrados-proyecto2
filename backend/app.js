@@ -7,6 +7,7 @@ import { Server } from 'socket.io';
 import { chatHandler } from './sockets/chat.js';
 import { verifyToken } from './utils/auth.js';
 import indexRoutes from './routes/index.js';
+import './apiServices/oauth/oauth.google.js';
 
 connection.connect((err) => {
   if (err) {
