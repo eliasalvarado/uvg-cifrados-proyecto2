@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import speakeasy from 'speakeasy';
 import qrcode from 'qrcode';
 import { createUser, getUserByEmail, getUserById, saveMFASecret } from './user.model.js';
+import { generateRSAKeys } from '../../utils/cypher/RSA.js';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -25,7 +26,12 @@ const registerUser = async (req, res) => {
     }
 
     try {
-        const userId = await createUser({ email, passwordHash });
+
+        // Generar llaves RSA
+        const { publicKey: publicKeyRSA, privateKey: privateKeyRSA } = generateRSAKeys();
+
+        
+        const userId = await createUser({ email, passwordHash, publicKeyRSA });
 
         // Generar token JWT, con una expiración de 1 hora
         const token = jwt.sign(
@@ -34,7 +40,7 @@ const registerUser = async (req, res) => {
             { expiresIn: '1h' }
         );
 
-        res.status(201).json({ message: 'Usario registrado exitosamente.', userId, token });
+        res.status(201).json({ message: 'Usario registrado exitosamente.', userId, token, publicKeyRSA, privateKeyRSA });
     } catch (error) {
         console.log("Error al crear el usuario:", error);
         res.status(500).json({ message: 'Ocurrió un error al crear el usuario:', error });

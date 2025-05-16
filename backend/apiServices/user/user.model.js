@@ -1,9 +1,9 @@
 import { executeQuery } from '../../db/connection.js';
 import { generateSecret } from 'speakeasy';
 
-const createUser = async ({ email, passwordHash }) => {
-    const query = 'INSERT INTO users (email, password_hash) VALUES (?, ?)';
-    const [result] = await executeQuery(query, [email, passwordHash]);
+const createUser = async ({ email, passwordHash, publicKeyRSA }) => {
+    const query = 'INSERT INTO users (email, password_hash, rsa_public_key) VALUES (?, ?, ?)';
+    const [result] = await executeQuery(query, [email, passwordHash, publicKeyRSA]);
     return result.insertId;
 };
 
