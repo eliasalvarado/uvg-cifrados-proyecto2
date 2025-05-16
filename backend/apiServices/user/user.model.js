@@ -1,5 +1,4 @@
 import { executeQuery } from '../../db/connection.js';
-import { generateSecret } from 'speakeasy';
 
 const createUser = async ({ email, passwordHash }) => {
     const query = 'INSERT INTO users (email, password_hash) VALUES (?, ?)';
