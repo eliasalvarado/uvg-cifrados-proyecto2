@@ -1,4 +1,4 @@
-import { executeQuery } from '../../database/connection.js';
+import { executeQuery } from '../../db/connection.js';
 import crypto from 'crypto';
 
 const GENESIS_HASH = '0'.repeat(64);
