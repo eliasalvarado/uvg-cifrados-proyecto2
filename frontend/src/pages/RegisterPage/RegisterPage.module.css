@@ -1,0 +1,29 @@
+.registerPageContainer{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+.registerForm {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 30%;
+}
+
+.buttonContainer {
+    margin-top: 20px;
+}
+
+.errorMessage {
+    color: red;
+    margin-top: 10px;
+}
+
+.infoText {
+    margin-top: 20px;
+    text-align: center;
+}

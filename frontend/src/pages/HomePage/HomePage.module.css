@@ -1,0 +1,43 @@
+.pageContainer{
+    padding: var(--page-vertical-padding--) var(--page-horizontal-padding--);
+}
+
+.header{
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
+.keyButton{
+    font-size: 12px;
+    padding: 5px 10px;
+}
+
+.keyGenContainer{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    text-align: center;
+}
+
+.keyGenWarning{
+    color: #ff0000;
+    margin-top: 10px;
+}
+
+.keyGenButtonContainer{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.keyGenResultContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    margin-top: 10px;
+}
