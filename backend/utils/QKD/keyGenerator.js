@@ -1,4 +1,4 @@
-export function generateBitsBases(length = 10) {
+export function generateBitsBases(length = 50) {
   const bits = Array.from({ length }, () => Math.round(Math.random()));
   const bases = Array.from({ length }, () => (Math.random() < 0.5 ? '↕' : '↗'));
   return { bits, bases };
@@ -24,6 +24,12 @@ export function measurePhotons(photons, bases) {
   });
 }
 
-export function getFinalKey(aliceBits, aliceBases, bobBases) {
-  return aliceBits.filter((bit, i) => aliceBases[i] === bobBases[i]);
+export function compareBasesAndGenerateKey(aliceBits, aliceBases, bobBases) {
+  const key = [];
+  for (let i = 0; i < aliceBases.length; i++) {
+    if (aliceBases[i] === bobBases[i]) {
+      key.push(aliceBits[i]);
+    }
+  }
+  return key;
 }
