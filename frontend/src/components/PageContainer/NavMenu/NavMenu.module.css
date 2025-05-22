@@ -1,0 +1,154 @@
+.navMenu {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+.navMenu .profile {
+  display: none;
+}
+.navMenu a {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+.navMenu a:visited {
+  color: inherit;
+}
+
+@media only screen and (min-width: 767px) and (min-height: 500px) {
+  .navMenu .buttons {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  .navButtons {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    row-gap: 20px;
+    max-height: 80%;
+    overflow: auto;
+  }
+  .navButtons .optionIcon {
+    width: 90px;
+    height: 90px;
+    min-height: 90px;
+    cursor: pointer;
+  }
+  .navButtons .optionIcon svg {
+    width: 45px;
+    height: 45px;
+    fill: var(--blue-theme-color--);
+  }
+  .sessionButtons {
+    height: 20%;
+    min-height: 150px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .sessionButtons .logOut {
+    width: 90px;
+    height: 90px;
+    min-height: 90px;
+    cursor: pointer;
+  }
+  .sessionButtons .logOut svg {
+    width: 45px;
+    height: 45px;
+    position: relative;
+    left: 7px;
+    fill: var(--blue-theme-color--);
+  }
+}
+
+@media only screen and (min-width: 767px) and (max-height: 670px) {
+  /* Alinear items arriba por scroll*/
+  .navButtons {
+    justify-content: start;
+  }
+}
+
+@media only screen and (max-width: 767px), (max-height: 499px) {
+  .navMenu {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    color: white;
+    padding-block: 10%;
+  }
+  .navMenu .profile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .navMenu .profile .profilePicture {
+    width: 90px;
+    height: 90px;
+    min-width: 90px;
+    min-height: 90px;
+    font-size: 35px;
+    font-weight: bold;
+    justify-content: center;
+  }
+  .navMenu ::-webkit-scrollbar {
+    width: 20px;
+  }
+  .navMenu ::-webkit-scrollbar-track {
+    width: 1px;
+    background: transparent;
+  }
+  .navMenu ::-webkit-scrollbar-thumb {
+    background: white;
+    border: 5px solid var(--blue-theme-color--);
+    border-radius: 20px;
+  }
+  .navMenu ::-webkit-scrollbar-thumb:hover {
+    cursor: pointer;
+  }
+  .buttons {
+    width: 100%;
+    padding-inline: 5%;
+    margin-block: 5%;
+    flex-direction: column;
+    flex-grow: 1;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .profileName {
+    max-width: 60%;
+    text-align: center;
+    font-weight: bold;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    text-overflow: ellipsis;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    margin-top: 10px;
+  }
+  .optionIcon {
+    display: flex;
+    align-items: center;
+    height: 70px;
+  }
+  .optionIcon svg {
+    height: 35px;
+    width: 35px;
+  }
+  .logOut {
+    display: flex;
+    align-items: center;
+    height: 70px;
+  }
+  .logOut svg {
+    height: 35px;
+    width: 35px;
+  }
+}

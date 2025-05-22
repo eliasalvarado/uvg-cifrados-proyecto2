@@ -1,0 +1,2 @@
+ALTER TABLE users
+ADD COLUMN rsa_public_key TEXT NOT NULL;
