@@ -28,7 +28,6 @@ import { MdAccountCircle as ProfileIcon } from "react-icons/md";
 function NavBar({
 	onChatOptionClick,
 	onGroupChatOptionClick,
-	onContactsOptionClick,
 	onExitOptionClick,
 	onProfileOptionClick,
 }) {
@@ -58,15 +57,6 @@ function NavBar({
 					<span>Grupos</span>
 				</li>
 				<li
-					onClick={onContactsOptionClick}
-					onKeyUp={onContactsOptionClick}
-					tabIndex={2}
-					role="button"
-					>
-					<ContactIcon className={styles.icon} />
-					<span>Contactos</span>
-				</li>
-				<li
 					onClick={onProfileOptionClick}
 					onKeyUp={onProfileOptionClick}
 					tabIndex={3}
@@ -94,7 +84,6 @@ export default NavBar;
 NavBar.propTypes = {
 	onChatOptionClick: PropTypes.func.isRequired,
 	onGroupChatOptionClick: PropTypes.func.isRequired,
-	onContactsOptionClick: PropTypes.func.isRequired,
 	onExitOptionClick: PropTypes.func.isRequired,
 	onProfileOptionClick: PropTypes.func.isRequired,
 };
