@@ -7,7 +7,6 @@ function InputText({
   title, error, value, onChange, onBlur, onFocus, name, className, disabled, hidden, ...props
 }) {
   const id = randomId(15);
-  console.log(id);
   return (
     <div className={`${styles.inputTextContainer} ${error ? styles.error : ''} ${className}`}>
       <input

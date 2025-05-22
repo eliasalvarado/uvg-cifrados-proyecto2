@@ -4,6 +4,7 @@ import styles from "./LoginPage.module.css";
 import SessionContext from "../../context/SessionContext";
 import InputText from "../../components/InputText";
 import Button from "../../components/Button";
+import GoogleLoginButton from "../../components/GoogleLoginButton";
 import Spinner from "../../components/Spinner";
 import { Link } from "react-router-dom";
 
@@ -104,6 +105,9 @@ function LoginPage() {
           <p className={styles.registerLink}>
             ¿No tienes cuenta? <Link to="/register" className={styles.registerHere}>Regístrate aquí</Link>
           </p>
+            <div className={styles.googleLoginContainer}>
+                <GoogleLoginButton />
+            </div>
         </div>
       );
 }

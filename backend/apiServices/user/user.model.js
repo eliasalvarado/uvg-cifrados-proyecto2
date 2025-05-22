@@ -19,7 +19,7 @@ const getUserById = async (userId) => {
 }
 
 const saveMFASecret = async (userId, secret) => {
-    const query = 'UPDATE users SET totp_secret = ? WHERE id = ?';
+    const query = 'UPDATE users SET totp_secret = ?, mfa_enabled = true WHERE id = ?';
     const [result] = await executeQuery(query, [secret, userId]);
     return result.affectedRows > 0;
 }

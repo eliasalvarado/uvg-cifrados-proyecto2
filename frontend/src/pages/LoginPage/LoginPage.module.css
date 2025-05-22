@@ -18,6 +18,13 @@
     margin-top: 20px;
 }
 
+.googleLoginContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+}
+
 .errorMessage {
     color: red;
     margin-top: 10px;

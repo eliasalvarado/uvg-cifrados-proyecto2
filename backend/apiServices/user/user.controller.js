@@ -48,11 +48,63 @@ const registerUser = async (req, res) => {
 }
 
 const loginUser = async (req, res) => {
-    console.log("Login user")
+    const { email, password } = req.body;
+
+    // Verificar que la solicitud contenga usuario y contraseña
+    if (!email || !password) {
+        res.statusMessage = "Email y contraseña son requeridos";
+        return res.status(400).json({ message: "Email y contraseña son requeridos" });
+    }
+
+    try {
+        // Buscar el usuario por email
+        const user = await getUserByEmail(email);
+        if (!user) {
+            res.statusMessage = "No se encontró un usuario con el correo indicado";
+            return res.status(401).json({ message: "No se encontró un usuario con el correo indicado" });
+        }
+    
+        // Comparar la contraseña hasheada
+        const passwordHash = sha256(password);
+        if (user.password_hash !== passwordHash) {
+            res.statusMessage = "Credenciales inválidas";
+            return res.status(401).json({ message: "Credenciales inválidas" });
+        }
+    
+        // Generar el token JWT, con una expiración de 1 hora
+        const token = jwt.sign(
+          { id: user.id, email: user.email },
+          JWT_SECRET,
+          { expiresIn: '1h' }
+        );
+    
+        res.status(200).json({ message: "Login exitoso", token });
+    } catch (error) {
+        res.status(500).json({ message: "Error al iniciar sesión", error: error.message });
+    }
+}
+
+const getUserInfo = async (req, res) => {
+    const userId = req.user && req.user.id; // Obtener el ID del usuario desde el token JWT
+
+    // Obtener el usuario de la base de datos
+    const user = await getUserById(userId);
+    if (!user) {
+        return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+
+    const response = {
+        id: user.id,
+        email: user.email,
+        rsa_public_key: user.rsa_public_key,
+        mfa_enabled: user.mfa_enabled,
+    }
+
+    res.status(200).json(response);
 }
 
 const setupMFA = async (req, res) => {
-    const { userId } = req.params;
+    const userId = req.user && req.user.id; // Obtener el ID del usuario desde el token JWT
 
     // Generar secreto
     const secret = speakeasy.generateSecret({ 
@@ -65,7 +117,7 @@ const setupMFA = async (req, res) => {
 
     const qr = await qrcode.toDataURL(secret.otpauth_url);
 
-    res.json({
+    res.status(200).json({
         qrCode: qr,
         manualEntry: secret.base32,
     });
@@ -98,6 +150,7 @@ const verifyMFA = async (req, res) => {
 export {
     registerUser,
     loginUser,
+    getUserInfo,
     setupMFA,
     verifyMFA,
 }

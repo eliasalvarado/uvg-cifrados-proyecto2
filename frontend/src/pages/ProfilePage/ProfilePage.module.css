@@ -1,0 +1,35 @@
+.pageContainer{
+    padding: var(--page-vertical-padding--) var(--page-horizontal-padding--);
+    display: flex;
+    flex-direction: column;
+}
+
+.header{
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
+.buttonsContainer{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 1rem;
+    flex-direction: column;
+    align-self: center;
+    gap: 1rem;
+}
+
+.mfaContainer{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 1rem;
+    flex-direction: column;
+    align-self: center;
+    gap: 1rem;
+}
+
+.mfaMessage{
+    text-align: center;
+}
