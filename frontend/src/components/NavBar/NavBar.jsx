@@ -32,7 +32,6 @@ function NavBar({
 	onChatOptionClick,
 	onGroupChatOptionClick,
 	onContactsOptionClick,
-	onExitOptionClick,
 	onProfileOptionClick,
 }) {
 
@@ -84,6 +83,7 @@ function NavBar({
 				<li
 					onClick={() => {navigate("/profile")}}
 					onKeyUp={() => {navigate("/profile")}}
+					onKeyUp={onProfileOptionClick}
 					tabIndex={3}
 					role="button"
 				>
@@ -109,7 +109,6 @@ export default NavBar;
 NavBar.propTypes = {
 	onChatOptionClick: PropTypes.func.isRequired,
 	onGroupChatOptionClick: PropTypes.func.isRequired,
-	onContactsOptionClick: PropTypes.func.isRequired,
 	onExitOptionClick: PropTypes.func.isRequired,
 	onProfileOptionClick: PropTypes.func.isRequired,
 };

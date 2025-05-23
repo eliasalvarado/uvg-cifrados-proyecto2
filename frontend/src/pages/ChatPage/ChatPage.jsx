@@ -35,7 +35,6 @@ function ChatPage() {
       <NavBar 
         onChatOptionClick={() => setSelectedOption(menuOption.CHATS)}
         onGroupChatOptionClick={() => setSelectedOption(menuOption.GROUPS)}
-        onContactsOptionClick={() => setSelectedOption(menuOption.CONTACTS)}
         onProfileOptionClick={() => setSelectedOption(menuOption.PROFILE)}
         onExitOptionClick={() => null}
       />

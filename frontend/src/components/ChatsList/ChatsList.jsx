@@ -4,6 +4,7 @@ import AddButton from '../AddButton/AddButton';
 import ChatItem from '../ChatItem/ChatItem';
 import styles from './ChatsList.module.css';
 import {scrollbarGray} from '../../styles/scrollbar.module.css';
+import useGetChats from '../../hooks/simpleChat/useGetChats';
 
 /**
  * Componente que muestra una lista de chats, permitiendo seleccionar un chat y agregar nuevos chats.
@@ -13,7 +14,13 @@ import {scrollbarGray} from '../../styles/scrollbar.module.css';
  */
 function ChatsList({onSelectedUserChange=null}) {
 
+  const {getChats, result: chatsList} = useGetChats();
+
   const [selectedUser, setSelectedUser] = useState(null);
+  
+  useEffect(() => {
+    getChats();
+  }, []);
 
   useEffect(() => {
     if(onSelectedUserChange) onSelectedUserChange(selectedUser);
@@ -32,38 +39,16 @@ function ChatsList({onSelectedUserChange=null}) {
 			</header>
 
 			<ul className={`${styles.listContainer} ${scrollbarGray}`}>
-				{/* {Object.keys(messages)
-        .sort((user1, user2) => {
-          // Ordenar por fecha del último mensaje (chats nuevos van al inicio)
-          const lastMessage1 = messages[user1].slice(-1)[0];
-          const lastMessage2 = messages[user2].slice(-1)[0];
-          if (lastMessage1 === undefined && lastMessage2 === undefined) return user1 < user2 ? -1 : 1; // Si no hay mensajes, ordenar por nombre
-          if (lastMessage1 === undefined) return -1; // Mantener los chats sin mensajes al inicio
-          if (lastMessage2 === undefined) return -1;
-          return lastMessage2.date - lastMessage1.date; // Ordenar por fecha del último mensaje
-        })
-        .map((user) => {
-
-          const lastMessage = messages[user].slice(-1)[0];
-          const notViewdMessages = messages[user].filter((message) => !message.viewed && !message.sent).length;
-          const available = userStates[user]?.available === true;
-          const isContact = roster[user]?.subscription === 'both';
-
-					return (
-						<ChatItem
-							key={user}
-							user={user}
-              alias={roster[user]?.alias}
-							message={lastMessage?.message}
-							notViewed={notViewdMessages}
-							active={available}
-							showStatus={isContact}
-              date={lastMessage?.date?.toString()}
+				{chatsList && chatsList.result.map((msg) => <ChatItem
+							key={msg.user_id}
+							user={msg.username}
+							message={msg.message}
+							active={false}
+							showStatus={false}
+              date={msg.created_at}
               onClick={setSelectedUser}
-              selected={selectedUser === user}
-						/>
-					);
-				})} */}
+              selected={selectedUser === msg.user_id}
+						/>)}
 			</ul>
 		</div>
 	);
