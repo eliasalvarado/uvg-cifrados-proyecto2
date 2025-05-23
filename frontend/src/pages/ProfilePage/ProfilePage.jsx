@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './ProfilePage.module.css';
 import SessionContext from "../../context/SessionContext";
@@ -19,8 +19,6 @@ function ProfilePage() {
     const {
         callFetch: getUserInfo,
         result: resultUserInfo,
-        loading: loadingUserInfo,
-        error: errorUserInfo,
         reset: resetUserInfo
     } = useFetch();
 

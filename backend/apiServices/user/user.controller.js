@@ -80,6 +80,11 @@ const loginUser = async (req, res) => {
             return res.status(401).json({ message: "Credenciales inválidas" });
         }
 
+        // Verificar si el usuario tiene habilitada la autenticación de dos factores (MFA)
+        if (user.mfa_enabled) {
+            return res.status(200).json({ message: "MFA habilitada. Ingresa el código de tu autenticador.", user_id: user.id, mfa_enabled: true });
+        }
+
         // Generar el token JWT, con una expiración de 1 hora
         const token = jwt.sign(
             { id: user.id, email: user.email },
@@ -136,6 +141,9 @@ const verifyMFA = async (req, res) => {
     const { userId } = req.params;
     const { token } = req.body;
 
+    console.log('Token received:', token);
+    console.log('User ID received:', userId);
+
     // Obtener el secreto del usuario de la base de datos
     const user = await getUserById(userId);
     if (!user) {
@@ -150,7 +158,15 @@ const verifyMFA = async (req, res) => {
     });
 
     if (verified) {
-        return res.status(200).json({ message: 'Token verificado exitosamente' });
+
+        // Generar el token JWT, con una expiración de 1 hora
+        const token = jwt.sign(
+            { id: user.id, email: user.email },
+            JWT_SECRET,
+            { expiresIn: '1h' }
+        );
+
+        return res.status(200).json({ message: 'Token verificado exitosamente', token });
     } else {
         return res.status(401).json({ message: 'Token inválido' });
     }

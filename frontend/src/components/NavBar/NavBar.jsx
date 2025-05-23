@@ -1,5 +1,8 @@
+import React, { useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import PropTypes from 'prop-types';
 import styles from "./NavBar.module.css";
+import SessionContext from "../../context/SessionContext";
 import { IoChatbubbles as ChatIcon } from "react-icons/io5";
 import GroupChatIcon from "../../assets/icons/group-chat.svg";
 import { RiContactsBook3Fill as ContactIcon } from "react-icons/ri";
@@ -32,6 +35,18 @@ function NavBar({
 	onExitOptionClick,
 	onProfileOptionClick,
 }) {
+
+	const { refreshToken } = useContext(SessionContext);
+    const navigate = useNavigate();
+
+	const logout = () => {
+		console.log("Logout");
+        localStorage.removeItem('token');
+        refreshToken();
+        
+        navigate("/");
+    }
+
 	return (
 		<nav className={styles.navBar}>
 			<ul>
@@ -67,8 +82,8 @@ function NavBar({
 					<span>Contactos</span>
 				</li>
 				<li
-					onClick={onProfileOptionClick}
-					onKeyUp={onProfileOptionClick}
+					onClick={() => {navigate("/profile")}}
+					onKeyUp={() => {navigate("/profile")}}
 					tabIndex={3}
 					role="button"
 				>
@@ -76,8 +91,8 @@ function NavBar({
 					<span>Perfil</span>
 				</li>
 				<li
-					onClick={onExitOptionClick}
-					onKeyUp={onExitOptionClick}
+					onClick={logout}
+					onKeyUp={logout}
 					tabIndex={4}
 					role="button"
 				>
