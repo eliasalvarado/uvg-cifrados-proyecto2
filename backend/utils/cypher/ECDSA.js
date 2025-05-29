@@ -1,5 +1,4 @@
-const crypto = require('crypto');
-const { promisify } = require('util');
+import crypto from 'crypto';
 
 function generateECDSAKeys() {
     return crypto.generateKeyPairSync('ec', {

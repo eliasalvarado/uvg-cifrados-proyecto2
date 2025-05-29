@@ -2,7 +2,7 @@ import CustomError from "../../utils/customError.js";
 import errorSender from "../../utils/errorSender.js"
 import { getChatsList } from "./chat.model.js";
 import { io } from "../../sockets/ioInstance.js";
-import { generateECDSAKeys } from "../../utils/cypher/crypto.js";
+import { generateECDSAKeys } from "../../utils/cypher/ECDSA.js";
 import { executeQuery } from '../../db/connection.js';
 
 const verifyMessage = async (message) => {
