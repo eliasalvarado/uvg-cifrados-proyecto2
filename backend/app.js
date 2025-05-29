@@ -4,7 +4,7 @@ import cors from 'cors';
 import http from 'http';
 import { connection } from './db/connection.js';
 import { Server } from 'socket.io';
-import { chatHandler } from './sockets/chat.js';
+import socketHandler from './sockets/socketHandler.js';
 import { verifyToken } from './utils/auth.js';
 import indexRoutes from './routes/index.js';
 import signatureRoutes from '../backend/apiServices/signature/signature.route.js';
@@ -51,7 +51,7 @@ io.use((socket, next) => {
 
 io.on('connection', (socket) => {
         console.log('Nuevo cliente conectado:', socket.id);
-        chatHandler(io, socket);
+        socketHandler(io, socket);
     }
 );
 
