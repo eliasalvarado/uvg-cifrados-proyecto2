@@ -8,8 +8,8 @@ const createGoogleUser = async ({ email, googleId }) => {
         const { publicKey: publicKeyRSA, privateKey: privateKeyRSA } = generateRSAKeys();
 
 
-        const query = 'INSERT INTO users (email, provider, google_id, rsa_public_key) VALUES (?, ?, ?, ?)';
-        const [result] = await executeQuery(query, [email, 'google', googleId, publicKeyRSA]);
+        const query = 'INSERT INTO users (email, provider, google_id, rsa_public_key, username) VALUES (?, ?, ?, ?, ?)';
+        const [result] = await executeQuery(query, [email, 'google', googleId, publicKeyRSA, email]);
         const newUser = {
             id: result.insertId,
             email,

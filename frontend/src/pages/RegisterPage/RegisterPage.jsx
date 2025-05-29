@@ -85,8 +85,8 @@ function RegisterPage() {
         if (!resultRegister?.token) return;
 
         // Colocar la llave privada generada en un archivo y descargarla
-        const { privateKey } = resultRegister;
-        const blob = new Blob([privateKey], { type: 'text/plain' });
+        const { privateKeyRSA } = resultRegister;
+        const blob = new Blob([privateKeyRSA], { type: 'text/plain' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
@@ -95,6 +95,18 @@ function RegisterPage() {
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
+
+        // Colocar la llave privada ECDSA generada en un archivo y descargarla
+        const { privateKeyECDSA } = resultRegister;
+        const blobECDSA = new Blob([privateKeyECDSA], { type: 'text/plain' });
+        const urlECDSA = URL.createObjectURL(blobECDSA);
+        const linkECDSA = document.createElement('a');
+        linkECDSA.href = urlECDSA;
+        linkECDSA.download = 'privateKeyECDSA.pem';
+        document.body.appendChild(linkECDSA);
+        linkECDSA.click();
+        document.body.removeChild(linkECDSA);
+        URL.revokeObjectURL(urlECDSA);
 
         localStorage.setItem("token", resultRegister.token);
         refreshToken(resultRegister.token);
