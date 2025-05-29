@@ -24,9 +24,16 @@ const saveMFASecret = async (userId, secret) => {
     return result.affectedRows > 0;
 }
 
+const deleteMFASecret = async (userId) => {
+    const query = 'UPDATE users SET totp_secret = NULL, mfa_enabled = false WHERE id = ?';
+    const [result] = await executeQuery(query, [userId]);
+    return result.affectedRows > 0;
+}
+
 export {
     createUser,
     getUserByEmail,
     getUserById,
     saveMFASecret,
+    deleteMFASecret
 }
