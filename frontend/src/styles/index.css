@@ -7,10 +7,10 @@
 
   --global-font-family--: 'Montserrat', 'Inter', sans-serif;
 
-  --error-color--: #df0303;
+  --error-color--: #ffffff;
   --blue-theme-color--: #16337f;
   --blue-theme-color-hover--: #2e4d9c;
-  --page-background-color--: white;
+  --page-background-color--: #202329;
 
   --text-font-size--: 16px;
   --h1-title-size--: 35px;
@@ -53,6 +53,7 @@
 html, body, #root {
   width: 100%;
   height: 100%;
+  background-color: var(--page-background-color--);
 }
 
 #root {

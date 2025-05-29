@@ -32,18 +32,17 @@ function NavBar({
 	onChatOptionClick,
 	onGroupChatOptionClick,
 	onContactsOptionClick,
-	onProfileOptionClick,
 }) {
 
-	const { refreshToken } = useContext(SessionContext);
+	const { clearToken } = useContext(SessionContext);
     const navigate = useNavigate();
 
 	const logout = () => {
 		console.log("Logout");
         localStorage.removeItem('token');
-        refreshToken();
+        clearToken();
         
-        navigate("/");
+        navigate("/", { replace: true });
     }
 
 	return (
@@ -83,7 +82,6 @@ function NavBar({
 				<li
 					onClick={() => {navigate("/profile")}}
 					onKeyUp={() => {navigate("/profile")}}
-					onKeyUp={onProfileOptionClick}
 					tabIndex={3}
 					role="button"
 				>

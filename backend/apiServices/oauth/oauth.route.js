@@ -5,7 +5,8 @@ import jwt from 'jsonwebtoken';
 const oauthRouter = express.Router();
 
 oauthRouter.get('/google', passport.authenticate('google', {
-  scope: ['profile', 'email']
+  scope: ['profile', 'email'],
+  prompt: 'consent'
 }));
 
 oauthRouter.get('/google/callback', 
