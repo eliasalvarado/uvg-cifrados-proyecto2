@@ -1,6 +1,9 @@
 import CustomError from "../../utils/customError.js";
 import errorSender from "../../utils/errorSender.js"
 import { getChatsList } from "./chat.model.js";
+import { addBlock } from '../blockchain/blockchain.model.js';
+import crypto from 'crypto';
+
 import { io } from "../../sockets/ioInstance.js";
 
 const getChatsListController= async (req, res) => {
@@ -23,8 +26,18 @@ const getChatsListController= async (req, res) => {
 const sendMessageController = async (req, res) => {
 
   const { userId } = req.params;
+  const { userId: to } = req.params;
   const { message } = req.body || {};
+  const from = req.user.id;     // emisor autenticado (JWT)
+  const { ciphertext, iv, sig } = req.body; 
 
+   //  Calcular hash del ciphertext para la blockchain
+  const msgHash = crypto.createHash('sha256')
+                          .update(message)
+                          .digest('hex');
+
+
+  await addBlock({ from, to, msgHash, sig }); 
   console.log(`Enviando mensaje a ${userId}: ${message}`);
 
   // Emitir el mensaje al socket del usuario
