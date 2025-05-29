@@ -20,7 +20,7 @@ export async function addBlock(dataObj) {
   const prev = await getLastBlock();
   const index   = prev ? prev.block_index + 1 : 0;
   const prevHash = prev ? prev.hash : GENESIS_HASH;
-  const ts = new Date().toISOString();
+  const ts = new Date();
 
   const hash = sha256(prevHash + ts + JSON.stringify(dataObj));
 
