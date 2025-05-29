@@ -3,6 +3,8 @@ import { io } from 'socket.io-client';
 import useToken from '../../hooks/useToken';
 import useFetch from '../../hooks/useFetch';
 
+import styles from './EphemeralMessages.module.css';
+
 const EphemeralMessages = () => {
   const token = useToken();
   const [socket, setSocket] = useState(null);
@@ -96,26 +98,39 @@ const EphemeralMessages = () => {
   };
 
   return (
-    <div>
-      <div>
-        <label>Usuario destinatario:</label>
+    <div className={styles.ephemeralMessagesPage}>
+      <h1 className={styles.header}>Mensajes efímeros</h1>
+      <div className={styles.inputContainer}>
+        <label className={styles.inputLabel}>Usuario destinatario:</label>
         <input
           type="text"
           value={receiver}
           onChange={(e) => setReceiver(e.target.value)}
           placeholder="Usuario con quien establecer clave"
+          className={styles.inputField}
         />
-        <button onClick={startKeyExchange}>Iniciar Intercambio de Clave</button>
+        <button onClick={startKeyExchange} className={styles.startButton}>
+          Iniciar intercambio de claves
+        </button>
+        {key && <div className={styles.keyEstablished}>Llave establecida - {key}</div>}
       </div>
-      <div>
-        <h3>Log:</h3>
-        <ul>
+      <div className={styles.chatContainer}>
+        <div className={styles.messagesList}>
           {log.map((message, index) => (
-            <li key={index}>{message}</li>
+            <div key={index} className={styles.messageItem}>
+              {message}
+            </div>
           ))}
-        </ul>
+        </div>
+        <div className={styles.inputMessageContainer}>
+          <input
+            type="text"
+            placeholder="Escribe tu mensaje..."
+            className={styles.inputMessageField}
+          />
+          <button className={styles.sendButton}>Enviar</button>
+        </div>
       </div>
-      {key && <div><strong>Clave generada:</strong> {key}</div>}
     </div>
   );
 };
