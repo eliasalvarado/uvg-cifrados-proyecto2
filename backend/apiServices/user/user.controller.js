@@ -39,7 +39,8 @@ const registerUser = async (req, res) => {
             email,
             passwordHash,
             publicKeyRSA,
-            publicKeyECDSA
+            publicKeyECDSA,
+            privateKeyECDSA
         });
 
         // Generar token JWT, con una expiración de 1 hora

@@ -1,13 +1,18 @@
-import pkg from 'elliptic';
-const EC = pkg.ec;
-
-const ec = new EC('secp256k1');
+const crypto = require('crypto');
+const { promisify } = require('util');
 
 function generateECDSAKeys() {
-    const keyPair = ec.genKeyPair();
-    const publicKey = keyPair.getPublic('hex');
-    const privateKey = keyPair.getPrivate('hex');
-    return { publicKey, privateKey };
+    return crypto.generateKeyPairSync('ec', {
+        namedCurve: 'secp256k1',
+        publicKeyEncoding: {
+            type: 'spki',
+            format: 'pem'
+        },
+        privateKeyEncoding: {
+            type: 'pkcs8',
+            format: 'pem'
+        }
+    });
 }
 
 export {
