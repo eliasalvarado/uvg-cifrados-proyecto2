@@ -1,12 +1,51 @@
 import React, { useState, useEffect } from 'react';
 import { io } from 'socket.io-client';
+import useToken from '../../hooks/useToken';
+import useFetch from '../../hooks/useFetch';
 
 const EphemeralMessages = () => {
+  const token = useToken();
   const [socket, setSocket] = useState(null);
   const [username, setUsername] = useState('');
   const [receiver, setReceiver] = useState('');
   const [log, setLog] = useState([]);
   const [key, setKey] = useState(null);
+
+  const {
+    callFetch: getUserInfo,
+    result: resultUserInfo,
+    reset: resetUserInfo
+  } = useFetch();
+
+  const handleGetUserInfo = () => {
+      resetUserInfo();
+      getUserInfo({
+          uri: "/api/user/profile",
+          method: "GET",
+          headers: {
+              "Content-Type": "application/json",
+              'Authorization': token,
+          },
+      });
+  }
+
+  useEffect(() => {
+      if (!token) return;
+      
+      handleGetUserInfo();
+  }, [token]);
+
+  useEffect(() => {
+      if (!resultUserInfo) return;
+
+      setUsername(resultUserInfo?.email);
+  }, [resultUserInfo]);
+
+  useEffect(() => {
+      if (!username) return;
+
+      joinChat();
+  }, [username]);
 
   useEffect(() => {
     const newSocket = io('http://localhost:3000');
@@ -58,16 +97,6 @@ const EphemeralMessages = () => {
 
   return (
     <div>
-      <div>
-        <label>Tu nombre de usuario:</label>
-        <input
-          type="text"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          placeholder="Ingresa tu usuario"
-        />
-        <button onClick={joinChat}>Unirse</button>
-      </div>
       <div>
         <label>Usuario destinatario:</label>
         <input
