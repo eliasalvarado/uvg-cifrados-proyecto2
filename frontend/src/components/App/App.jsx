@@ -4,15 +4,18 @@ import IndexPage from '../../pages/IndexPage/IndexPage';
 import RegisterPage from '../../pages/RegisterPage/RegisterPage';
 import OAuthSuccessPage from '../../pages/OAuthSuccessPage/OAuthSuccessPage';
 import { SessionProvider } from '../../context/SessionContext';
+import { ChatProvider } from '../../context/ChatContext';
 
 function App() {
   return (
     <SessionProvider>
-      <Router>
+      <ChatProvider>
+        <Router>
 
-        <IndexPage />
+          <IndexPage />
 
-      </Router>
+        </Router>
+      </ChatProvider>
     </SessionProvider>
   );
 }
