@@ -2,7 +2,7 @@ import sha256 from 'js-sha256';
 import jwt from 'jsonwebtoken';
 import speakeasy from 'speakeasy';
 import qrcode from 'qrcode';
-import { createUser, getUserByEmail, getUserById, saveMFASecret } from './user.model.js';
+import { createUser, getUserByEmail, getUserById, saveMFASecret, deleteMFASecret } from './user.model.js';
 import { generateRSAKeys } from '../../utils/cypher/RSA.js';
 import { generateECDSAKeys } from '../../utils/cypher/ECDSA.js'
 
@@ -137,6 +137,19 @@ const setupMFA = async (req, res) => {
     });
 }
 
+const deleteMFA = async (req, res) => {
+    const userId = req.user && req.user.id; // Obtener el ID del usuario desde el token JWT
+    console.log('User ID for MFA deletion:', userId);
+
+    // Eliminar el secreto de la base de datos
+    const deleted = await deleteMFASecret(userId);
+    if (!deleted) {
+        return res.status(500).json({ message: 'Error al eliminar la autenticación de dos factores' });
+    }
+
+    res.status(200).json({ message: 'Autenticación de dos factores eliminada exitosamente' });
+}
+
 const verifyMFA = async (req, res) => {
     const { userId } = req.params;
     const { token } = req.body;
@@ -178,4 +191,5 @@ export {
     getUserInfo,
     setupMFA,
     verifyMFA,
+    deleteMFA
 }

@@ -12,6 +12,7 @@ import usePopUp from '../../hooks/usePopup';
 function ProfilePage() {
 
     const [isMFAOpen, openMFA, closeMFA] = usePopUp();
+    const [isDeleteMFAOpen, openDeleteMFA, closeDeleteMFA] = usePopUp();
     const { refreshToken } = useContext(SessionContext);
     const token = useToken();
     const navigate = useNavigate();
@@ -27,6 +28,13 @@ function ProfilePage() {
         result: resultSetupMFA,
         loading: loadingSetupMFA,
         error: errorSetupMFA
+    } = useFetch();
+
+    const {
+        callFetch: fetchDeleteMFA,
+        result: resultDeleteMFA,
+        loading: loadingDeleteMFA,
+        error: errorDeleteMFA
     } = useFetch();
 
     const handleGetUserInfo = () => {
@@ -70,6 +78,19 @@ function ProfilePage() {
         });
     }
 
+    const handleDeleteMFA = (e) => {
+        e.preventDefault();
+        if (!resultUserInfo?.mfa_enabled) return; // Si MFA no está habilitado, no se hace nada
+        fetchDeleteMFA({
+            uri: "/api/user/mfa/delete",
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                'Authorization': token,
+            },
+        });
+    }
+
     useEffect(() => {
         if (!resultUserInfo) return;
         console.log(resultUserInfo);
@@ -82,6 +103,7 @@ function ProfilePage() {
         </div> 
         <div className={styles.buttonsContainer}>
             <Button text="Activar MFA" green onClick={handleSetupMFA} />
+            <Button text="Eliminar MFA" red onClick={openDeleteMFA} />
             <Button text="Cerrar sesión" red onClick={logout} />
         </div>
         {isMFAOpen && (
@@ -109,6 +131,23 @@ function ProfilePage() {
                         )}
                     </div>
                 )}
+            </PopUp>
+        )}
+        {isDeleteMFAOpen && (
+            <PopUp close={closeDeleteMFA} closeButton closeWithBackground callback={handleGetUserInfo}>
+                <div className={styles.deleteMFAContainer}>
+                    <h2>Eliminar MFA</h2>
+                    {loadingDeleteMFA ? (
+                        <Spinner />
+                    ) : (
+                        <>
+                            <p>¿Estás seguro de que deseas eliminar la autenticación de dos factores (MFA)?</p>
+                            <Button text="Eliminar MFA" red onClick={handleDeleteMFA} />
+                            {errorDeleteMFA && <p>{errorDeleteMFA.message}</p>}
+                            {resultDeleteMFA && <p>MFA eliminado exitosamente.</p>}
+                        </>
+                    )}
+                </div>
             </PopUp>
         )}
     </div>
