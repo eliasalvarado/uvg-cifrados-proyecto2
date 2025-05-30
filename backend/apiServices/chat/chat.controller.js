@@ -30,7 +30,7 @@ const sendMessageController = async (req, res) => {
   // Emitir el mensaje al socket del usuario
   io.to(userId.toString()).emit('chat_message', { from: req.user.id, message, to: userId });
 
-  res.sendStatus(200)
+  res.send({ ok: true })
 }
 
 export {

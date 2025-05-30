@@ -1,15 +1,14 @@
-import { useContext, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import getTokenPayload from '../helpers/getTokenPayload';
 import useToken from './useToken';
 import { io } from 'socket.io-client';
-import ChatContext from '../context/ChatContext';
+import useChatState from './useChatState';
 
-function useChatState() {
-
-const {messages, setMessages} = useContext(ChatContext);
+function useSocket() {
   
   const token = useToken();
-  const socketRef = useRef(null); // referencia para mantener el socket entre renders
+  const socketRef = useRef(null);
+  const { addMessage } = useChatState();
 
   useEffect(() => {
     if (!token) {
@@ -43,6 +42,7 @@ const {messages, setMessages} = useContext(ChatContext);
       if (data.to === userData.id) {
         console.log('Mensaje recibido:', data.message);
         // Aquí podrías actualizar tu estado con el nuevo mensaje
+        addMessage(data)
       }
     });
 
@@ -62,22 +62,7 @@ const {messages, setMessages} = useContext(ChatContext);
     };
   }, [token]); // [ idUsuario: [{id, message}, {id, message}, ...], ...]
 
-    const addMessage = (message) => {
-        const originUserId = message.from;
-        setMessages((prevMessages) => {
-            const userMessages = prevMessages[originUserId] || [];
-            return {
-                ...prevMessages,
-                [originUserId]: [...userMessages, message]
-            };
-        });
-    }
-        
 
-    return {
-        messages,
-        addMessage
-    };
 }
 
-export default useChatState;
+export default useSocket;
