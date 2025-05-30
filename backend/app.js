@@ -3,12 +3,11 @@ import express from 'express';
 import cors from 'cors';
 import http from 'http';
 import { connection } from './db/connection.js';
-import { Server } from 'socket.io';
-import socketHandler from './sockets/socketHandler.js';
-import { verifyToken } from './utils/auth.js';
+import { startSocketServer } from './sockets/ioInstance.js';
 import indexRoutes from './routes/index.js';
 import signatureRoutes from '../backend/apiServices/signature/signature.route.js';
 import './apiServices/oauth/oauth.google.js';
+import { start } from 'repl';
 
 connection.connect((err) => {
   if (err) {
@@ -31,28 +30,6 @@ app.use('/signature', signatureRoutes);
 
 // Sockets
 const server = http.createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: '*',
-    methods: ['GET', 'POST'],
-  },
-});
-
-io.use((socket, next) => {
-    const token = socket.handshake.auth.token;
-    try {
-      // const user = verifyToken(token);
-      socket.user = undefined;
-      next();
-    } catch (err) {
-      next(new Error("Autenticación inválida"));
-    }
-});
-
-io.on('connection', (socket) => {
-        console.log('Nuevo cliente conectado:', socket.id);
-        socketHandler(io, socket);
-    }
-);
+startSocketServer(server);
 
 export default server;

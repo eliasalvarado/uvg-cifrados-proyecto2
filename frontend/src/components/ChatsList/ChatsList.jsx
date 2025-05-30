@@ -31,6 +31,7 @@ function ChatsList({onSelectedUserChange=null}) {
     if(!user) return
     //createEmptyChat(user);
   }
+  console.log(chatsList)
   return (
 		<div className={styles.chatsList}>
 			<header>
@@ -41,6 +42,7 @@ function ChatsList({onSelectedUserChange=null}) {
 			<ul className={`${styles.listContainer} ${scrollbarGray}`}>
 				{chatsList && chatsList.result.map((msg) => <ChatItem
 							key={msg.user_id}
+              userId={msg.user_id}
 							user={msg.username}
 							message={msg.message}
 							active={false}

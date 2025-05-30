@@ -2,6 +2,7 @@
     padding: var(--page-vertical-padding--) var(--page-horizontal-padding--);
     display: flex;
     flex-direction: column;
+    color: white;
 }
 
 .header{

@@ -4,6 +4,8 @@ import Message from "../Message/Message";
 import styles from "./SingleChat.module.css";
 import { scrollbarGray } from "../../styles/scrollbar.module.css";
 import { useEffect, useRef } from "react";
+import useChatState from "../../hooks/useChatState";
+import useSendMessage from "../../hooks/simpleChat/useSendMessage";
 
 /**
  * Componente de chat individual que maneja la interacción del usuario con otro usuario específico.
@@ -17,49 +19,58 @@ import { useEffect, useRef } from "react";
  */
 function SingleChat({ user }) {
 
+	const { messages } = useChatState();
 
 	const forceScrollRef = useRef(true);
-
 	const chatContainerRef = useRef();
-  const lastChildRef = useRef();
+	const lastChildRef = useRef();
 
-  const scrollToBottom = () => {
-    chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
-  }
+	const {sendMessage } = useSendMessage();
+
+	const scrollToBottom = () => {
+		chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+	}
 
 	const handleSend = (text) => {
-    scrollToBottom(); // Al mandar mensaje, scroll al final obligatorio
-		//sendMessage(user, text);
+		scrollToBottom(); // Al mandar mensaje, scroll al final obligatorio
+		
+		sendMessage({targetUserId: user, message: text});
+
 	};
 
-  useEffect(() => {
-		if(!user) return;
-    // Enviar al abrir al chat (o cambiar de chat)
-    //sendViewedConfirmation(user);
+	useEffect(() => {
+		if (!user) return;
 		forceScrollRef.current = true;
-  }, [user]);
+	}, [user]);
 
-	// useEffect(() => {
+	useEffect(() => {
+		if (!user) return;
+		// Enviar al abrir al chat (o cambiar de chat)
+		forceScrollRef.current = true;
+	}, [user]);
 
-    // if (chatContainerRef.current && lastChildRef.current) {
+	useEffect(() => {
 
-    //   if(forceScrollRef.current){
-    //     // Si es la primera vez que se abre el chat, hacer scroll al final
-    //     scrollToBottom();
-    //     forceScrollRef.current = false;
-    //   }
+		if (chatContainerRef.current && lastChildRef.current) {
 
-    //   // Cuando se recibe un mensaje, verificar si el último mensaje es visible
-    //   // si lo es, hacer scroll al final
+			if (forceScrollRef.current) {
+				// Si es la primera vez que se abre el chat, hacer scroll al final
+				scrollToBottom();
+				forceScrollRef.current = false;
+			}
 
-    //   const { scrollTop, clientHeight} = chatContainerRef.current;
-    //   const lastChildOffsetTop = lastChildRef.current.offsetTop;
+			// Cuando se recibe un mensaje, verificar si el último mensaje es visible
+			// si lo es, hacer scroll al final
 
-    //   if (scrollTop + clientHeight >= lastChildOffsetTop - 100) {
-    //     scrollToBottom();
-    //   }
-    // }
-	// }, [messages[user]]);
+			const { scrollTop, clientHeight } = chatContainerRef.current;
+			const lastChildOffsetTop = lastChildRef.current.offsetTop;
+
+			if (scrollTop + clientHeight >= lastChildOffsetTop - 100) {
+				scrollToBottom();
+			}
+		}
+	}, [messages[user]]);
+
 
 	return (
 		<div
@@ -73,9 +84,9 @@ function SingleChat({ user }) {
 				ref={chatContainerRef}
 			>
 				<ul className={styles.messagesList}>
-					{/* {messages[user] &&
+					{messages[user] &&
 						messages[user].map((message, index) => {
-							const firstMessage = index === 0 || messages[user][index - 1].sent !== message.sent;
+							const firstMessage = index === 0 || messages[user][index - 1].from !== message.from;
 							return (
 								<Message
 									key={index}
@@ -87,7 +98,7 @@ function SingleChat({ user }) {
 									refObj={index === messages[user].length - 1 ? lastChildRef : null}
 								/>
 							);
-						})} */}
+						})}
 				</ul>
 			</div>
 			<ChatInput

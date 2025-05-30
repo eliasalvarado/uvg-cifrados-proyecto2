@@ -118,7 +118,7 @@ function LoginPage() {
 
     return (
         <div className={styles.loginPageContainer}>
-          <h1>Iniciar sesión</h1>
+          <h1 className={styles.title}>Iniciar sesión</h1>
           <form className={styles.loginForm} onSubmit={handleLogin}>
             <InputText 
                 title="Usuario"
@@ -149,14 +149,14 @@ function LoginPage() {
                 )}
                 {loadingLogin && <Spinner />}
             </div>
+            <div className={styles.googleLoginContainer}>
+                <GoogleLoginButton />
+            </div>
             {errorLogin && <p className={styles.errorMessage}>{errorLogin.message}</p>}
           </form>
           <p className={styles.registerLink}>
             ¿No tienes cuenta? <Link to="/register" className={styles.registerHere}>Regístrate aquí</Link>
           </p>
-            <div className={styles.googleLoginContainer}>
-                <GoogleLoginButton />
-            </div>
             {isMFAOpen && (
                 <PopUp close={closeMFA} closeButton closeWithBackground>
                 <div className={styles.mfaContainer}>

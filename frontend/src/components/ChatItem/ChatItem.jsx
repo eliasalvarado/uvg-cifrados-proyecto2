@@ -21,6 +21,7 @@ import dayjs from 'dayjs';
  * @param {Function} [props.onClick] - Función a ejecutar cuando se hace clic en el elemento de chat.
  */
 function ChatItem({
+	userId = "",
 	user = "",
 	alias = null,
 	message = "",
@@ -46,7 +47,7 @@ function ChatItem({
   }
 
   const handleClick = () => {
-    if(onClick) onClick(user);
+    if(onClick) onClick(userId);
   }
 
 	return (
@@ -76,6 +77,7 @@ function ChatItem({
 export default ChatItem;
 
 ChatItem.propTypes = {
+	userId: PropTypes.string.isRequired,
 	user: PropTypes.string.isRequired,
 	alias: PropTypes.string,
 	message: PropTypes.string,
