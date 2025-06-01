@@ -84,17 +84,8 @@ function RegisterPage() {
     useEffect(() => {
         if (!resultRegister?.token) return;
 
-        // Colocar la llave privada generada en un archivo y descargarla
-        const { privateKeyRSA } = resultRegister;
-        const blob = new Blob([privateKeyRSA], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = 'privateKey.pem';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
+        // Guardar llave privada en localStorage
+        localStorage.setItem("privateKey", resultRegister.privateKey);
 
         // Colocar la llave privada ECDSA generada en un archivo y descargarla
         const { privateKeyECDSA } = resultRegister;
