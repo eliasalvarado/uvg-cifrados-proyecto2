@@ -16,10 +16,11 @@ import useSendMessage from "../../hooks/simpleChat/useSendMessage";
  *
  * @param {Object} props - Las propiedades del componente.
  * @param {string} props.user - El identificador del usuario con el que se está chateando.
+ * @param {string} props.username - El nombre del usuario con el que se está chateando.
  */
-function SingleChat({ user }) {
+function SingleChat({ userId, username }) {
 
-	const { messages } = useChatState();
+	const { messages, addSingleChatMessage, getMessageObject } = useChatState();
 
 	const forceScrollRef = useRef(true);
 	const chatContainerRef = useRef();
@@ -30,24 +31,30 @@ function SingleChat({ user }) {
 	const scrollToBottom = () => {
 		chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
 	}
-
 	const handleSend = (text) => {
 		scrollToBottom(); // Al mandar mensaje, scroll al final obligatorio
-		
-		sendMessage({targetUserId: user, message: text});
+		sendMessage({targetUserId: userId, message: text});
 
+		const message = getMessageObject({
+			from: null, // null significa que es el usuario actual
+			to: userId,
+			message: text,
+			datetime: new Date(),
+			sent: true // true significa que el mensaje fue enviado por el usuario actual
+		});
+		addSingleChatMessage(message);
 	};
 
 	useEffect(() => {
-		if (!user) return;
+		if (!userId) return;
 		forceScrollRef.current = true;
-	}, [user]);
+	}, [userId]);
 
 	useEffect(() => {
-		if (!user) return;
+		if (!userId) return;
 		// Enviar al abrir al chat (o cambiar de chat)
 		forceScrollRef.current = true;
-	}, [user]);
+	}, [userId]);
 
 	useEffect(() => {
 
@@ -69,7 +76,7 @@ function SingleChat({ user }) {
 				scrollToBottom();
 			}
 		}
-	}, [messages[user]]);
+	}, [messages[userId]]);
 
 
 	return (
@@ -77,25 +84,24 @@ function SingleChat({ user }) {
 			className={styles.chat}
 		>
 			<header className={styles.chatHeader}>
-				<h3 className={styles.title}>{user}</h3>
+				<h3 className={styles.title}>{username}</h3>
 			</header>
 			<div
 				className={`${styles.chatsContainer} ${scrollbarGray}`}
 				ref={chatContainerRef}
 			>
 				<ul className={styles.messagesList}>
-					{messages[user] &&
-						messages[user].map((message, index) => {
-							const firstMessage = index === 0 || messages[user][index - 1].from !== message.from;
+					{messages[userId] &&
+						messages[userId].map((message, index) => {
+							const firstMessage = index === 0 || messages[userId][index - 1].from !== message.from;
 							return (
 								<Message
 									key={index}
 									left={!message.sent}
 									message={message.message}
-									date={message.date.toString()}
-									viewed={message.viewed}
+									date={message.datetime?.toString()}
 									showTriangle={firstMessage}
-									refObj={index === messages[user].length - 1 ? lastChildRef : null}
+									refObj={index === messages[userId].length - 1 ? lastChildRef : null}
 								/>
 							);
 						})}
@@ -112,4 +118,5 @@ export default SingleChat;
 
 SingleChat.propTypes = {
 	user: PropTypes.string.isRequired,
+	username: PropTypes.string.isRequired
 };

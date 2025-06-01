@@ -2,9 +2,10 @@ import sha256 from 'js-sha256';
 import jwt from 'jsonwebtoken';
 import speakeasy from 'speakeasy';
 import qrcode from 'qrcode';
-import { createUser, getUserByEmail, getUserById, saveMFASecret, deleteMFASecret } from './user.model.js';
+import { createUser, getUserByEmail, getUserById, saveMFASecret, deleteMFASecret, searchUserByEmailOrUsername } from './user.model.js';
 import { generateRSAKeys } from '../../utils/cypher/RSA.js';
 import { generateECDSAKeys } from '../../utils/cypher/ECDSA.js'
+import CustomError from '../../utils/customError.js';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -109,6 +110,7 @@ const getUserInfo = async (req, res) => {
 
     const response = {
         id: user.id,
+        username: user.username,
         email: user.email,
         rsa_public_key: user.rsa_public_key,
         mfa_enabled: user.mfa_enabled,
@@ -116,6 +118,31 @@ const getUserInfo = async (req, res) => {
 
     res.status(200).json(response);
 }
+
+const getUserByIdController = async (req, res) => {
+
+    try{
+        const { userId } = req.params;
+
+        // Obtener el usuario de la base de datos
+        const user = await getUserById(userId);
+        if (!user) {
+            throw new CustomError('Usuario no encontrado', 404);
+        }
+
+        res.status(200).json({
+            id: user.id,
+            email: user.email,
+            username: user.username,
+            rsaPublicKey: user.rsa_public_key,
+        });
+
+    }catch(ex){
+        console.log(ex);
+        errorSender({res, ex });
+    }
+}
+    
 
 const setupMFA = async (req, res) => {
     const userId = req.user && req.user.id; // Obtener el ID del usuario desde el token JWT
@@ -185,11 +212,47 @@ const verifyMFA = async (req, res) => {
     }
 }
 
+const searchUserController = async (req, res) => {
+
+    try{
+
+        const { search } = req.params;
+        if (!search) {
+            throw new CustomError('El término de búsqueda es requerido', 400);
+        }
+
+        // Buscar usuario por email o username
+        const user = await searchUserByEmailOrUsername(search);
+        if (!user) {
+            throw new CustomError('Usuario no encontrado', 404);
+        }
+
+        res.status(200).json({
+            ok: true,
+            result: {
+                id: user.id,
+                email: user.email,
+                username: user.username,
+                rsaPublicKey: user.rsa_public_key
+            }
+        });
+        
+    }catch(ex){
+    console.log(ex)
+        errorSender({res, ex })
+   }
+
+
+}
+
+
 export {
     registerUser,
     loginUser,
     getUserInfo,
     setupMFA,
     verifyMFA,
-    deleteMFA
+    deleteMFA,
+    searchUserController,
+    getUserByIdController
 }

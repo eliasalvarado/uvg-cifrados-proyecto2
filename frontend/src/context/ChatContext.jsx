@@ -6,12 +6,15 @@ const ChatContext = createContext();
 
 export const ChatProvider = ({ children }) => {
   
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState({});
+  const [users, setUsers] = useState({}); // Optional: If you want to manage users in the context
   
 
   const data = {
     messages,
-    setMessages
+    setMessages,
+    users,
+    setUsers,
   };
 
   return (

@@ -7,10 +7,11 @@ function useSendMessage() {
     const token = useToken();
 
     const sendMessage = async ({targetUserId, message}) => {
+        console.log('Sending message:', { targetUserId, message });
         callFetch({
             uri: `${consts.apiPath}/chat/single/${targetUserId}`,
             method: 'POST',
-            body: JSON.stringify({ message }),
+            body: JSON.stringify({ message, lol:1 }),
             headers: {
                 'Authorization': token,
             },

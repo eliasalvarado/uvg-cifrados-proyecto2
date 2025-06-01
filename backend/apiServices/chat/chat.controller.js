@@ -22,15 +22,24 @@ const getChatsListController= async (req, res) => {
 
 const sendMessageController = async (req, res) => {
 
-  const { userId } = req.params;
-  const { message } = req.body || {};
+  try{
 
-  console.log(`Enviando mensaje a ${userId}: ${message}`);
-
-  // Emitir el mensaje al socket del usuario
-  io.to(userId.toString()).emit('chat_message', { from: req.user.id, message, to: userId });
-
-  res.send({ ok: true })
+    
+    const { userId } = req.params;
+    const { message } = req.body || {};
+    
+    if (!message){
+      throw new CustomError('El mensaje es requerido', 400);
+    }
+    
+    // Emitir el mensaje al socket del usuario
+    io.to(userId.toString()).emit('chat_message', { from: req.user.id, message, to: parseInt(userId, 10), sent: false, datetime: new Date() });
+    
+    res.send({ ok: true })
+  }catch(ex){
+    console.log(ex)
+    errorSender({res, ex })
+  }
 }
 
 export {

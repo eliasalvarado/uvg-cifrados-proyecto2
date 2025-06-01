@@ -32,7 +32,7 @@ function useFetch() {
     const reply = await fetch(uri, {
       method,
       body,
-      headers,
+      headers: heads,
       signal,
       credentials: 'include',
     });
