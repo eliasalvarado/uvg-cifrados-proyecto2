@@ -104,7 +104,7 @@ function LoginPage() {
         if (!resultLogin?.token) return;
 
         // Guardar private key en localStorage
-        localStorage.setItem("privateKey", resultLogin.privateKeyRSA);
+        localStorage.setItem("privateKeyRSA", resultLogin.privateKeyRSA);
 
         localStorage.setItem("token", resultLogin.token);
         refreshToken();
@@ -115,7 +115,7 @@ function LoginPage() {
         if (!resultMFA?.token) return;
 
         // Guardar la llave privada en localStorage
-        localStorage.setItem("privateKey", resultMFA.privateKeyRSA);
+        localStorage.setItem("privateKeyRSA", resultMFA.privateKeyRSA);
 
         // Guardar el token en el localStorage
         localStorage.setItem("token", resultMFA.token);

@@ -4,7 +4,6 @@ import ChatContext from '../context/ChatContext';
 function useChatState() {
 
 const {messages, setMessages, users, setUsers} = useContext(ChatContext);
-    console.log("Mensajes actuales: ",messages)
     /**
      * 
      * @param {*} message Expects a messageObject.

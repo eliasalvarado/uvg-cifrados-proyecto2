@@ -85,7 +85,7 @@ function RegisterPage() {
         if (!resultRegister?.token) return;
 
         // Guardar llave privada en localStorage
-        localStorage.setItem("privateKey", resultRegister.privateKey);
+        localStorage.setItem("privateKeyRSA", resultRegister.privateKeyRSA);
 
         // Colocar la llave privada ECDSA generada en un archivo y descargarla
         const { privateKeyECDSA } = resultRegister;

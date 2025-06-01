@@ -26,14 +26,25 @@ const sendMessageController = async (req, res) => {
 
     
     const { userId } = req.params;
-    const { message } = req.body || {};
+    const { message, key } = req.body || {};
     
     if (!message){
       throw new CustomError('El mensaje es requerido', 400);
     }
+
+    if (!key){
+      throw new CustomError('La llave es requerida', 400);
+    }
     
     // Emitir el mensaje al socket del usuario
-    io.to(userId.toString()).emit('chat_message', { from: req.user.id, message, to: parseInt(userId, 10), sent: false, datetime: new Date() });
+    io.to(userId.toString()).emit('chat_message', {
+      from: req.user.id,
+      message: message?.toString(),
+      to: parseInt(userId, 10),
+      sent: false,
+      datetime: new Date(),
+      key
+    });
     
     res.send({ ok: true })
   }catch(ex){

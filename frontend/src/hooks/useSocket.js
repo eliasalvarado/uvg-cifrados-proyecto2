@@ -4,13 +4,14 @@ import useToken from './useToken';
 import { io } from 'socket.io-client';
 import useChatState from './useChatState';
 import useGetUserById from './user/useGetUserById';
+import { decryptAESRSA } from '../helpers/cypher/AES_RSA';
 
 function useSocket() {
   
   const token = useToken();
   const socketRef = useRef(null);
 
-  const { addSingleChatMessage, users, addUser } = useChatState();
+  const { addSingleChatMessage, users, addUser, getMessageObject } = useChatState();
   const { getUserById, result: userResult } = useGetUserById();
 
   useEffect(() => {
@@ -40,10 +41,29 @@ function useSocket() {
       console.log('Socket connected:', socket.id);
     });
 
-    socket.on('chat_message', (data) => {
+    socket.on('chat_message', async (data) => {
         console.log('Received chat message:', data, "for user:", userData.id);
       if (data.to === userData.id) {
-        addSingleChatMessage(data);
+
+        // Descifrar mensaje
+        const privateKeyRSA = localStorage.getItem('privateKeyRSA');
+        if (!privateKeyRSA) {
+          console.error('Private key not found in localStorage');
+          return;
+        }
+
+        const { message: messageEncrypted, key } = data;
+
+        const message = await decryptAESRSA(messageEncrypted, key, privateKeyRSA);
+        const messageObject = getMessageObject({
+          from: data.from,
+          to: data.to,
+          message,
+          datetime: new Date(data.datetime),
+          sent: false, // Indica que el mensaje fue recibido
+        })
+
+        addSingleChatMessage(messageObject);
 
         // Si el usuario no existe, agregarlo
         if (data.from && !users[data.from]) {

@@ -93,8 +93,7 @@ const loginUser = async (req, res) => {
             JWT_SECRET,
             { expiresIn: '1h' }
         );
-
-        res.status(200).json({ message: "Login exitoso", token, privateKeyRSA: user.privateKeyRSA });
+        res.status(200).json({ message: "Login exitoso", token, privateKeyRSA: user.rsa_private_key });
     } catch (error) {
         res.status(500).json({ message: "Error al iniciar sesión", error: error.message });
     }
