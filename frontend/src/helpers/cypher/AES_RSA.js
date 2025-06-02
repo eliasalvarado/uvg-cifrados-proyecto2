@@ -1,17 +1,21 @@
 import { decryptAES256, encryptAES256, generateAES256Key } from "./AES-256"
 import { decryptRSA, encryptRSA } from "./RSA";
 
-const encryptAESRSA = async (text, publicKey) => {
+const encryptAESRSA = async (text, targetPublicKey, originPublicKey) => {
 
     const key = generateAES256Key();
     const textEncrypted = await encryptAES256(text, key);
 
-    // Encriptar la key AES con la llave pública RSA
-    const keyEncrypted = await encryptRSA(key, publicKey);
+    // Encriptar la key AES con la llave pública RSA del destinatario
+    const targetKeyEncrypted = await encryptRSA(key, targetPublicKey);
+
+    // Encriptar la key AES con la llave pública RSA del remitente 
+    const originKeyEncrypted = await encryptRSA(key, originPublicKey);
 
     return {
         textEncrypted,
-        keyEncrypted
+        targetKeyEncrypted,
+        originKeyEncrypted
     };
 
 }

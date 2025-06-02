@@ -6,6 +6,7 @@ import { scrollbarGray } from "../../styles/scrollbar.module.css";
 import { useEffect, useRef } from "react";
 import useChatState from "../../hooks/useChatState";
 import useSendMessage from "../../hooks/simpleChat/useSendMessage";
+import getMessageObject from "../../helpers/dto/getMessageObject";
 
 /**
  * Componente de chat individual que maneja la interacción del usuario con otro usuario específico.
@@ -20,7 +21,7 @@ import useSendMessage from "../../hooks/simpleChat/useSendMessage";
  */
 function SingleChat({ userId, username }) {
 
-	const { messages, addSingleChatMessage, getMessageObject } = useChatState();
+	const { messages, addSingleChatMessage } = useChatState();
 
 	const forceScrollRef = useRef(true);
 	const chatContainerRef = useRef();

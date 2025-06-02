@@ -1,33 +1,56 @@
 import { executeQuery } from '../../db/connection.js';
 
-const getChatsList = async (userId) => {
-    const query = `
-    WITH ranked AS (
-    SELECT *,
-        ROW_NUMBER() OVER (
-        PARTITION BY LEAST(origin_user_id, target_user_id), GREATEST(origin_user_id, target_user_id)
-        ORDER BY created_at DESC
-        ) AS rn,
-        CASE 
-        WHEN origin_user_id = ? THEN target_user_id
-        ELSE origin_user_id
-        END AS other_user_id
-    FROM messages
-    WHERE origin_user_id = ? OR target_user_id = ?
-    )
+/**
+ * Obtiene los mensajes de un usuario específico.
+ * @param {*} userId 
+ * @returns 
+ */
+const getUserMessages = async (userId) => {
+  const query = `
     SELECT 
-    u.id AS user_id,
-    u.username,
-    r.id AS message_id,
-    r.message,
-    r.created_at
-    FROM ranked r
-    JOIN users u ON u.id = r.other_user_id
-    WHERE r.rn = 1
-    ORDER BY r.created_at DESC;
+      id, 
+      message, 
+      origin_user_id, 
+      target_user_id, 
+      created_at, 
+      origin_key,
+      target_key,
+      CASE WHEN ? = origin_user_id THEN 1 ELSE 0 END AS sent
+    FROM messages
+    WHERE origin_user_id = ? OR target_user_id = ?;
+  `;
+  const [rows] = await executeQuery(query, [userId, userId, userId]);
+  return rows;
+};
+
+/**
+ * Obtiene los usuarios con los que se ha intercambiado mensajes individuales.
+ * @param {*} userId 
+ * @returns 
+ */
+const getUserContacts = async (userId) => {
+  const query = `
+    SELECT DISTINCT
+      u.id,
+      u.email,
+      u.username,
+      u.rsa_public_key
+    FROM users u
+    INNER JOIN messages m ON (u.id = m.origin_user_id OR u.id = m.target_user_id)
+    WHERE (m.origin_user_id = ? OR m.target_user_id = ?) AND u.id != ?;
+  `;
+  const [rows] = await executeQuery(query, [userId, userId, userId]);
+  return rows;
+};
+
+
+const insertMessage = async ({message, originUserId, targetUserId, originKey, targetKey}) => {
+    const query = `
+    INSERT INTO messages (message, origin_user_id, target_user_id, origin_key, target_key, created_at)
+    VALUES (?, ?, ?, ?, ?, NOW());
     `;
-    const [rows] = await executeQuery(query, [userId, userId, userId]);
-    return rows;
+    const [result] = await executeQuery(query, [message, originUserId, targetUserId, originKey, targetKey]);
+    return result?.affectedRows === 1;
 }
 
-export {getChatsList}
+export { insertMessage, getUserMessages, getUserContacts };

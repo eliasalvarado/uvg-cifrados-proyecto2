@@ -1,24 +1,8 @@
 import CustomError from "../../utils/customError.js";
 import errorSender from "../../utils/errorSender.js"
-import { getChatsList } from "./chat.model.js";
+import { getUserContacts, getUserMessages, insertMessage } from "./chat.model.js";
 import { io } from "../../sockets/ioInstance.js";
 
-const getChatsListController= async (req, res) => {
-
-   try{
-        const userId = 1; // TODO: Cambiar por el id del usuario logueado
-        const chats = await getChatsList(userId);
-        if (!chats || chats.length === 0) {
-            throw new CustomError('No se encontraron mensajes.', 404);
-        }
-
-        res.status(200).send({ ok: true, result: chats})
-
-   }catch(ex){
-    console.log(ex)
-        errorSender({res, ex })
-   }
-}
 
 const sendMessageController = async (req, res) => {
 
@@ -26,14 +10,31 @@ const sendMessageController = async (req, res) => {
 
     
     const { userId } = req.params;
-    const { message, key } = req.body || {};
+    const { message, originKey, targetKey } = req.body || {};
     
     if (!message){
       throw new CustomError('El mensaje es requerido', 400);
     }
 
-    if (!key){
-      throw new CustomError('La llave es requerida', 400);
+    if (!originKey){
+      throw new CustomError('La llave de origen es requerida', 400);
+    }
+
+    if (!targetKey){
+      throw new CustomError('La llave de destino es requerida', 400);
+    }
+
+    // Guardar el mensaje en la base de datos
+    const ok = await insertMessage({
+      message,
+      originUserId: req.user.id,
+      targetUserId: parseInt(userId, 10),
+      originKey,
+      targetKey
+    });
+
+    if (!ok) {
+      throw new CustomError('No se pudo guardar el mensaje', 500);
     }
     
     // Emitir el mensaje al socket del usuario
@@ -43,7 +44,7 @@ const sendMessageController = async (req, res) => {
       to: parseInt(userId, 10),
       sent: false,
       datetime: new Date(),
-      key
+      targetKey,
     });
     
     res.send({ ok: true })
@@ -53,7 +54,22 @@ const sendMessageController = async (req, res) => {
   }
 }
 
+const getSingleChatsController = async (req, res) => {
+  try {
+    console.log("holis")
+    const userId = req.user.id;
+    const contacts = await getUserContacts(userId);
+    const messages = await getUserMessages(userId);
+    
+    
+    res.send({ ok: true, contacts, messages });
+  } catch (ex) {
+    console.log("Error: ",ex);
+    errorSender({ res, ex });
+  }
+}
+
 export {
-  getChatsListController,
   sendMessageController,
+  getSingleChatsController
 }

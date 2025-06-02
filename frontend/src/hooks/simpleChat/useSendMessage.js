@@ -23,12 +23,22 @@ function useSendMessage() {
             return;
         }
 
-        const { textEncrypted,  keyEncrypted } = await encryptAESRSA(message, targetUser.rsaPublicKey);
+        const userPublicKeyRSA = localStorage.getItem('publicKeyRSA');
+
+        const { textEncrypted, targetKeyEncrypted, originKeyEncrypted } = await encryptAESRSA(
+            message,
+            targetUser.rsaPublicKey,
+            userPublicKeyRSA,
+        );
             
         callFetch({
             uri: `${consts.apiPath}/chat/single/${targetUserId}`,
             method: 'POST',
-            body: JSON.stringify({ message: textEncrypted, key: keyEncrypted }),
+            body: JSON.stringify({
+                message: textEncrypted,
+                targetKey: targetKeyEncrypted,
+                originKey: originKeyEncrypted
+            }),
             headers: {
                 'Authorization': token,
             },

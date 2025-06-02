@@ -5,13 +5,14 @@ import { io } from 'socket.io-client';
 import useChatState from './useChatState';
 import useGetUserById from './user/useGetUserById';
 import { decryptAESRSA } from '../helpers/cypher/AES_RSA';
+import getMessageObject from '../helpers/dto/getMessageObject';
 
 function useSocket() {
   
   const token = useToken();
   const socketRef = useRef(null);
 
-  const { addSingleChatMessage, users, addUser, getMessageObject } = useChatState();
+  const { addSingleChatMessage, users, addUser } = useChatState();
   const { getUserById, result: userResult } = useGetUserById();
 
   useEffect(() => {
@@ -52,9 +53,9 @@ function useSocket() {
           return;
         }
 
-        const { message: messageEncrypted, key } = data;
+        const { message: messageEncrypted, targetKey } = data;
 
-        const message = await decryptAESRSA(messageEncrypted, key, privateKeyRSA);
+        const message = await decryptAESRSA(messageEncrypted, targetKey, privateKeyRSA);
         const messageObject = getMessageObject({
           from: data.from,
           to: data.to,

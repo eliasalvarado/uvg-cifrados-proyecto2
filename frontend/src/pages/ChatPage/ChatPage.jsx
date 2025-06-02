@@ -32,6 +32,8 @@ function ChatPage() {
     setCurrentSingleChat(null);
   }
 
+  console.log(users)
+
   return (
     <div className={styles.chatPage}>
       <NavBar 
@@ -42,7 +44,7 @@ function ChatPage() {
       />
       {selectedOption === menuOption.CHATS && <ChatsList onSelectedUserChange={handleSingleChatSelected}/>}
       {selectedOption === menuOption.GROUPS && <ChatRoomsList onSelectedRoomChange={handleRoomChatSelected}/> }
-      {currentSingleChat && <SingleChat userId={currentSingleChat} username={users[currentSingleChat].username} />}
+      {currentSingleChat && <SingleChat userId={currentSingleChat} username={users[currentSingleChat]?.username} />}
       {currentRoomChat && <RoomChat room={currentRoomChat}/>}
 
     </div>

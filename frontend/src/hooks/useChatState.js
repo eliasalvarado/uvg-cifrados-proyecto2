@@ -1,9 +1,14 @@
 import { useContext } from 'react';
 import ChatContext from '../context/ChatContext';
 
+import getUserObject from '../helpers/dto/getUserObject';
+
 function useChatState() {
 
-const {messages, setMessages, users, setUsers} = useContext(ChatContext);
+    const {messages, setMessages, users, setUsers} = useContext(ChatContext);
+
+
+
     /**
      * 
      * @param {*} message Expects a messageObject.
@@ -20,27 +25,11 @@ const {messages, setMessages, users, setUsers} = useContext(ChatContext);
         });
     }
 
-    /**
-     * 
-     * @param {*} from: The user ID of the sender
-     * @param {*} to: The user ID of the receiver
-     * @param {*} message: The message content
-     * @param {*} datetime: The date and time when the message was sent
-     * @param {*} sent: Boolean indicating if the message was sent by the current user
-     * @returns 
-     */
-    const getMessageObject = ({from, to, message, datetime, sent }) => ({
-      from,
-      to,
-      message,
-      datetime,
-      sent
-    })
     
     const addUser = ({userId, username, email, rsaPublicKey}) => {
         setUsers((prev) => {
             if (prev[userId]) return prev; // If user already exists, do nothing
-            return { ...prev, [userId]: { username, email, rsaPublicKey } };
+            return { ...prev, [userId]: getUserObject({userId, username, email, rsaPublicKey}) };
         });
     }
 
@@ -57,13 +46,14 @@ const {messages, setMessages, users, setUsers} = useContext(ChatContext);
 
          addUser({userId, username, email, rsaPublicKey});
     }
+
+    
         
 
     return {
         messages,
         users,
         addSingleChatMessage,
-        getMessageObject,
         createEmptyChat,
         addUser,
     };
