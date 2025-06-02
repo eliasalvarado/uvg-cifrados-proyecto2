@@ -103,6 +103,10 @@ function LoginPage() {
 
         if (!resultLogin?.token) return;
 
+        // Guardar private key en localStorage
+        localStorage.setItem("privateKeyRSA", resultLogin.privateKeyRSA);
+        localStorage.setItem("publicKeyRSA", resultLogin.publicKeyRSA);
+
         localStorage.setItem("token", resultLogin.token);
         refreshToken();
 
@@ -110,6 +114,10 @@ function LoginPage() {
 
     useEffect(() => {
         if (!resultMFA?.token) return;
+
+        // Guardar la llave privada en localStorage
+        localStorage.setItem("privateKeyRSA", resultMFA.privateKeyRSA);
+        localStorage.setItem("publicKeyRSA", resultMFA.publicKeyRSA);
 
         // Guardar el token en el localStorage
         localStorage.setItem("token", resultMFA.token);

@@ -1,24 +1,28 @@
 import consts from '../../helpers/consts.js';
 import useFetch from '../useFetch.js';
+import useToken from '../useToken.js';
 
-function useGetChats() {
+function useSearchUser() {
   const {callFetch, result, loading, error} = useFetch();
+  const token = useToken();
 
-    const getChats = async () => {
+    const searchUser = async (searchTerm) => {
         const response = await callFetch({
-        uri: `${consts.apiPath}/chat`,
+        uri: `${consts.apiPath}/user/search/${searchTerm}`,
         method: 'GET',
-        });
+        headers: {
+            Authorization: token,
+        }});
     
         return response;
     };
 
     return {
-        getChats,
+        searchUser,
         result,
         loading,
         error,
     };
 }
 
-export default useGetChats;
+export default useSearchUser;

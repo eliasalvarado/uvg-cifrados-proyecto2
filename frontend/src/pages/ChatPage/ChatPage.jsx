@@ -6,6 +6,7 @@ import SingleChat from '../../components/SingleChat/SingleChat';
 import { useState } from 'react';
 import ChatRoomsList from '../../components/ChatRoomsList/ChatRoomsList';
 import RoomChat from '../../components/RoomChat/RoomChat';
+import useChatState from '../../hooks/useChatState';
 
 const menuOption = {
   CHATS: 'CHATS',
@@ -18,6 +19,7 @@ function ChatPage() {
   const [selectedOption, setSelectedOption] = useState(menuOption.CHATS);
   const [currentSingleChat, setCurrentSingleChat] = useState(null);
   const [currentRoomChat, setCurrentRoomChat] = useState(null);
+  const { users } = useChatState();
 
 
   const handleSingleChatSelected = (user) => {
@@ -30,6 +32,8 @@ function ChatPage() {
     setCurrentSingleChat(null);
   }
 
+  console.log(users)
+
   return (
     <div className={styles.chatPage}>
       <NavBar 
@@ -40,7 +44,7 @@ function ChatPage() {
       />
       {selectedOption === menuOption.CHATS && <ChatsList onSelectedUserChange={handleSingleChatSelected}/>}
       {selectedOption === menuOption.GROUPS && <ChatRoomsList onSelectedRoomChange={handleRoomChatSelected}/> }
-      {currentSingleChat && <SingleChat user={currentSingleChat}/>}
+      {currentSingleChat && <SingleChat userId={currentSingleChat} username={users[currentSingleChat]?.username} />}
       {currentRoomChat && <RoomChat room={currentRoomChat}/>}
 
     </div>

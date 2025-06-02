@@ -1,8 +1,8 @@
 import { executeQuery } from '../../db/connection.js';
 
-const createUser = async ({ email, passwordHash, publicKeyRSA, publicKeyECDSA }) => {
-    const query = 'INSERT INTO users (email, password_hash, rsa_public_key, ecdsa_public_key, username) VALUES (?, ?, ?, ?, ?)';
-    const [result] = await executeQuery(query, [email, passwordHash, publicKeyRSA, publicKeyECDSA, email]);
+const createUser = async ({ email, passwordHash, publicKeyRSA, publicKeyECDSA, privateKeyRSA }) => {
+    const query = 'INSERT INTO users (email, password_hash, rsa_public_key, ecdsa_public_key, username, rsa_private_key) VALUES (?, ?, ?, ?, ?, ?)';
+    const [result] = await executeQuery(query, [email, passwordHash, publicKeyRSA, publicKeyECDSA, email, privateKeyRSA]);
     return result.insertId;
 };
 
@@ -30,10 +30,22 @@ const deleteMFASecret = async (userId) => {
     return result.affectedRows > 0;
 }
 
+const searchUserByEmailOrUsername = async (searchTerm) => {
+    const query = `
+        SELECT id, email, username, rsa_public_key
+        FROM users
+        WHERE email = ? OR username = ?
+        LIMIT 1
+    `;
+    const [rows] = await executeQuery(query, [`${searchTerm}`, `${searchTerm}`]);
+    return rows?.[0] || null;
+}
+
 export {
     createUser,
     getUserByEmail,
     getUserById,
     saveMFASecret,
-    deleteMFASecret
+    deleteMFASecret,
+    searchUserByEmailOrUsername
 }
