@@ -5,16 +5,19 @@ import RegisterPage from '../../pages/RegisterPage/RegisterPage';
 import OAuthSuccessPage from '../../pages/OAuthSuccessPage/OAuthSuccessPage';
 import { SessionProvider } from '../../context/SessionContext';
 import { ChatProvider } from '../../context/ChatContext';
+import { SocketProvider } from '../../context/SocketContext';
 
 function App() {
   return (
     <SessionProvider>
       <ChatProvider>
-        <Router>
+        <SocketProvider>
+          <Router>
 
-          <IndexPage />
+            <IndexPage />
 
-        </Router>
+          </Router>
+        </SocketProvider>
       </ChatProvider>
     </SessionProvider>
   );
