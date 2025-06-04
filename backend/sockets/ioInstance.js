@@ -1,7 +1,7 @@
 import { Server } from 'socket.io';
 import socketHandler from './socketHandler.js';
 import { verifyToken } from '../utils/auth.js';
-import { getGroupsForUser } from '../apiServices/chat/chat.model.js';
+import { getGroupsIdForUser } from '../apiServices/chat/chat.model.js';
 
 let io = null;
 
@@ -39,10 +39,10 @@ const startSocketServer = async (server) => {
 
          // Obtener grupos del usuario y unirse a cada uno
 
-        getGroupsForUser(userId).then((groupsData) => {
+        getGroupsIdForUser(userId).then((groupsId) => {
 
-            for (const group of groupsData) {
-                const roomName = `group_${group.id}`;
+            for (const groupId of groupsId) {
+                const roomName = `group_${groupId}`;
                 socket.join(roomName);
                 console.log(`Usuario ${userId} se ha unido a la sala de grupo ${roomName}`);
             }

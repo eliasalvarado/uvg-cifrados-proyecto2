@@ -141,15 +141,15 @@ const getGroupMembersId = async (groupId) => {
   return rows.map(row => row.user_id);
 };
 
-const getGroupsForUser = async (userId) => {
+const getGroupsIdForUser = async (userId) => {
   const query = `
-    SELECT g.id, g.key
+    SELECT g.id
     FROM \`groups\` g
     INNER JOIN group_members gm ON g.id = gm.group_id
     WHERE gm.user_id = ?;
   `;
   const [rows] = await executeQuery(query, [userId]);
-  return rows.map(row => ({id:row.id, key:row.key}));
+  return rows.map(row => row.id);
 }
 
 
@@ -164,5 +164,5 @@ export {
   insertGroupMessage,
   verifyIfUserIsGroupMember,
   getGroupMembersId,
-  getGroupsForUser,
+  getGroupsIdForUser,
 };
