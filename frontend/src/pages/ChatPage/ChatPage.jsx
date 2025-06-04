@@ -19,8 +19,8 @@ function ChatPage() {
 
   const [selectedOption, setSelectedOption] = useState(menuOption.CHATS);
   const [currentSingleChat, setCurrentSingleChat] = useState(null);
-  const [currentRoomChat, setCurrentRoomChat] = useState(null);
-  const { users } = useChatState();
+  const [currentGroupChat, setCurrentRoomChat] = useState(null);
+  const { users, groups } = useChatState();
 
 
   const handleSingleChatSelected = (user) => {
@@ -47,7 +47,7 @@ function ChatPage() {
       {selectedOption === menuOption.GROUPS && <ChatRoomsList onSelectedRoomChange={handleRoomChatSelected}/> }
       {selectedOption === menuOption.PROFILE && <ProfilePage />}
       {currentSingleChat && <SingleChat userId={currentSingleChat} username={users[currentSingleChat]?.username} />}
-      {currentRoomChat && <RoomChat room={currentRoomChat}/>}
+      {currentGroupChat && <RoomChat groupId={currentGroupChat} name={groups[currentGroupChat]?.name}/>}
 
     </div>
   );

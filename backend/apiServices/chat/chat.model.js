@@ -1,4 +1,5 @@
 import { executeQuery } from '../../db/connection.js';
+import CustomError from '../../utils/customError.js';
 
 /**
  * Obtiene los mensajes de un usuario específico.
@@ -53,4 +54,58 @@ const insertMessage = async ({message, originUserId, targetUserId, originKey, ta
     return result?.affectedRows === 1;
 }
 
-export { insertMessage, getUserMessages, getUserContacts };
+const insertGroup = async ({ name, creatorId }) => {
+  console.log('insertGroup', { name, creatorId });
+  const query = `
+    INSERT INTO \`groups\` (\`name\`, creator_id)
+    VALUES (?, ?);
+  `;
+
+  try {
+    const [result] = await executeQuery(query, [name, creatorId]);
+
+    // Retorna el ID del nuevo grupo
+    if (result?.affectedRows === 1) {
+      return result.insertId;
+    }
+
+    throw new CustomError('No se pudo crear el grupo.', 500);
+  } catch (error) {
+    if (error.code === 'ER_DUP_ENTRY') {
+      throw new CustomError(`El grupo con nombre "${name}" ya existe.`, 409);
+    }
+    throw error;
+  }
+};
+
+
+
+const insertGroupMember = async ({ groupId, userId }) => {
+  const query = `
+    INSERT INTO group_members (group_id, user_id)
+    VALUES (?, ?);
+  `;
+
+  try {
+    const [result] = await executeQuery(query, [groupId, userId]);
+
+    // Verificamos si se insertó correctamente
+    return result?.affectedRows === 1;
+  } catch (error) {
+    if (error.code === 'ER_DUP_ENTRY') {
+      throw new CustomError('El usuario ya es miembro del grupo.', 409);
+    }
+    throw error;
+  }
+};
+
+const getGroupIdByName = async (groupName) => {
+  const query = `
+    SELECT id FROM \`groups\` WHERE name = ?;
+  `;
+  const [rows] = await executeQuery(query, [groupName]);
+  return rows.length > 0 ? rows[0].id : null;
+};
+
+
+export { insertMessage, getUserMessages, getUserContacts, insertGroup, insertGroupMember, getGroupIdByName};

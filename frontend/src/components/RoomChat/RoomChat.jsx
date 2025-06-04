@@ -15,7 +15,7 @@ import { useEffect, useRef } from "react";
  * @param {Object} props - Las propiedades del componente.
  * @param {string} props.room - El nombre o identificador de la sala de chat.
  */
-function RoomChat({ room }) {
+function RoomChat({ groupId, name }) {
 
 
 	const chatContainerRef = useRef();
@@ -37,7 +37,7 @@ function RoomChat({ room }) {
     // Enviar al abrir al chat
     //markAllRoomMessagesAsViewed(room);
 		scrollToBottom();
-  }, [room]);
+  }, [groupId]);
 
 	useEffect(() => {
 
@@ -66,7 +66,7 @@ function RoomChat({ room }) {
 			className={styles.chat}
 		>
 			<header className={styles.chatHeader}>
-				<h3 className={styles.title}>{room}</h3>
+				<h3 className={styles.title}>{name}</h3>
 
 			</header>
 			<div className={styles.chatBody}>
@@ -106,5 +106,6 @@ function RoomChat({ room }) {
 export default RoomChat;
 
 RoomChat.propTypes = {
-	room: PropTypes.string.isRequired,
+	groupId: PropTypes.string.isRequired,
+	name: PropTypes.string.isRequired
 };
