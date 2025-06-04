@@ -12,6 +12,10 @@ export const ChatProvider = ({ children }) => {
   const [messages, setMessages] = useState({});
   const [users, setUsers] = useState({});
 
+  // Variables para manejar estado de grupos
+  const [groups, setGroups] = useState({}); // { groupId: { name, members:[userId, ...] } }
+  const [groupMessages, setGroupMessages] = useState({}); // { groupId: [groupMessageObject, ...] }
+
   // Hooks para obtener estado inicial
   const {getSingleChats, result: singleChatsResult } = useGetSingleChats();
   const token = useToken();
@@ -42,6 +46,10 @@ export const ChatProvider = ({ children }) => {
     setMessages,
     users,
     setUsers,
+    groups,
+    setGroups,
+    groupMessages,
+    setGroupMessages,
   };
 
   return (

@@ -4,6 +4,9 @@ import AddButton from "../AddButton/AddButton";
 import ChatItem from "../ChatItem/ChatItem";
 import styles from "./ChatRoomsList.module.css";
 import { scrollbarGray } from "../../styles/scrollbar.module.css";
+import JoinButton from "../JoinButton/JoinButton";
+import useCreateGroup from "../../hooks/groupChat/useSendMessage";
+import useChatState from "../../hooks/useChatState";
 
 /**
  * Componente que muestra una lista de salas de chat y permite unirse a nuevas salas y seleccionar salas existentes.
@@ -14,60 +17,67 @@ import { scrollbarGray } from "../../styles/scrollbar.module.css";
 function ChatRoomsList({ onSelectedRoomChange = null }) {
 	const [selectedRoom, setSelectedRoom] = useState(null);
 
-	useEffect(() => {
-		if (onSelectedRoomChange) onSelectedRoomChange(selectedRoom);
-	}, [selectedRoom]);
+	const { createGroup, result: successCreateGroup, error: errorCreateGroup } = useCreateGroup();
+	const { createEmptyGroup, groups } = useChatState(); 
+
+	const handleCreateRoom = () => {
+		const name = prompt("Ingrese el nombre del nuevo grupo:");
+		if (!name) return;
+		createGroup({name});
+	}
 
 	const handleJoinRoom = () => {
 		const room = prompt("Ingrese el nombre del grupo al que desea unirse:");
 		if (!room) return;
 		// joinRoom(room, session.user);
 	};
+
+	useEffect(() => {
+		if (onSelectedRoomChange) onSelectedRoomChange(selectedRoom);
+	}, [selectedRoom]);
+
+	useEffect(() => {
+
+		if(!successCreateGroup) return;
+		const { groupId, name, creatorId } = successCreateGroup;
+		alert("Grupo creado exitosamente!")
+
+		// Añadir el nuevo grupo a la lista de grupos
+		createEmptyGroup({ groupId, name, creatorId });
+
+		// Seleccionar automáticamente el nuevo grupo
+		setSelectedRoom(groupId);
+		
+	}, [successCreateGroup]);
+
+
+	useEffect(() => {
+
+		if (!errorCreateGroup) return;
+		alert(`Error al crear el grupo: ${errorCreateGroup?.message || "Error desconocido"}`);
+		
+	}, [errorCreateGroup]);
+
 	return (
 		<div className={styles.roomsList}>
 			<header>
 				<h1 className={styles.title}>Grupos</h1>
-				<AddButton onClick={handleJoinRoom} />
+				<div className={styles.buttonsContainer}>
+					<JoinButton onClick={handleJoinRoom} />
+					<AddButton onClick={handleCreateRoom} />
+				</div>
 			</header>
 
 			<ul className={`${styles.listContainer} ${scrollbarGray}`}>
-				{/* {Object.entries(rooms)
-					.sort((room1, room2) => {
-						const [roomName1, roomData1] = room1;
-						const [roomName2, roomData2] = room2;
-
-						// Ordenar por fecha del último mensaje (chats nuevos van al inicio)
-						const lastMessage1 = roomData1.messages.slice(-1)[0];
-						const lastMessage2 = roomData2.messages.slice(-1)[0];
-						if (!lastMessage1 && !lastMessage2) return roomName1 < roomName2 ? -1 : 1; // Si no hay mensajes, ordenar por nombre
-						if (!lastMessage1) return -1; // Mantener los chats sin mensajes al inicio
-						if (!lastMessage2) return -1;
-						return lastMessage2.date - lastMessage1.date; // Ordenar por fecha del último mensaje
-					})
-					.map((roomData) => {
-						const [room, { messages }] = roomData;
-
-						const lastMessage = messages.slice(-1)[0];
-						const lastMessageText = lastMessage
-							? 
-              `${lastMessage.nickname === session.user ? "Tú" : lastMessage.nickname}: ${lastMessage.message}`
-							: null;
-						const notViewdMessages = messages.filter(
-							(message) => !message.viewed && message.nickname !== session.user
-						).length;
-
-						return (
-							<ChatItem
-								key={room}
-								user={room}
-								message={lastMessageText}
-								date={lastMessage?.date?.toString()}
-								onClick={setSelectedRoom}
-								selected={selectedRoom === room}
-								notViewed={notViewdMessages}
-							/>
-						);
-					})} */}
+				{Object.entries(groups).map(([groupId, group]) => (
+					<ChatItem
+						key={groupId}
+						id={groupId}
+						user={group.name}
+						onClick={() => setSelectedRoom(groupId)}
+						selected={selectedRoom === groupId}
+					/>
+				))}
 			</ul>
 		</div>
 	);
