@@ -122,7 +122,7 @@ const joinGroupController = async (req, res) => {
       throw new CustomError('No se pudo añadir al usuario como miembro del grupo', 500);
     }
 
-    res.send({ ok: true });
+    res.send({ ok: true, groupId, name: groupName, newMemberId: req.user.id });
   } catch (ex) {
     console.log(ex);
     errorSender({ res, ex });

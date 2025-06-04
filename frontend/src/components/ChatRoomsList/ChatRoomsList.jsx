@@ -5,8 +5,9 @@ import ChatItem from "../ChatItem/ChatItem";
 import styles from "./ChatRoomsList.module.css";
 import { scrollbarGray } from "../../styles/scrollbar.module.css";
 import JoinButton from "../JoinButton/JoinButton";
-import useCreateGroup from "../../hooks/groupChat/useSendMessage";
+import useCreateGroup from "../../hooks/groupChat/useCreateGroup";
 import useChatState from "../../hooks/useChatState";
+import useJoinGroup from "../../hooks/groupChat/useJoinGroup";
 
 /**
  * Componente que muestra una lista de salas de chat y permite unirse a nuevas salas y seleccionar salas existentes.
@@ -18,6 +19,7 @@ function ChatRoomsList({ onSelectedRoomChange = null }) {
 	const [selectedRoom, setSelectedRoom] = useState(null);
 
 	const { createGroup, result: successCreateGroup, error: errorCreateGroup } = useCreateGroup();
+	const { joinGroup, result: successJoinGroup, error: errorJoinGroup } = useJoinGroup();
 	const { createEmptyGroup, groups } = useChatState(); 
 
 	const handleCreateRoom = () => {
@@ -27,9 +29,9 @@ function ChatRoomsList({ onSelectedRoomChange = null }) {
 	}
 
 	const handleJoinRoom = () => {
-		const room = prompt("Ingrese el nombre del grupo al que desea unirse:");
-		if (!room) return;
-		// joinRoom(room, session.user);
+		const groupName = prompt("Ingrese el nombre del grupo al que desea unirse:");
+		if (!groupName) return;
+		joinGroup({ groupName })
 	};
 
 	useEffect(() => {
@@ -50,13 +52,36 @@ function ChatRoomsList({ onSelectedRoomChange = null }) {
 		
 	}, [successCreateGroup]);
 
-
 	useEffect(() => {
 
 		if (!errorCreateGroup) return;
 		alert(`Error al crear el grupo: ${errorCreateGroup?.message || "Error desconocido"}`);
 		
 	}, [errorCreateGroup]);
+
+
+	useEffect(() => {
+
+		if (!successJoinGroup) return;
+		const { groupId, name, newMemberId } = successJoinGroup;
+		alert("Unido al grupo exitosamente!");
+
+		// Añadir el nuevo grupo a la lista de grupos
+		createEmptyGroup({ groupId, name, creatorId: newMemberId });
+
+		// Seleccionar automáticamente el nuevo grupo
+		setSelectedRoom(groupId);
+		
+		if (onSelectedRoomChange) onSelectedRoomChange(groupId);
+		
+	}, [successJoinGroup]);
+	
+	useEffect(() => {
+
+		if (!errorJoinGroup) return;
+		alert(`Error al unirse al grupo: ${errorJoinGroup?.message || "Error desconocido"}`);
+		
+	}, [errorJoinGroup]);
 
 	return (
 		<div className={styles.roomsList}>
