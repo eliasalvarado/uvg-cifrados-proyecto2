@@ -3,6 +3,7 @@ import styles from './ChatPage.module.css';
 import NavBar from '../../components/NavBar/NavBar';
 import ChatsList from '../../components/ChatsList/ChatsList';
 import SingleChat from '../../components/SingleChat/SingleChat';
+import ProfilePage from '../ProfilePage/ProfilePage';
 import { useState } from 'react';
 import ChatRoomsList from '../../components/ChatRoomsList/ChatRoomsList';
 import RoomChat from '../../components/RoomChat/RoomChat';
@@ -44,6 +45,7 @@ function ChatPage() {
       />
       {selectedOption === menuOption.CHATS && <ChatsList onSelectedUserChange={handleSingleChatSelected}/>}
       {selectedOption === menuOption.GROUPS && <ChatRoomsList onSelectedRoomChange={handleRoomChatSelected}/> }
+      {selectedOption === menuOption.PROFILE && <ProfilePage />}
       {currentSingleChat && <SingleChat userId={currentSingleChat} username={users[currentSingleChat]?.username} />}
       {currentRoomChat && <RoomChat room={currentRoomChat}/>}
 
