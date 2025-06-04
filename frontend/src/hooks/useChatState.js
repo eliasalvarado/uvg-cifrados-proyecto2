@@ -48,8 +48,8 @@ function useChatState() {
          addUser({userId, username, email, rsaPublicKey});
     }
 
-    const createEmptyGroup = ({groupId, name, creatorId}) => {
-        const groupObj = getGroupObject({name, members: [creatorId]});
+    const createEmptyGroup = ({groupId, name, creatorId, key}) => {
+        const groupObj = getGroupObject({name, members: [creatorId], key});
         setGroups((prev) => {
             if (prev[groupId]) return prev; // If group already exists, do nothing
             return { ...prev, [groupId]: groupObj };

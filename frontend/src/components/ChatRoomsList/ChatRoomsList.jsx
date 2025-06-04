@@ -8,6 +8,7 @@ import JoinButton from "../JoinButton/JoinButton";
 import useCreateGroup from "../../hooks/groupChat/useCreateGroup";
 import useChatState from "../../hooks/useChatState";
 import useJoinGroup from "../../hooks/groupChat/useJoinGroup";
+import useJoinGroupSocket from "../../hooks/groupChat/useJoinGroupSocket";
 
 /**
  * Componente que muestra una lista de salas de chat y permite unirse a nuevas salas y seleccionar salas existentes.
@@ -21,10 +22,12 @@ function ChatRoomsList({ onSelectedRoomChange = null }) {
 	const { createGroup, result: successCreateGroup, error: errorCreateGroup } = useCreateGroup();
 	const { joinGroup, result: successJoinGroup, error: errorJoinGroup } = useJoinGroup();
 	const { createEmptyGroup, groups } = useChatState(); 
+	const joinGroupSocket = useJoinGroupSocket();
 
 	const handleCreateRoom = () => {
 		const name = prompt("Ingrese el nombre del nuevo grupo:");
 		if (!name) return;
+		
 		createGroup({name});
 	}
 
@@ -41,14 +44,17 @@ function ChatRoomsList({ onSelectedRoomChange = null }) {
 	useEffect(() => {
 
 		if(!successCreateGroup) return;
-		const { groupId, name, creatorId } = successCreateGroup;
+		const { groupId, name, creatorId, key } = successCreateGroup;
 		alert("Grupo creado exitosamente!")
 
 		// Añadir el nuevo grupo a la lista de grupos
-		createEmptyGroup({ groupId, name, creatorId });
+		createEmptyGroup({ groupId, name, creatorId, key });
 
 		// Seleccionar automáticamente el nuevo grupo
 		setSelectedRoom(groupId);
+
+		// Unirse al grupo en el socket
+		joinGroupSocket(groupId);
 		
 	}, [successCreateGroup]);
 
@@ -63,16 +69,19 @@ function ChatRoomsList({ onSelectedRoomChange = null }) {
 	useEffect(() => {
 
 		if (!successJoinGroup) return;
-		const { groupId, name, newMemberId } = successJoinGroup;
+		const { groupId, name, newMemberId, key } = successJoinGroup;
 		alert("Unido al grupo exitosamente!");
 
 		// Añadir el nuevo grupo a la lista de grupos
-		createEmptyGroup({ groupId, name, creatorId: newMemberId });
+		createEmptyGroup({ groupId, name, creatorId: newMemberId, key });
 
 		// Seleccionar automáticamente el nuevo grupo
 		setSelectedRoom(groupId);
 		
 		if (onSelectedRoomChange) onSelectedRoomChange(groupId);
+
+		// Unirse al grupo en el socket
+		joinGroupSocket(groupId);
 		
 	}, [successJoinGroup]);
 	

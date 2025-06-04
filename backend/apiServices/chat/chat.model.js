@@ -54,15 +54,23 @@ const insertMessage = async ({message, originUserId, targetUserId, originKey, ta
     return result?.affectedRows === 1;
 }
 
-const insertGroup = async ({ name, creatorId }) => {
-  console.log('insertGroup', { name, creatorId });
+const insertGroupMessage = async ({message, groupId, userId}) => {
+    const query = `
+    INSERT INTO group_messages (message, group_id, user_id, created_at)
+    VALUES (?, ?, ?, NOW());
+    `;
+    const [result] = await executeQuery(query, [message, groupId, userId]);
+    return result?.affectedRows === 1;
+}
+
+const insertGroup = async ({ name, creatorId, key }) => {
   const query = `
-    INSERT INTO \`groups\` (\`name\`, creator_id)
-    VALUES (?, ?);
+    INSERT INTO \`groups\` (\`name\`, creator_id, \`key\`)
+    VALUES (?, ?, ?);
   `;
 
   try {
-    const [result] = await executeQuery(query, [name, creatorId]);
+    const [result] = await executeQuery(query, [name, creatorId, key]);
 
     // Retorna el ID del nuevo grupo
     if (result?.affectedRows === 1) {
@@ -99,13 +107,62 @@ const insertGroupMember = async ({ groupId, userId }) => {
   }
 };
 
-const getGroupIdByName = async (groupName) => {
+const getGroupByName = async (groupName) => {
   const query = `
-    SELECT id FROM \`groups\` WHERE name = ?;
+    SELECT id, name, \`key\`, creator_id FROM \`groups\` WHERE name = ?;
   `;
   const [rows] = await executeQuery(query, [groupName]);
-  return rows.length > 0 ? rows[0].id : null;
+  
+  return rows.length > 0 ? {
+    groupId: rows[0].id,
+    name: rows[0].name,
+    key: rows[0].key,
+    creatorId: rows[0].creator_id
+  } : null;
 };
 
+const verifyIfUserIsGroupMember = async (groupId, userId) => {
+  const query = `
+    SELECT COUNT(*) AS count
+    FROM group_members
+    WHERE group_id = ? AND user_id = ?;
+  `;
+  const [rows] = await executeQuery(query, [groupId, userId]);
+  return rows[0].count > 0;
+}
 
-export { insertMessage, getUserMessages, getUserContacts, insertGroup, insertGroupMember, getGroupIdByName};
+const getGroupMembersId = async (groupId) => {
+  const query = `
+    SELECT user_id
+    FROM group_members
+    WHERE group_id = ?;
+  `;
+  const [rows] = await executeQuery(query, [groupId]);
+  return rows.map(row => row.user_id);
+};
+
+const getGroupsForUser = async (userId) => {
+  const query = `
+    SELECT g.id, g.key
+    FROM \`groups\` g
+    INNER JOIN group_members gm ON g.id = gm.group_id
+    WHERE gm.user_id = ?;
+  `;
+  const [rows] = await executeQuery(query, [userId]);
+  return rows.map(row => ({id:row.id, key:row.key}));
+}
+
+
+
+export {
+  insertMessage,
+  getUserMessages,
+  getUserContacts,
+  insertGroup,
+  insertGroupMember,
+  getGroupByName,
+  insertGroupMessage,
+  verifyIfUserIsGroupMember,
+  getGroupMembersId,
+  getGroupsForUser,
+};

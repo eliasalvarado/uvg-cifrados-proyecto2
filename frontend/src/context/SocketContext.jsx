@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import useToken from '../hooks/useToken';
 import { io } from 'socket.io-client';
 import useAddReceivedMessage from '../hooks/simpleChat/useAddReceivedMessage';
+import getTokenPayload from '../helpers/getTokenPayload';
 
 const SocketContext = createContext();
 
@@ -20,6 +21,8 @@ export const SocketProvider = ({ children }) => {
       }
       return;
     }
+
+    const tokenPayload = getTokenPayload(token);
 
     // crear socket con autenticación
     socketRef.current = io('http://localhost:3000', {
@@ -46,6 +49,15 @@ export const SocketProvider = ({ children }) => {
 
     socket.on('connect_error', (err) => {
       console.error('Error de conexión socket:', err.message);
+    });
+
+    socket.on('chat_group_message', (data) => {
+      const userId = tokenPayload.id;
+      if(data.userId === userId) {
+        return; // No procesar mensajes enviados por el usuario actual
+      }
+      console.log('Received group chat message:', data);
+      console.log(tokenPayload);
     });
 
     return () => {
