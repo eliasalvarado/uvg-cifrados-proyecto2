@@ -2,12 +2,15 @@ import sha256 from 'js-sha256';
 import jwt from 'jsonwebtoken';
 import speakeasy from 'speakeasy';
 import qrcode from 'qrcode';
-import { createUser, getUserByEmail, getUserById, saveMFASecret, deleteMFASecret, searchUserByEmailOrUsername } from './user.model.js';
+import { OAuth2Client } from 'google-auth-library';
+import { createUser, createGoogleUser, getUserByEmail, getUserById, saveMFASecret, deleteMFASecret, searchUserByEmailOrUsername } from './user.model.js';
 import { generateRSAKeys } from '../../utils/cypher/RSA.js';
 import { generateECDSAKeys } from '../../utils/cypher/ECDSA.js'
 import CustomError from '../../utils/customError.js';
 
 const JWT_SECRET = process.env.JWT_SECRET;
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;  
+const oauthClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 const registerUser = async (req, res) => {
     const { email, password } = req.body;
@@ -91,7 +94,7 @@ const loginUser = async (req, res) => {
 
         // Verificar si el usuario tiene habilitada la autenticación de dos factores (MFA)
         if (user.mfa_enabled) {
-            return res.status(200).json({ message: "MFA habilitada. Ingresa el código de tu autenticador.", user_id: user.id, mfa_enabled: true });
+            return res.status(200).json({ message: "MFA habilitada. Ingresa el código de tu autenticador.", userId: user.id, mfa_enabled: true });
         }
 
         // Generar el token JWT, con una expiración de 1 hora
@@ -108,6 +111,93 @@ const loginUser = async (req, res) => {
         });
     } catch (error) {
         res.status(500).json({ message: "Error al iniciar sesión", error: error.message });
+    }
+}
+
+const loginGoogleUser = async (req, res) => {
+    const { token } = req.body;
+
+    // Verificar que el token de Google esté presente
+    if (!token) {
+        res.statusMessage = "Token de Google es requerido";
+        return res.status(400).json({ message: "Token de Google es requerido" });
+    }
+
+    // Verificar el token de Google
+    const ticket = await oauthClient.verifyIdToken({
+        idToken: token,
+        audience: GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    const email = payload.email;
+    const googleId = payload.sub;
+    const username = payload.name || email; // Usar el nombre del usuario o el email como nombre de usuario
+
+    // Verificar si el usuario ya existe en la base de datos
+    let user = await getUserByEmail(email);
+
+    if (!user) {
+        // Si el usuario no existe, crear uno nuevo
+        const { publicKey: publicKeyRSA, privateKey: privateKeyRSA } = generateRSAKeys();
+        const { publicKey: publicKeyECDSA, privateKey: privateKeyECDSA } = generateECDSAKeys();
+        
+        const userId = await createGoogleUser({
+            email,
+            googleId,
+            publicKeyRSA,
+            publicKeyECDSA,
+            username,
+            privateKeyRSA
+        });
+
+        user = {
+            id: userId,
+            email,
+            username,
+            provider: 'google',
+            rsa_public_key: publicKeyRSA,
+            rsa_private_key: privateKeyRSA,
+            ecdsa_public_key: publicKeyECDSA,
+            ecdsa_private_key: privateKeyECDSA,
+            mfa_enabled: false, // Por defecto, MFA no está habilitado
+            google_id: googleId,
+        };
+
+        const token = jwt.sign(
+            { id: user.id, email: user.email },
+            JWT_SECRET,
+            { expiresIn: '1h' }
+        );
+
+        res.status(201).json({ message: 'Usuario creado exitosamente.',
+            userId: userId,
+            token,
+            publicKeyRSA: user.rsa_public_key,
+            privateKeyRSA: user.rsa_private_key,
+            publicKeyECDSA: user.ecdsa_public_key,
+            privateKeyECDSA: user.ecdsa_private_key,
+            newUser: true
+        });
+    } else {
+        // Si el usuario ya existe, verificar si tiene autenticación de dos factores habilitada
+        if (user.mfa_enabled) {
+            return res.status(200).json({ message: "MFA habilitada. Ingresa el código de tu autenticador.", userId: user.id, mfa_enabled: true });
+        }
+        // Si el usuario ya existe y no tiene MFA habilitada, generar un nuevo token JWT
+        const token = jwt.sign(
+            { id: user.id, email: user.email },
+            JWT_SECRET,
+            { expiresIn: '1h' }
+        );
+        res.status(200).json({
+            message: "Login exitoso",
+            token,
+            privateKeyRSA: user.rsa_private_key,
+            publicKeyRSA: user.rsa_public_key,
+            publicKeyECDSA: user.ecdsa_public_key,
+            privateKeyECDSA: user.ecdsa_private_key,
+        });
     }
 }
 
@@ -183,6 +273,7 @@ const deleteMFA = async (req, res) => {
     // Eliminar el secreto de la base de datos
     const deleted = await deleteMFASecret(userId);
     if (!deleted) {
+        res.statusMessage = "Error al eliminar la autenticación de dos factores";
         return res.status(500).json({ message: 'Error al eliminar la autenticación de dos factores' });
     }
 
@@ -225,7 +316,8 @@ const verifyMFA = async (req, res) => {
             publicKeyRSA: user.rsa_public_key,
         });
     } else {
-        return res.status(401).json({ message: 'Token inválido' });
+        res.statusMessage = "Código de autenticación inválido";
+        return res.status(401).json({ message: 'Código de autenticación inválido' });
     }
 }
 
@@ -266,6 +358,7 @@ const searchUserController = async (req, res) => {
 export {
     registerUser,
     loginUser,
+    loginGoogleUser,
     getUserInfo,
     setupMFA,
     verifyMFA,

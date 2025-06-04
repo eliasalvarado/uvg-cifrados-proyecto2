@@ -6,7 +6,6 @@ import { connection } from './db/connection.js';
 import { startSocketServer } from './sockets/ioInstance.js';
 import indexRoutes from './routes/index.js';
 import signatureRoutes from '../backend/apiServices/signature/signature.route.js';
-import './apiServices/oauth/oauth.google.js';
 import { start } from 'repl';
 
 connection.connect((err) => {

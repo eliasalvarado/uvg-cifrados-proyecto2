@@ -1,8 +1,14 @@
 import { executeQuery } from '../../db/connection.js';
 
-const createUser = async ({ email, passwordHash, publicKeyRSA, publicKeyECDSA, privateKeyRSA }) => {
+const createUser = async ({ email, passwordHash, publicKeyRSA, publicKeyECDSA, username, privateKeyRSA }) => {
     const query = 'INSERT INTO users (email, password_hash, rsa_public_key, ecdsa_public_key, username, rsa_private_key) VALUES (?, ?, ?, ?, ?, ?)';
     const [result] = await executeQuery(query, [email, passwordHash, publicKeyRSA, publicKeyECDSA, email, privateKeyRSA]);
+    return result.insertId;
+};
+
+const createGoogleUser = async ({ email, googleId, publicKeyRSA, publicKeyECDSA, username, privateKeyRSA }) => {
+    const query = 'INSERT INTO users (email, provider, google_id, rsa_public_key, ecdsa_public_key, username, rsa_private_key) VALUES (?, ?, ?, ?, ?, ?, ?)';
+    const [result] = await executeQuery(query, [email, 'google', googleId, publicKeyRSA, publicKeyECDSA, username, privateKeyRSA]);
     return result.insertId;
 };
 
@@ -43,6 +49,7 @@ const searchUserByEmailOrUsername = async (searchTerm) => {
 
 export {
     createUser,
+    createGoogleUser,
     getUserByEmail,
     getUserById,
     saveMFASecret,
