@@ -12,7 +12,8 @@ import usePopUp from '../../hooks/usePopup';
 function ProfilePage() {
 
     const [isMFAOpen, openMFA, closeMFA] = usePopUp();
-    const { refreshToken } = useContext(SessionContext);
+    const [isDeleteMFAOpen, openDeleteMFA, closeDeleteMFA] = usePopUp();
+    const { clearToken } = useContext(SessionContext);
     const token = useToken();
     const navigate = useNavigate();
 
@@ -26,11 +27,22 @@ function ProfilePage() {
         callFetch: fetchSetupMFA,
         result: resultSetupMFA,
         loading: loadingSetupMFA,
-        error: errorSetupMFA
+        error: errorSetupMFA,
+        reset: resetSetupMFA
+    } = useFetch();
+
+    const {
+        callFetch: fetchDeleteMFA,
+        result: resultDeleteMFA,
+        loading: loadingDeleteMFA,
+        error: errorDeleteMFA,
+        reset: resetDeleteMFA
     } = useFetch();
 
     const handleGetUserInfo = () => {
         resetUserInfo();
+        resetDeleteMFA();
+        resetSetupMFA();
         getUserInfo({
             uri: "/api/user/profile",
             method: "GET",
@@ -42,10 +54,11 @@ function ProfilePage() {
     }
 
     const logout = () => {
+		console.log("Logout");
         localStorage.removeItem('token');
-        refreshToken();
+        clearToken();
         
-        navigate("/");
+        navigate("/", { replace: true });
     }
 
     useEffect(() => {
@@ -70,6 +83,19 @@ function ProfilePage() {
         });
     }
 
+    const handleDeleteMFA = (e) => {
+        e.preventDefault();
+        if (!resultUserInfo?.mfa_enabled) return; // Si MFA no está habilitado, no se hace nada
+        fetchDeleteMFA({
+            uri: "/api/user/mfa/delete",
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                'Authorization': token,
+            },
+        });
+    }
+
     useEffect(() => {
         if (!resultUserInfo) return;
         console.log(resultUserInfo);
@@ -81,11 +107,15 @@ function ProfilePage() {
             <h1>Perfil de Usuario</h1>
         </div> 
         <div className={styles.buttonsContainer}>
-            <Button text="Activar MFA" green onClick={handleSetupMFA} />
-            <Button text="Cerrar sesión" red onClick={logout} />
+            {resultUserInfo?.mfa_enabled ? (
+                <Button text="Desactivar MFA" gray onClick={openDeleteMFA} />
+            ) : (
+                <Button text="Activar MFA" emptyBlue onClick={handleSetupMFA} />
+            )}
+            <Button text="Cerrar sesión" black onClick={logout} />
         </div>
         {isMFAOpen && (
-            <PopUp close={closeMFA} closeButton closeWithBackground callback={handleGetUserInfo}>
+            <PopUp close={closeMFA} closeButton closeWithBackground maxWidth={500} callback={handleGetUserInfo}>
                 {resultUserInfo?.mfa_enabled ? (
                     <div className={styles.mfaContainer}>
                         <h2>MFA ya está habilitado</h2>
@@ -109,6 +139,27 @@ function ProfilePage() {
                         )}
                     </div>
                 )}
+            </PopUp>
+        )}
+        {isDeleteMFAOpen && (
+            <PopUp close={closeDeleteMFA} closeButton closeWithBackground maxWidth={500} callback={handleGetUserInfo}>
+                <div className={styles.deleteMFAContainer}>
+                    <h2>Desactivar MFA</h2>
+                    {loadingDeleteMFA ? (
+                        <Spinner />
+                    ) : (
+                        <>
+                            {!resultDeleteMFA && (
+                                <>
+                                    <p>¿Estás seguro de que quieres desactivar el MFA? Esta acción no se puede deshacer.</p>
+                                    <Button text="Desactivar MFA" black onClick={handleDeleteMFA} />
+                                </>
+                            )}
+                            {errorDeleteMFA && <p>{errorDeleteMFA.message}</p>}
+                            {resultDeleteMFA && <p>MFA desactivado exitosamente.</p>}
+                        </>
+                    )}
+                </div>
             </PopUp>
         )}
     </div>

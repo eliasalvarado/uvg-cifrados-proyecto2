@@ -22,39 +22,51 @@ function RegisterPage() {
         error: errorRegister
     } = useFetch();
 
-    const {
-        callFetch: fetchKeyGen,
-        result: resultKeyGen,
-        loading: loadingKeyGen,
-        error: errorKeyGen,
-        reset: resetKeyGen,
-      } = useFetch();
-
     const handleFormChange = (e) => {
         const field = e.target.name;
         const { value } = e.target;
         setForm((lastValue) => ({ ...lastValue, [field]: value }));
     };
 
+    const validateEmail = () => {
+        const email = form?.email?.trim() || "";
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!email) {
+            setErrors((lastValue) => ({ ...lastValue, email: "El correo electrónico es requerido" }));
+            return false;
+        }
+        if (!regex.test(email)) {
+            setErrors((lastValue) => ({ ...lastValue, email: "El correo electrónico no es válido" }));
+            return false;
+        }
+        return true;
+    }
+
     const validateUsername = () => {
-        if (form?.password?.trim().length > 0) return true;
+        if (form?.username?.trim().length > 0) return true;
         setErrors((lastValue) => ({ ...lastValue, username: "El usuario es requerido" }));
     }
 
     const validatePassword = () => {
-        if (form?.password?.trim().length > 0) return true;
-        setErrors((lastValue) => ({ ...lastValue, password: "La contraseña es requerida" }));
+        const password = form?.password?.trim() || "";
+        const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+        if (!password) {
+            setErrors((lastValue) => ({ ...lastValue, password: "La contraseña es requerida" }));
+            return false;
+        }
+        if (!regex.test(password)) {
+            setErrors((lastValue) => ({
+                ...lastValue,
+                password: "La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial"
+            }));
+            return false;
+        }
+        return true;
     }
 
     const validateRepeatPassword = () => {
-        if (form?.repeatPassword?.trim().length > 0) return true;
         if (form?.repeatPassword === form?.password) return true;
         setErrors((lastValue) => ({ ...lastValue, repeatPassword: "Las contraseñas no coinciden" }));
-    }
-
-    const validateAlgorithm = () => {
-        if (form?.algorithm?.trim().length > 0) return true;
-        setErrors((lastValue) => ({ ...lastValue, algorithm: "El algoritmo de cifrado es requerido" }));
     }
 
     const clearError = (e) => {
@@ -65,16 +77,16 @@ function RegisterPage() {
     const handleRegister = (e) => {
 
         e.preventDefault();
-        const { username, password, algorithm } = form;
+        const { email, username, password } = form;
+        if (!validateEmail()) return;
         if (!validateUsername()) return;
         if (!validatePassword()) return;
         if (!validateRepeatPassword()) return;
-        if (!validateAlgorithm()) return;
 
         fetchRegister({
             uri: "/api/user/register",
             method: "POST",
-            body: JSON.stringify({ email: username, password, algorithm }),
+            body: JSON.stringify({ email, username, password }),
             headers: {
                 "Content-Type": "application/json",
             },
@@ -84,17 +96,9 @@ function RegisterPage() {
     useEffect(() => {
         if (!resultRegister?.token) return;
 
-        // Colocar la llave privada generada en un archivo y descargarla
-        const { privateKeyRSA } = resultRegister;
-        const blob = new Blob([privateKeyRSA], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = 'privateKey.pem';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
+        // Guardar llave privada en localStorage
+        localStorage.setItem("privateKeyRSA", resultRegister.privateKeyRSA);
+        localStorage.setItem("publicKeyRSA", resultRegister.publicKeyRSA);
 
         // Colocar la llave privada ECDSA generada en un archivo y descargarla
         const { privateKeyECDSA } = resultRegister;
@@ -117,8 +121,17 @@ function RegisterPage() {
 
     return (
         <div className={styles.registerPageContainer}>
-            <h1>Registrarse</h1>
+            <h1 className={styles.title}>Registrarse</h1>
           <form className={styles.registerForm} onSubmit={handleRegister}>
+            <InputText 
+                title="Correo electrónico"
+                name="email"
+                onChange={handleFormChange}
+                value={form?.email}
+                error={errors?.email}
+                onBlur={validateEmail}
+                onFocus={clearError}
+            />
             <InputText 
                 title="Usuario"
                 name="username"
@@ -148,26 +161,13 @@ function RegisterPage() {
                 onFocus={clearError}
                 hidden
             />
-            <InputSelect
-                title="Algoritmo de cifrado de archivos"
-                name="algorithm"
-                onChange={handleFormChange}
-                value={form?.algorithm}
-                error={errors?.algorithm}
-                onBlur={validateAlgorithm}
-                onFocus={clearError}
-                options={[
-                    { value: "RSA", title: "RSA" },
-                    { value: "ECC", title: "ECC" },
-                ]}
-                placeholder="Selecciona un algoritmo"
-            />
             <p className={styles.infoText}>Al registrate, se descargará automáticamente tu llave privada</p>
             <div className={styles.buttonContainer}>
                 {!loadingRegister && (
                     <Button
                         text="Registrarse"
                         onClick={handleRegister}
+                        black
                     />
                 )}
                 {loadingRegister && <Spinner />}

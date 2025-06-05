@@ -9,7 +9,6 @@ function LoggedIndexPage() {
     <Routes>
       <Route path="/" element={<ChatPage />} />
       <Route path="/profile" element={<ProfilePage />} />
-      <Route path="/ephemeral-messages" element={<EphemeralMessagesPage />} />
     </Routes>
   );
 }
