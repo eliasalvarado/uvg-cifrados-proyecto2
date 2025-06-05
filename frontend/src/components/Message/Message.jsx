@@ -45,8 +45,8 @@ function Message({
 					{message}
 				</span>
 				<div className={styles.messageFooter}>
-					{verified && <span style={{color:"green",width:"100%"}}>✅</span>}
-					{!verified && <span style={{color:"red",width:"100%"}}>❌</span>}
+					{verified == true && <span style={{color:"green",width:"100%"}}>✅</span>}
+					{verified == false && <span style={{color:"red",width:"100%"}}>❌</span>}
 					<span className={styles.time}>{formattedTime}</span>
 					{!left && showViewed && <CheckIcon className={`${styles.checkIcon} ${viewed ? styles.viewed : ""}`} />}
 				</div>

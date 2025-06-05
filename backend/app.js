@@ -5,7 +5,6 @@ import http from 'http';
 import { connection } from './db/connection.js';
 import { startSocketServer } from './sockets/ioInstance.js';
 import indexRoutes from './routes/index.js';
-import signatureRoutes from '../backend/apiServices/signature/signature.route.js';
 import { start } from 'repl';
 
 connection.connect((err) => {
@@ -25,7 +24,6 @@ app.use(express.static('./public'));
 
 // Routes
 app.use('/', indexRoutes);
-app.use('/signature', signatureRoutes);
 
 // Sockets
 const server = http.createServer(app);

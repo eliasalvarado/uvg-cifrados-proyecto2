@@ -69,6 +69,8 @@ const sendMessageController = async (req, res) => {
       msgHash,
       sig: signature
     });
+
+    console.log("VERIFIED: ",isValidSignature)
     
     // Emitir el mensaje al socket del usuario
     io.to(userId.toString()).emit('chat_message', {
@@ -220,6 +222,8 @@ const sendGroupMessageController = async (req, res) => {
       msgHash,
       sig: signature
     });
+
+    console.log("VERIFIED: ",isValidSignature)
 
     // Emitir al room del grupo
     io.to(`group_${groupIdInt}`).emit('chat_group_message', {

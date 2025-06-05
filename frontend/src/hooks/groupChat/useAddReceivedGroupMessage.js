@@ -16,7 +16,7 @@ function useAddReceivedGroupMessage() {
     }, [groups]);
 
     const addReceivedGroupMessage = async (data) => {
-        const { message: messageEncrypted, groupId, datetime, userId, username } = data;
+        const { message: messageEncrypted, groupId, datetime, userId, username,verified } = data;
 
         const group = groupsRef.current?.[groupId];
         if (!group) {
@@ -34,6 +34,7 @@ function useAddReceivedGroupMessage() {
             datetime: new Date(datetime),
             sent: false,
             username,
+            verified
 
         });
 

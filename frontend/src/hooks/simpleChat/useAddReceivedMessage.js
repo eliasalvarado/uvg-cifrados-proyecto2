@@ -58,6 +58,7 @@ function useAddReceivedMessage() {
                 message,
                 datetime: new Date(data.datetime),
                 sent: false, // Indica que el mensaje fue recibido
+                verified:data.verified
             })
 
             addSingleChatMessage(messageObject);

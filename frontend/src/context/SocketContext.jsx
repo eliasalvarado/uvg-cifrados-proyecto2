@@ -41,6 +41,7 @@ export const SocketProvider = ({ children }) => {
 
     socket.on('chat_message', async (data) => {
       console.log('Received chat message:', data);
+      console.log("RECIBIDO: ",data)
       addReceivedMessage(data);
       
     });

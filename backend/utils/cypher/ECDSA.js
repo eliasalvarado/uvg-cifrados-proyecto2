@@ -1,7 +1,8 @@
 import crypto from 'crypto';
 
 function verifySignature(message, signature, publicKeyPem) {
-  return crypto.verify(
+  try
+  {return crypto.verify(
     'sha256',
     Buffer.from(message, 'utf8'),
     {
@@ -10,6 +11,9 @@ function verifySignature(message, signature, publicKeyPem) {
     },
     Buffer.from(signature, 'base64')
     );
+  }catch(Exception){
+    return false
+  }
 }
 
 function generateECDSAKeys() {

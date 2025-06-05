@@ -46,6 +46,10 @@ function NavBar({
 	const logout = () => {
 		console.log("Logout");
         localStorage.removeItem('token');
+		localStorage.removeItem('privateKeyECDSA');
+		localStorage.removeItem('privateKeyRSA');
+		localStorage.removeItem('publicKeyRSA');
+		localStorage.removeItem('publicKeyECDSA');
         clearToken();
         
         navigate("/", { replace: true });
