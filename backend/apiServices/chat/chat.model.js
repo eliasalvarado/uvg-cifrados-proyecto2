@@ -27,14 +27,19 @@ const getUserMessages = async (userId) => {
   `;
   try {
     const [rows] = await executeQuery(query, [userId, userId, userId]);
+    
     const messages = rows.map(row => {
       // Verificar firmas
-      const isValid = verifySignature(row.message, row.signature.replaceAll("\n","").replaceAll(" ",""), row.signature_key);
+      const isValid = verifySignature(row.message, row.signature?.replaceAll("\n","").replaceAll(" ",""), row.signature_key);
       return { ...row, isValid, signature_key: undefined };
     });
 
+    console.log("Messages", messages);
+
     return messages;
+
   } catch (err) {
+    console.error("Error al obtener mensajes:", err);
     return [];
   }
 };
