@@ -5,18 +5,25 @@ import RegisterPage from '../../pages/RegisterPage/RegisterPage';
 import OAuthSuccessPage from '../../pages/OAuthSuccessPage/OAuthSuccessPage';
 import { SessionProvider } from '../../context/SessionContext';
 import { ChatProvider } from '../../context/ChatContext';
+import { SocketProvider } from '../../context/SocketContext';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 function App() {
   return (
-    <SessionProvider>
-      <ChatProvider>
-        <Router>
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+      <SessionProvider>
+        <ChatProvider>
+          <SocketProvider>
+            <Router>
 
-          <IndexPage />
+              <IndexPage />
 
-        </Router>
-      </ChatProvider>
-    </SessionProvider>
+            </Router>
+          </SocketProvider>
+        </ChatProvider>
+      </SessionProvider>
+    </GoogleOAuthProvider>
   );
 }
 

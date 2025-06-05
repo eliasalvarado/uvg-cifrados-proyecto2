@@ -4,6 +4,12 @@
     align-items: center;
     justify-content: center;
     height: 100%;
+    color: white;
+}
+
+.title{
+  color: white;
+  font-size: 32px;
 }
 
 .loginForm {
@@ -26,7 +32,6 @@
 }
 
 .errorMessage {
-    color: red;
     margin-top: 10px;
 }
 
@@ -34,6 +39,23 @@
     margin-top: 10px;
 }
 
+.registerHere{
+    color: white;
+    text-decoration: none;
+    font-weight: normal;
+}
+
 .registerHere:hover {
-    color: blue
+    font-weight: bold;
+}
+
+.mfaContainer{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 1rem;
+    flex-direction: column;
+    align-self: center;
+    gap: 1rem;
+    text-align: center;
 }

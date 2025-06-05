@@ -8,6 +8,8 @@ import GroupChatIcon from "../../assets/icons/group-chat.svg";
 import { RiContactsBook3Fill as ContactIcon } from "react-icons/ri";
 import { IoExitSharp as ExitIcon } from "react-icons/io5";
 import { MdAccountCircle as ProfileIcon } from "react-icons/md";
+import { MdMessage as EphemeralIcon } from "react-icons/md";
+import { MdToken as BlockChainIcon } from "react-icons/md";
 
 /**
  * Componente de barra de navegación para una aplicación de chat.
@@ -17,6 +19,7 @@ import { MdAccountCircle as ProfileIcon } from "react-icons/md";
  * - Grupos
  * - Contactos
  * - Perfil
+ * - Mensajes efímeros
  * - Salir
  *
  * Cada opción se representa como un botón que ejecuta una función de callback cuando es clickeado o activado con el teclado.
@@ -25,25 +28,27 @@ import { MdAccountCircle as ProfileIcon } from "react-icons/md";
  * @param {function} props.onChatOptionClick - Función callback al hacer clic en la opción de chats activos.
  * @param {function} props.onGroupChatOptionClick - Función callback al hacer clic en la opción de grupos.
  * @param {function} props.onContactsOptionClick - Función callback al hacer clic en la opción de contactos.
- * @param {function} props.onExitOptionClick - Función callback al hacer clic en la opción de salir.
  * @param {function} props.onProfileOptionClick - Función callback al hacer clic en la opción de perfil.
+ * @param {function} props.onBlockChainOptionClick - Función callback al hacer clic en la opción de blockchain.
  */
 function NavBar({
 	onChatOptionClick,
 	onGroupChatOptionClick,
 	onContactsOptionClick,
 	onProfileOptionClick,
+	onEphemeralMessagesOptionClick, 
+	onBlockChainOptionClick
 }) {
 
-	const { refreshToken } = useContext(SessionContext);
+	const { clearToken } = useContext(SessionContext);
     const navigate = useNavigate();
 
 	const logout = () => {
 		console.log("Logout");
         localStorage.removeItem('token');
-        refreshToken();
+        clearToken();
         
-        navigate("/");
+        navigate("/", { replace: true });
     }
 
 	return (
@@ -81,8 +86,7 @@ function NavBar({
 					<span>Contactos</span>
 				</li>
 				<li
-					onClick={() => {navigate("/profile")}}
-					onKeyUp={() => {navigate("/profile")}}
+					onClick={onProfileOptionClick}
 					onKeyUp={onProfileOptionClick}
 					tabIndex={3}
 					role="button"
@@ -91,9 +95,27 @@ function NavBar({
 					<span>Perfil</span>
 				</li>
 				<li
+                    onClick={onEphemeralMessagesOptionClick}
+                    onKeyUp={onEphemeralMessagesOptionClick}
+                    tabIndex={4}
+                    role="button"
+                >
+                    <EphemeralIcon className={styles.icon} />
+                    <span>Mensajes efímeros</span>
+                </li>
+				<li
+                    onClick={onBlockChainOptionClick}
+                    onKeyUp={onBlockChainOptionClick}
+                    tabIndex={5}
+                    role="button"
+                >
+                    <BlockChainIcon className={styles.icon} />
+                    <span>Blockchain</span>
+                </li>
+				<li
 					onClick={logout}
 					onKeyUp={logout}
-					tabIndex={4}
+					tabIndex={5}
 					role="button"
 				>
 					<ExitIcon className={styles.icon} />
@@ -109,6 +131,6 @@ export default NavBar;
 NavBar.propTypes = {
 	onChatOptionClick: PropTypes.func.isRequired,
 	onGroupChatOptionClick: PropTypes.func.isRequired,
-	onExitOptionClick: PropTypes.func.isRequired,
 	onProfileOptionClick: PropTypes.func.isRequired,
+	onEphemeralMessagesOptionClick: PropTypes.func.isRequired,
 };

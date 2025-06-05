@@ -1,4 +1,3 @@
-// events/keyExchange.js
 import {
   generateBitsBases,
   encodePhotons,
@@ -7,78 +6,98 @@ import {
 } from '../../utils/QKD/keyGenerator.js'
 
 export default function registerKeyExchange(io, socket, chatData) {
-  socket.on('start-key-exchange', ({ receiver }) => {
+  socket.on('start-key-exchange', ({ receiverId }) => {
+    console.log(`Usuario "${socket.user.email}" ha iniciado un intercambio de claves con el usuario ID "${receiverId}"`);
+
     const receiverSocket = [...io.sockets.sockets.values()].find(
-      (s) => s.username === receiver
-    )
+      (s) => s.user.email === receiverId
+    );
 
     if (!receiverSocket) {
-      console.error(`El usuario "${receiver}" no está conectado`)
-      return
+      console.error(`El usuario con ID "${receiverId}" no está conectado`);
+      socket.emit('key-exchange-error', { message: `El usuario "${receiverId}" no está conectado.` });
+      return;
     }
+    try {
+      console.log(`Iniciando intercambio de claves entre "${socket.user.email}" y "${receiverSocket.user.email}"`);
+      const { bits: senderBits, bases: senderBases } = generateBitsBases();
+      const photons = encodePhotons(senderBits, senderBases);
 
-    console.log(`Iniciando intercambio de claves entre "${socket.username}" y "${receiver}"`)
-    const { bits: senderBits, bases: senderBases } = generateBitsBases()
-    const photons = encodePhotons(senderBits, senderBases)
+      const chatKey = `${socket.user.email}-${receiverId}`;
+      chatData[chatKey] = {
+        sender: socket.user.email,
+        receiver: receiverId,
+        photons,
+        senderBits,
+        senderBases,
+      };
 
-    const chatKey = `${socket.username}-${receiver}`
-    chatData[chatKey] = {
-      sender: socket.username,
-      receiver,
-      photons,
-      senderBits,
-      senderBases,
+      receiverSocket.emit('receive-photons', {
+        senderId: socket.user.email,
+        photons,
+        length: photons.length,
+      });
+      console.log(`Fotones enviados a "${receiverSocket.user.email}"`);
+    } catch (error) {
+      console.error(`Error durante el intercambio de claves: ${error.message}`);
+      socket.emit('key-exchange-error', { message: `Error durante el intercambio de claves: ${error.message}` });
     }
+  });
 
-    receiverSocket.emit('receive-photons', {
-      sender: socket.username,
-      photons,
-      length: photons.length,
-    })
-  })
+  socket.on('measure-photons', ({ receiverBases, senderId }) => {
+    try {
+      console.log(`Usuario "${socket.user.email}" está midiendo fotones para el intercambio con "${senderId}"`);
+      const chatKey = `${senderId}-${socket.user.email}`;
+      const senderData = chatData[chatKey];
 
-  socket.on('measure-photons', ({ receiverBases, sender }) => {
-    const chatKey = `${sender}-${socket.username}`
-    const senderData = chatData[chatKey]
+      if (!senderData) {
+        console.error(`No se encontraron datos para el intercambio entre "${senderId}" y "${socket.user.email}"`);
+        return;
+      }
 
-    if (!senderData) {
-      console.error(`No se encontraron datos para el intercambio entre "${sender}" y "${socket.username}"`)
-      return
+      const { photons } = senderData;
+      const receiverBits = measurePhotons(photons, receiverBases);
+
+      senderData.receiverBases = receiverBases;
+      senderData.receiverBits = receiverBits;
+
+      const senderSocket = [...io.sockets.sockets.values()].find(
+        (s) => s.user.email === senderId
+      );
+
+      senderSocket.emit('send-bases-receiver', { receiverBases, receiverBits });
+      console.log(`Bases del receptor enviadas a "${senderId}"`);
+    } catch (error) {
+      console.error(`Error durante la medición de fotones: ${error.message}`);
+      socket.emit('key-exchange-error', { message: `Error durante la medición de fotones: ${error.message}` });
     }
+  });
 
-    const { photons } = senderData
-    const receiverBits = measurePhotons(photons, receiverBases)
+  socket.on('compare-bases', ({ receiverBases, receiverId }) => {
+    try {
+      const chatKey = `${socket.user.email}-${receiverId}`;
+      const senderData = chatData[chatKey];
 
-    senderData.receiverBases = receiverBases
-    senderData.receiverBits = receiverBits
+      if (!senderData) {
+        console.error(`No se encontraron datos para el intercambio entre "${socket.user.email}" y "${receiverId}"`);
+        return;
+      }
 
-    const senderSocket = [...io.sockets.sockets.values()].find(
-      (s) => s.username === sender
-    )
+      const { senderBases, senderBits } = senderData;
+      const key = compareBasesAndGenerateKey(senderBits, senderBases, receiverBases);
 
-    senderSocket.emit('send-bases-receiver', { receiverBases, receiverBits })
-  })
+      const receiverSocket = [...io.sockets.sockets.values()].find(
+        (s) => s.user.email === receiverId
+      );
 
-  socket.on('compare-bases', ({ receiverBases, receiver }) => {
-    const chatKey = `${socket.username}-${receiver}`
-    const senderData = chatData[chatKey]
+      socket.emit('key-generated', { keyGenerated: key });
+      receiverSocket.emit('key-generated', { keyGenerated: key });
 
-    if (!senderData) {
-      console.error(`No se encontraron datos para el intercambio entre "${socket.username}" y "${receiver}"`)
-      return
+      delete chatData[chatKey];
+      console.log('Clave generada y enviada a ambos usuarios:', key.join(''));
+    } catch (error) {
+      console.error(`Error durante la comparación de bases: ${error.message}`);
+      socket.emit('key-exchange-error', { message: `Error durante la comparación de bases: ${error.message}` });
     }
-
-    const { senderBases, senderBits } = senderData
-    const key = compareBasesAndGenerateKey(senderBits, senderBases, receiverBases)
-
-    const receiverSocket = [...io.sockets.sockets.values()].find(
-      (s) => s.username === receiver
-    )
-
-    socket.emit('key-generated', { key })
-    receiverSocket.emit('key-generated', { key })
-
-    delete chatData[chatKey]
-    console.log('Clave generada y enviada a ambos usuarios:', key.join(''))
-  })
-}
+  });
+};

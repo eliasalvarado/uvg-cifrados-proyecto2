@@ -32,7 +32,7 @@ function useFetch() {
     const reply = await fetch(uri, {
       method,
       body,
-      headers,
+      headers: heads,
       signal,
       credentials: 'include',
     });
@@ -57,7 +57,7 @@ function useFetch() {
       }
       setError({
         status: reply?.status,
-        message: parsedError?.err?.trim() || reply?.statusMessage?.trim() || reply?.statusText?.trim() || 'Ocurrió un error.',
+        message: parsedError?.err?.trim() || reply?.statusMessage?.trim() || parsedError?.error?.trim() || parsedError?.message?.trim() || reply?.statusText?.trim() || 'Ocurrió un error.',
       });
     } else {
       // Forbidden error, force logout

@@ -65,10 +65,28 @@
 }
 
 .button.emptyBlue {
-  color: #16337F;
+  color: #000000;
   background-color: #e5e5e5;
 }
 
 .button.button.emptyBlue:hover {
-  color: #1d45ac;
+  color: #000000;
+}
+
+.button.black {
+  background-color: #131313;
+  color: white;
+}
+
+.button.black:hover {
+  background-color: #121212;
+}
+
+.button.gray {
+  background-color: #e5e5e5;
+  color: black;
+}
+
+.button.gray:hover {
+  background-color: #d4d4d4;
 }

@@ -1,71 +1,67 @@
-import { createContext, useEffect, useRef } from 'react';
+import { createContext, useState } from 'react';
 import PropTypes from 'prop-types';
-import { io } from 'socket.io-client';
-import useChatState from '../hooks/useChatState';
+import { useEffect } from 'react';
+import useGetSingleChats from '../hooks/simpleChat/useGetSingleChats';
 import useToken from '../hooks/useToken';
-import getTokenPayload from '../helpers/getTokenPayload';
+import useGetGroups from '../hooks/groupChat/useGetGroups';
 
 const ChatContext = createContext();
 
 export const ChatProvider = ({ children }) => {
-  const { messages } = useChatState();
+
+  // Variables para manejar el estado del chat
+  const [messages, setMessages] = useState({});
+  const [users, setUsers] = useState({});
+
+  // Variables para manejar estado de grupos
+  const [groups, setGroups] = useState({}); // { groupId: { name, members:[userId, ...] } }
+  const [groupMessages, setGroupMessages] = useState({}); // { groupId: [groupMessageObject, ...] }
+
+  // Hooks para obtener estado inicial
+  const {getSingleChats, result: singleChatsResult } = useGetSingleChats();
+  const { getGroups, result: groupsResult } = useGetGroups();
   const token = useToken();
-  const socketRef = useRef(null); // referencia para mantener el socket entre renders
+
 
   useEffect(() => {
-    if (!token) {
-      if (socketRef.current) {
-        socketRef.current.disconnect();
-      }
-      return;
-    }
+    
+    if (!token) return;
+    
+    console.log("INICIALIZANDO CHAT");
+    // Inicializar la información de los chats
+    getSingleChats();
+    getGroups();
 
-    const userData = getTokenPayload(token);
-    if (!userData) {
-      console.error('Invalid token');
-      return;
-    }
-
-    // crear socket con autenticación
-    socketRef.current = io('http://localhost:3000', {
-      auth: { token },
-    });
-
-    const socket = socketRef.current;
-
-    console.log('Connecting to socket with user ID:', userData.id);
-
-    socket.on('connect', () => {
-      console.log('Socket connected:', socket.id);
-    });
-
-    socket.on('chat_message', (data) => {
-        console.log('Received chat message:', data);
-      if (data.to === userData.id) {
-        console.log('Mensaje recibido:', data.message);
-        // Aquí podrías actualizar tu estado con el nuevo mensaje
-      }
-    });
-
-    socket.on('disconnect', () => {
-      console.log('Socket disconnected');
-    });
-
-    socket.on('connect_error', (err) => {
-        console.error('Error de conexión socket:', err.message);
-    });
-
-    return () => {
-      socket.off('connect');
-      socket.off('disconnect');
-      socket.off('chat_message');
-      socket.disconnect(); // desconectar socket al desmontar
-    };
   }, [token]);
+
+  useEffect(() => {
+
+    if (!singleChatsResult) return;
+    const { contacts, messages } = singleChatsResult;
+
+    setMessages(messages);
+    setUsers(contacts);
+
+  }, [singleChatsResult]);
+
+  useEffect(() => {
+    if (!groupsResult) return;
+    const { groups, messages } = groupsResult;
+
+    setGroups(groups);
+    setGroupMessages(messages);
+
+  }, [groupsResult]);
 
   const data = {
     messages,
-    socket: socketRef.current,
+    setMessages,
+    users,
+    setUsers,
+    groups,
+    setGroups,
+    groupMessages,
+    setGroupMessages,
   };
 
   return (
