@@ -53,11 +53,9 @@ function EphemeralMessages() {
     });
 
     socket.on('key-generated', ({ keyGenerated }) => {
-      if (key && key !== keyGenerated.join('')) {
-        setKey(null);
-        setMessages([]);
-        setLog([]);
-      }
+      setKey(null);
+      setMessages([]);
+      setLog([]);
       setKey(keyGenerated.join(''));
       addLog(`Clave generada: ${keyGenerated.join('')}`);
     });
