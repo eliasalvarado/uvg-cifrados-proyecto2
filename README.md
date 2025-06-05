@@ -37,6 +37,17 @@ El objetivo de este proyecto consiste en diseñar e implementar un sistema de co
 - Mini Blockchain para Registro de Mensajes:
     - Hash encadenado para evitar manipulación.
     - Registros inmutables de transacciones.
+ 
+## ✒ Conclusiones
+- Se implementó un sistema de autenticación robusto que admite tanto inicio de sesión tradicional como autenticación mediante Google OAuth 2.0, siguiendo los estándares de seguridad recomendados.
+- A pesar de que SHA-256 es más ligero que Argon2, este útlmo es más robusto, alineando el sistema con las mejores prácticas actuales de seguridad.
+- Se incorporó autenticación multifactor (MFA) como capa adicional de seguridad para usuarios registrados, fortaleciendo la protección frente a accesos no autorizados incluso si la contraseña ha sido comprometida.
+- La aplicación aplica principios de seguridad como almacenamiento seguro de claves, generación de RSA/ECDSA y JWTs, contribuyendo a una arquitectura sólida y confiable.
+- Usar AES junto con RSA es una buena forma de asegurar los mensajes sin sacrificar el rendimiento. RSA se usa para enviar de forma segura la clave que luego se emplea con AES-256, que es mucho más rápido para cifrar grandes cantidades de información. Esta combinación es práctica porque aprovecha la seguridad de RSA y la eficiencia de AES.
+- Ambos métodos son considerados bastante seguros. AES-256 es resistente a ataques de fuerza bruta por su largo tamaño de clave, y RSA se basa en problemas matemáticos difíciles de resolver, como la factorización de números grandes. Por eso, al usarlos juntos, se logra un sistema de cifrado fuerte y confiable.
+- Al utilizar funciones hash junto con firmas digitales como ECDSA, se asegura que el contenido del mensaje no haya sido alterado en tránsito. Cualquier modificación, por mínima que sea, cambia completamente el hash y hace que la firma no sea válida.
+- El sistema de mensajería efímera cumple con los objetivos planteados, proporcionando una solución segura y funcional para el intercambio de mensajes cifrados utilizando una clave generada por QKD.
+- La mini-blockchain sella cada mensaje con su hash, aportando integridad y no repudio al chat. Con ella cerramos el ciclo de seguridad (autenticación, cifrado, firma y registro inmutable), cumpliendo el objetivo de una comunicación segura y auditable.
 
 ## 👨🏻‍💻 Responsabilidades
 - Pablo Zamora: Autenticación segura
