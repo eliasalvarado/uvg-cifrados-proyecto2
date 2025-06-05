@@ -2,6 +2,8 @@ import { Server } from 'socket.io';
 import socketHandler from './socketHandler.js';
 import { verifyToken } from '../utils/auth.js';
 import { getGroupsIdForUser } from '../apiServices/chat/chat.model.js';
+import { isHealthy } from '../utils/blockchainHealth.js';
+
 
 let io = null;
 
@@ -15,6 +17,9 @@ const startSocketServer = async (server) => {
     });
 
     io.use((socket, next) => {
+         if (!isHealthy()) {
+            return next(new Error('read_only'));
+        }
         const token = socket.handshake.auth.token;
         try {
             const user = verifyToken(token);

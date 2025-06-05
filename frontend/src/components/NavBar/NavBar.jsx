@@ -9,6 +9,7 @@ import { RiContactsBook3Fill as ContactIcon } from "react-icons/ri";
 import { IoExitSharp as ExitIcon } from "react-icons/io5";
 import { MdAccountCircle as ProfileIcon } from "react-icons/md";
 import { MdMessage as EphemeralIcon } from "react-icons/md";
+import { MdToken as BlockChainIcon } from "react-icons/md";
 
 /**
  * Componente de barra de navegación para una aplicación de chat.
@@ -28,13 +29,15 @@ import { MdMessage as EphemeralIcon } from "react-icons/md";
  * @param {function} props.onGroupChatOptionClick - Función callback al hacer clic en la opción de grupos.
  * @param {function} props.onContactsOptionClick - Función callback al hacer clic en la opción de contactos.
  * @param {function} props.onProfileOptionClick - Función callback al hacer clic en la opción de perfil.
+ * @param {function} props.onBlockChainOptionClick - Función callback al hacer clic en la opción de blockchain.
  */
 function NavBar({
 	onChatOptionClick,
 	onGroupChatOptionClick,
 	onContactsOptionClick,
 	onProfileOptionClick,
-	onEphemeralMessagesOptionClick
+	onEphemeralMessagesOptionClick, 
+	onBlockChainOptionClick
 }) {
 
 	const { clearToken } = useContext(SessionContext);
@@ -99,6 +102,15 @@ function NavBar({
                 >
                     <EphemeralIcon className={styles.icon} />
                     <span>Mensajes efímeros</span>
+                </li>
+				<li
+                    onClick={onBlockChainOptionClick}
+                    onKeyUp={onBlockChainOptionClick}
+                    tabIndex={5}
+                    role="button"
+                >
+                    <BlockChainIcon className={styles.icon} />
+                    <span>Blockchain</span>
                 </li>
 				<li
 					onClick={logout}

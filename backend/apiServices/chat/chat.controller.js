@@ -1,9 +1,12 @@
 import CustomError from "../../utils/customError.js";
 import errorSender from "../../utils/errorSender.js"
+import sha256Hex from "../../utils/cypher/hash.js"
 import { getGroupByName, getGroupsForUser, getUserContacts, getUserGroupMessages, getUserMessages, insertGroup, insertGroupMember, insertGroupMessage, insertMessage, verifyIfUserIsGroupMember } from "./chat.model.js";
 import { io } from "../../sockets/ioInstance.js";
 import generateAES256KeyBase64 from "../../../frontend/src/helpers/cypher/generateAES256KeyBase64.js";
 import { getUserById } from "../user/user.model.js";
+import { addBlock } from "../blockchain/blockchain.model.js";
+
 
 
 const sendMessageController = async (req, res) => {
@@ -38,6 +41,16 @@ const sendMessageController = async (req, res) => {
     if (!ok) {
       throw new CustomError('No se pudo guardar el mensaje', 500);
     }
+
+    /* Encadenar en blockchain */
+     const msgHash = sha256Hex(message);
+
+     await addBlock({
+      from    : req.user.id,
+      to      : parseInt(userId, 10),
+      msgHash,
+      sig     :  ''                      // firma pendiente
+    });
     
     // Emitir el mensaje al socket del usuario
     io.to(userId.toString()).emit('chat_message', {
@@ -169,6 +182,18 @@ const sendGroupMessageController = async (req, res) => {
     if (!ok) {
       throw new CustomError('No se pudo guardar el mensaje de grupo', 500);
     }
+
+
+    /* Encadenar en blockchain */
+     const msgHash = sha256Hex(message);
+
+
+     await addBlock({
+      from    : userId,
+      to      : groupIdInt,
+      msgHash,
+      sig     :  ''                     // firma pendiente
+    });
 
     // Emitir al room del grupo
     io.to(`group_${groupIdInt}`).emit('chat_group_message', {

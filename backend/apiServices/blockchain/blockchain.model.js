@@ -1,4 +1,6 @@
 import { executeQuery } from '../../db/connection.js';
+import toMysql from "../../utils/dateFormat.js"
+
 import crypto from 'crypto';
 
 const GENESIS_HASH = '0'.repeat(64);
@@ -17,21 +19,24 @@ export async function getLastBlock() {
 
 /* Crea y guarda un bloque. Devuelve {index, hash} */
 export async function addBlock(dataObj) {
-  const prev = await getLastBlock();
-  const index   = prev ? prev.block_index + 1 : 0;
+  const prev   = await getLastBlock();
+  const index  = prev ? prev.block_index + 1 : 0;
   const prevHash = prev ? prev.hash : GENESIS_HASH;
-  const ts = new Date().toISOString();
 
-  const hash = sha256(prevHash + ts + JSON.stringify(dataObj));
+  const tsMillis = Date.now();   
 
+  const dataString = JSON.stringify(dataObj);  
+
+  const hash = sha256(prevHash + tsMillis + dataString);
   await executeQuery(
     `INSERT INTO blockchain (block_index, timestamp, prev_hash, hash, data)
      VALUES (?, ?, ?, ?, ?)`,
-    [index, ts, prevHash, hash, JSON.stringify(dataObj)]
+    [index, tsMillis, prevHash, hash, dataString]
   );
 
   return { index, hash };
 }
+
 
 /* Devuelve la cadena completa */
 export async function getAllBlocks() {
@@ -48,9 +53,11 @@ export async function validateChain() {
   let prevHash = GENESIS_HASH;
 
   for (const blk of chain) {
-    const recalculated = sha256(
-      prevHash + blk.timestamp.toISOString() + JSON.stringify(blk.data)
-    );
+    const tsMillis = blk.timestamp.toString();      
+    const dataString = blk.data;                   
+  
+    const recalculated = sha256(prevHash + tsMillis + dataString);
+
     if (recalculated !== blk.hash) {
       return { ok: false, firstTamperedIndex: blk.block_index };
     }
