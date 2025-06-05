@@ -49,12 +49,17 @@ const encryptAES256 = async (plaintext, key) => {
  * @returns {Promise<string>} texto desencriptado
  */
 const decryptAES256 = async (base64Ciphertext, key) => {
+  try{
   const combined = base64ToUint8Array(base64Ciphertext);
   const iv = combined.slice(0, 12); // IV de 12 bytes para GCM
   const ciphertext = combined.slice(12);
   
   const decryptedBytes = await decrypt(ciphertext, key, { iv });
   return uint8ArrayToString(new Uint8Array(decryptedBytes));
+  }catch(error) {
+    console.error("Error al desencriptar AES-256:", error);
+    return base64Ciphertext;
+  }
 };
 
 export { generateAES256Key, encryptAES256, decryptAES256 };

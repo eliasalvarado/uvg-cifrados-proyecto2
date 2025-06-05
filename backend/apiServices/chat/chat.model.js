@@ -230,7 +230,7 @@ const getUserGroupMessages = async (userId) => {
     const [rows] = await executeQuery(query, [userId, userId]);
 
     const messages = rows.map(row => {
-      const isValid = verifySignature(row.message, row.signature.replaceAll("\n","").replaceAll(" ",""), row.signature_key);
+      const isValid = verifySignature(row.message, row.signature?.replaceAll("\n","").replaceAll(" ",""), row.signature_key);
       return ({
       id: row.id,
       message: row.message,
