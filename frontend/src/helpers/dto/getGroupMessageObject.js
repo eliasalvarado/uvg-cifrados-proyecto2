@@ -7,11 +7,12 @@
  * @param {*} sent: Boolean indicating if the message was sent by the current user
  * @returns 
  */
-const getGroupMessageObject = ({message, userId, datetime, sent }) => ({
+const getGroupMessageObject = ({message, userId, datetime, sent, username }) => ({
     message,
     userId,
     sent,
     datetime,
+    username,
 })
 
 export default getGroupMessageObject;

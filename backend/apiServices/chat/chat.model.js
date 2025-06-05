@@ -196,10 +196,12 @@ const getUserGroupMessages = async (userId) => {
       message, 
       gm.group_id, 
       gm.user_id, 
-      created_at, 
-      CASE WHEN ? = gm.user_id THEN 1 ELSE 0 END AS sent 
+      gm.created_at, 
+      CASE WHEN ? = gm.user_id THEN 1 ELSE 0 END AS sent,
+      u.username
     FROM group_messages gm
     JOIN group_members gmem ON gm.group_id = gmem.group_id
+    JOIN users u ON gm.user_id = u.id
     WHERE gmem.user_id = ?
     ORDER BY gm.group_id, gm.created_at
   `;
@@ -212,7 +214,8 @@ const getUserGroupMessages = async (userId) => {
     groupId: row.group_id,
     userId: row.user_id,
     datetime: row.created_at,
-    sent: row.sent === 1
+    sent: row.sent === 1,
+    username: row.username
   }));
 };
 

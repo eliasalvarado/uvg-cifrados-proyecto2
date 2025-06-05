@@ -4,6 +4,8 @@ import useFetch from '../useFetch.js';
 import useToken from '../useToken.js';
 import getGroupObject from '../../helpers/dto/getGroupObject.js';
 import getGroupMessageObject from '../../helpers/dto/getGroupMessageObject.js';
+import { decryptAES256 } from '../../helpers/cypher/AES-256.js';
+import base64ToUint8Array from '../../helpers/base64ToUint8Array.js';
 
 function useGetGroups() {
     const { callFetch, result: groupsResult, loading, error } = useFetch();
@@ -23,41 +25,56 @@ function useGetGroups() {
 
     useEffect(() => {
 
-        if(!groupsResult) return;
-        const {groups, messages} = groupsResult;
+        (async () => {
+            if (!groupsResult) return;
+            const { groups, messages } = groupsResult;
 
-        const newGroups = {};
-        groups.forEach((group) => {
-            const groupObject = getGroupObject({
-                groupId: group.groupId,
-                name: group.name,
-                creatorId: group.creator_id,
-                key: group.key,
+            const newGroups = {};
+            groups.forEach((group) => {
+                const groupObject = getGroupObject({
+                    groupId: group.groupId,
+                    name: group.name,
+                    creatorId: group.creator_id,
+                    key: group.key,
+                });
+                newGroups[group.groupId] = groupObject;
             });
-            newGroups[group.groupId] = groupObject;
-        });
 
-        const newMessages = {};
+            const newMessages = {};
 
-        messages.forEach((msg) => {
-            const messageObject = getGroupMessageObject({
-                userId: msg.userId,
-                message: msg.message,
-                datetime: msg.datetime,
-                sent: msg.sent,
-            })
+            await Promise.allSettled(
+                messages.map(async (msg) => {
 
-            if (!newMessages[msg.groupId]) {
-                newMessages[msg.groupId] = [];
-            }
+                    const key = newGroups[msg.groupId]?.key;
+                    if (key) {
 
-            newMessages[msg.groupId].push(messageObject);
-        });
+                        const keyParsed = base64ToUint8Array(key);
 
-        // Desencriptar el resultado de los grupos
+                        // Desencriptar el mensaje
+                        const messageDecrypted = await decryptAES256(msg.message, keyParsed);
 
-        setResult({groups: newGroups, messages: newMessages});
-        
+                        const messageObject = getGroupMessageObject({
+                            userId: msg.userId,
+                            message: messageDecrypted,
+                            datetime: msg.datetime,
+                            sent: msg.sent,
+                            username: msg.username,
+                        })
+
+                        if (!newMessages[msg.groupId]) {
+                            newMessages[msg.groupId] = [];
+                        }
+
+                        newMessages[msg.groupId].push(messageObject);
+                    }
+                })
+            )
+
+            // Desencriptar el resultado de los grupos
+
+            setResult({ groups: newGroups, messages: newMessages });
+        })();
+
     }, [groupsResult]);
 
     return {

@@ -107,7 +107,7 @@ function RoomChat({ groupId, name }) {
 										message={message.message}
 										date={new Date(message.datetime).toString()}
 										showTriangle={firstMessage}
-										user={firstMessage ? users[message.userId]?.username : null}
+										user={firstMessage ? message.username : null}
 										refObj={index === groupMessages[groupId].length - 1 ? lastChildRef : null}
 									/>
 								);

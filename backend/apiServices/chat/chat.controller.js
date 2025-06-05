@@ -3,6 +3,7 @@ import errorSender from "../../utils/errorSender.js"
 import { getGroupByName, getGroupsForUser, getUserContacts, getUserGroupMessages, getUserMessages, insertGroup, insertGroupMember, insertGroupMessage, insertMessage, verifyIfUserIsGroupMember } from "./chat.model.js";
 import { io } from "../../sockets/ioInstance.js";
 import generateAES256KeyBase64 from "../../../frontend/src/helpers/cypher/generateAES256KeyBase64.js";
+import { getUserById } from "../user/user.model.js";
 
 
 const sendMessageController = async (req, res) => {
@@ -153,6 +154,11 @@ const sendGroupMessageController = async (req, res) => {
       throw new CustomError('El usuario no es miembro del grupo', 403);
     }
 
+    const userData = await getUserById(userId);
+    if (!userData) {
+      throw new CustomError('Usuario emisor de mensaje grupal no encontrado', 404);
+    }
+
     // Guardar el mensaje en la base de datos
     const ok = await insertGroupMessage({
       message,
@@ -171,6 +177,7 @@ const sendGroupMessageController = async (req, res) => {
       userId,
       sent: false,
       datetime: new Date(),
+      username: userData.username,
     });
     
     
