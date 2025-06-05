@@ -1,2 +1,1 @@
-ALTER TABLE users
-MODIFY COLUMN username VARCHAR(256) NULL;
+ALTER TABLE users DROP INDEX username;

@@ -2,7 +2,7 @@ import { executeQuery } from '../../db/connection.js';
 
 const createUser = async ({ email, passwordHash, publicKeyRSA, publicKeyECDSA, username, privateKeyRSA }) => {
     const query = 'INSERT INTO users (email, password_hash, rsa_public_key, ecdsa_public_key, username, rsa_private_key) VALUES (?, ?, ?, ?, ?, ?)';
-    const [result] = await executeQuery(query, [email, passwordHash, publicKeyRSA, publicKeyECDSA, email, privateKeyRSA]);
+    const [result] = await executeQuery(query, [email, passwordHash, publicKeyRSA, publicKeyECDSA, username, privateKeyRSA]);
     return result.insertId;
 };
 
