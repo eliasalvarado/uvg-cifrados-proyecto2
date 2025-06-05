@@ -8,6 +8,7 @@ import GroupChatIcon from "../../assets/icons/group-chat.svg";
 import { RiContactsBook3Fill as ContactIcon } from "react-icons/ri";
 import { IoExitSharp as ExitIcon } from "react-icons/io5";
 import { MdAccountCircle as ProfileIcon } from "react-icons/md";
+import { MdMessage as EphemeralIcon } from "react-icons/md";
 
 /**
  * Componente de barra de navegación para una aplicación de chat.
@@ -17,6 +18,7 @@ import { MdAccountCircle as ProfileIcon } from "react-icons/md";
  * - Grupos
  * - Contactos
  * - Perfil
+ * - Mensajes efímeros
  * - Salir
  *
  * Cada opción se representa como un botón que ejecuta una función de callback cuando es clickeado o activado con el teclado.
@@ -31,7 +33,8 @@ function NavBar({
 	onChatOptionClick,
 	onGroupChatOptionClick,
 	onContactsOptionClick,
-	onProfileOptionClick
+	onProfileOptionClick,
+	onEphemeralMessagesOptionClick
 }) {
 
 	const { clearToken } = useContext(SessionContext);
@@ -89,9 +92,18 @@ function NavBar({
 					<span>Perfil</span>
 				</li>
 				<li
+                    onClick={onEphemeralMessagesOptionClick}
+                    onKeyUp={onEphemeralMessagesOptionClick}
+                    tabIndex={4}
+                    role="button"
+                >
+                    <EphemeralIcon className={styles.icon} />
+                    <span>Mensajes efímeros</span>
+                </li>
+				<li
 					onClick={logout}
 					onKeyUp={logout}
-					tabIndex={4}
+					tabIndex={5}
 					role="button"
 				>
 					<ExitIcon className={styles.icon} />
@@ -108,4 +120,5 @@ NavBar.propTypes = {
 	onChatOptionClick: PropTypes.func.isRequired,
 	onGroupChatOptionClick: PropTypes.func.isRequired,
 	onProfileOptionClick: PropTypes.func.isRequired,
+	onEphemeralMessagesOptionClick: PropTypes.func.isRequired,
 };
