@@ -8,6 +8,7 @@ import { useState } from 'react';
 import ChatRoomsList from '../../components/ChatRoomsList/ChatRoomsList';
 import RoomChat from '../../components/RoomChat/RoomChat';
 import EphemeralMessages from '../../components/EphemeralMessages/EphemeralMessages';
+import BlockchainViewer from '../../components/Blockchain/BlockchainViewer';
 import useChatState from '../../hooks/useChatState';
 
 const menuOption = {
@@ -16,6 +17,7 @@ const menuOption = {
   CONTACTS: 'CONTACTS',
   PROFILE: 'PROFILE',
   EPHEMERAL_MESSAGES: 'EPHEMERAL_MESSAGES',
+  BLOCKCHAIN: 'BLOCKCHAIN',
 };
 function ChatPage() {
 
@@ -44,12 +46,14 @@ function ChatPage() {
         onGroupChatOptionClick={() => setSelectedOption(menuOption.GROUPS)}
         onProfileOptionClick={() => setSelectedOption(menuOption.PROFILE)}
         onEphemeralMessagesOptionClick={() => setSelectedOption(menuOption.EPHEMERAL_MESSAGES)}
+        onBlockChainOptionClick={() => setSelectedOption(menuOption.BLOCKCHAIN)}
         onExitOptionClick={() => null}
       />
       {selectedOption === menuOption.CHATS && <ChatsList onSelectedUserChange={handleSingleChatSelected}/>}
       {selectedOption === menuOption.GROUPS && <ChatRoomsList onSelectedRoomChange={handleRoomChatSelected}/> }
       {selectedOption === menuOption.PROFILE && <ProfilePage />}
       {selectedOption === menuOption.EPHEMERAL_MESSAGES && <EphemeralMessages />}
+      {selectedOption === menuOption.BLOCKCHAIN && <BlockchainViewer />}
       {currentSingleChat && <SingleChat userId={currentSingleChat} username={users[currentSingleChat]?.username} />}
       {currentGroupChat && <RoomChat groupId={currentGroupChat} name={groups[currentGroupChat]?.name}/>}
 
