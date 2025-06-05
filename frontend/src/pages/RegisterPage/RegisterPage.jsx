@@ -28,6 +28,20 @@ function RegisterPage() {
         setForm((lastValue) => ({ ...lastValue, [field]: value }));
     };
 
+    const validateEmail = () => {
+        const email = form?.email?.trim() || "";
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!email) {
+            setErrors((lastValue) => ({ ...lastValue, email: "El correo electrónico es requerido" }));
+            return false;
+        }
+        if (!regex.test(email)) {
+            setErrors((lastValue) => ({ ...lastValue, email: "El correo electrónico no es válido" }));
+            return false;
+        }
+        return true;
+    }
+
     const validateUsername = () => {
         if (form?.username?.trim().length > 0) return true;
         setErrors((lastValue) => ({ ...lastValue, username: "El usuario es requerido" }));
@@ -63,7 +77,8 @@ function RegisterPage() {
     const handleRegister = (e) => {
 
         e.preventDefault();
-        const { username, password, algorithm } = form;
+        const { email, username, password } = form;
+        if (!validateEmail()) return;
         if (!validateUsername()) return;
         if (!validatePassword()) return;
         if (!validateRepeatPassword()) return;
@@ -71,7 +86,7 @@ function RegisterPage() {
         fetchRegister({
             uri: "/api/user/register",
             method: "POST",
-            body: JSON.stringify({ email: username, password, algorithm }),
+            body: JSON.stringify({ email, username, password }),
             headers: {
                 "Content-Type": "application/json",
             },
@@ -108,6 +123,15 @@ function RegisterPage() {
         <div className={styles.registerPageContainer}>
             <h1 className={styles.title}>Registrarse</h1>
           <form className={styles.registerForm} onSubmit={handleRegister}>
+            <InputText 
+                title="Correo electrónico"
+                name="email"
+                onChange={handleFormChange}
+                value={form?.email}
+                error={errors?.email}
+                onBlur={validateEmail}
+                onFocus={clearError}
+            />
             <InputText 
                 title="Usuario"
                 name="username"
