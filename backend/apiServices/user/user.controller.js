@@ -1,4 +1,4 @@
-import sha256 from 'js-sha256';
+import argon2 from 'argon2';
 import jwt from 'jsonwebtoken';
 import speakeasy from 'speakeasy';
 import qrcode from 'qrcode';
@@ -21,8 +21,6 @@ const registerUser = async (req, res) => {
         return res.status(400).json({ message: "Email y contraseña son requeridos" });
     }
 
-    const passwordHash = sha256(password);
-
     // Verificar si el usuario ya existe
     const existingUser = await getUserByEmail(email);
     if (existingUser) {
@@ -31,6 +29,9 @@ const registerUser = async (req, res) => {
     }
 
     try {
+
+        // Hashear la contraseña con Argon2
+        const passwordHash = await argon2.hash(password);
 
         // Generar llaves RSA
         const { publicKey: publicKeyRSA, privateKey: privateKeyRSA } = generateRSAKeys();
@@ -86,11 +87,11 @@ const loginUser = async (req, res) => {
             return res.status(401).json({ message: "No se encontró un usuario con el correo indicado" });
         }
 
-        // Comparar la contraseña hasheada
-        const passwordHash = sha256(password);
-        if (user.password_hash !== passwordHash) {
-            res.statusMessage = "Credenciales inválidas";
-            return res.status(401).json({ message: "Credenciales inválidas" });
+        // Comparar la contraseña hasheada con Argon2
+        const validPassword = await argon2.verify(user.password_hash, password);
+        if (!validPassword) {
+            res.statusMessage = "Credenciales incorrectas";
+            return res.status(401).json({ message: "Credenciales incorrectas" });
         }
 
         // Verificar si el usuario tiene habilitada la autenticación de dos factores (MFA)
