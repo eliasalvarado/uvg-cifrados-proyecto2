@@ -6,7 +6,7 @@ import getGroupObject from '../helpers/dto/getGroupObject';
 
 function useChatState() {
 
-    const {messages, setMessages, users, setUsers, setGroups, groups, groupMessages } = useContext(ChatContext);
+    const {messages, setMessages, users, setUsers, setGroups, groups, groupMessages, setGroupMessages } = useContext(ChatContext);
 
     /**
      * 
@@ -20,6 +20,16 @@ function useChatState() {
             return {
                 ...prevMessages,
                 [userId]: [...userMessages, message]
+            };
+        });
+    }
+
+    const addGroupChatMessage = (groupId, message) => {
+        setGroupMessages((prevMessages) => {
+            const groupChatMessages = prevMessages[groupId] || [];
+            return {
+                ...prevMessages,
+                [groupId]: [...groupChatMessages, message]
             };
         });
     }
@@ -64,6 +74,7 @@ function useChatState() {
         createEmptyChat,
         addUser,
         createEmptyGroup,
+        addGroupChatMessage,
     };
 }
 

@@ -5,6 +5,8 @@ import styles from "./RoomChat.module.css";
 import { scrollbarGray } from "../../styles/scrollbar.module.css";
 import { useEffect, useRef } from "react";
 import useChatState from "../../hooks/useChatState";
+import useSendGroupMessage from "../../hooks/groupChat/useSendGroupMessage";
+import getGroupMessageObject from "../../helpers/dto/getGroupMessageObject";
 
 /**
  * Componente de chat de sala que maneja la interacción del usuario en una sala de chat específica.
@@ -18,7 +20,9 @@ import useChatState from "../../hooks/useChatState";
  */
 function RoomChat({ groupId, name }) {
 
-	const { groupMessages, users } = useChatState();
+	const { groupMessages, users, addGroupChatMessage } = useChatState();
+
+	const {sendGroupMessage, error: errorSendGroupMessage} = useSendGroupMessage();
 
 	const chatContainerRef = useRef();
 	const lastChildRef = useRef();
@@ -28,9 +32,19 @@ function RoomChat({ groupId, name }) {
 		chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
 	}
 
-	const handleSend = (text) => {
+	const handleSend = (message) => {
 		//sendRoomMessage(room, text);
 		forceScrollRef.current = true; // Forzar scroll al final al recibir mensajes
+		sendGroupMessage({ groupId, message });
+
+		const messageObject = getGroupMessageObject({
+			message,
+			userId: null,
+			datetime: new Date(),
+			sent: true
+		})
+
+		addGroupChatMessage(groupId, messageObject);
 	};
 
 
@@ -61,7 +75,13 @@ function RoomChat({ groupId, name }) {
 				scrollToBottom();
 			}
 		}
-	}, [/*rooms*/]);
+	}, [groupMessages[groupId]]);
+
+	useEffect(() => {
+		if (errorSendGroupMessage) {
+			console.error("Error al enviar el mensaje de grupo:", errorSendGroupMessage);
+		}
+	}, [errorSendGroupMessage]);
 
 	return (
 		<div
