@@ -2,15 +2,17 @@ import server from '../app.js';
 const PORT = 3000;
 
 import { validateChain } from '../apiServices/blockchain/blockchain.model.js';
+import { setHealthy } from '../utils/blockchainHealth.js';
+
 
 async function boot() {
   /* ── Puerta de hierro ─────────────────────────── */
   const { ok, firstTamperedIndex } = await validateChain();
+  setHealthy(ok);    
   if (!ok) {
-    console.error(
+    console.warn(
       `[BLOCKCHAIN]  Integridad rota. Bloque corrupto desde #${firstTamperedIndex}`
     );
-    process.exit(1);              // aborta arranque
   }
   console.log('[BLOCKCHAIN] Cadena OK ✔️');
 
