@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { io } from 'socket.io-client';
 import useToken from '../../hooks/useToken';
 import useFetch from '../../hooks/useFetch';
-
+import useSocket from '../../hooks/useSocket';
+import { encryptMessage, decryptMessage } from '../../helpers/cypher/ephimeralCrypto';
 import styles from './EphemeralMessages.module.css';
 
 const EphemeralMessages = () => {
   const token = useToken();
-  const [socket, setSocket] = useState(null);
+  const socket = useSocket();
   const [username, setUsername] = useState('');
   const [receiver, setReceiver] = useState('');
   const [log, setLog] = useState([]);
   const [key, setKey] = useState(null);
+  const [messages, setMessages] = useState([]);
 
   const {
     callFetch: getUserInfo,
@@ -44,48 +45,47 @@ const EphemeralMessages = () => {
   }, [resultUserInfo]);
 
   useEffect(() => {
-      if (!username) return;
+    if (!socket) return;
 
-      joinChat();
-  }, [username]);
-
-  useEffect(() => {
-    const newSocket = io('http://localhost:3000');
-    setSocket(newSocket);
-
-    newSocket.on('key-generated', ({ key }) => {
+    socket.on('key-generated', ({ key }) => {
       setKey(key.join(''));
       addLog(`Clave generada: ${key.join('')}`);
     });
 
-    newSocket.on('receive-photons', ({ sender, photons, length }) => {
-      addLog(`Fotones recibidos de ${sender}: ${photons.join(' ')}`);
+    socket.on('receive-photons', ({ senderId, photons, length }) => {
       const basesBob = Array.from({ length }, () => (Math.random() < 0.5 ? '↕' : '↗'));
-      addLog(`Bases generadas: ${basesBob.join(' ')}`);
-      newSocket.emit('measure-photons', { receiverBases: basesBob, sender });
+      setReceiver(senderId);
+      socket.emit('measure-photons', { receiverBases: basesBob, senderId });
     });
 
-    newSocket.on('send-bases-receiver', ({ receiverBases, receiverBits }) => {
-      addLog(`Bases del receptor recibidas: ${receiverBases.join(' ')}`);
-      addLog(`Bits medidos por el receptor: ${receiverBits.join(' ')}`);
-      console.log('receiver', receiver);
-      newSocket.emit('compare-bases', { receiverBases, receiver });
+    socket.on('send-bases-receiver', ({ receiverBases, receiverBits }) => {
+      socket.emit('compare-bases', { receiverBases, receiverId: receiver });
     });
 
-    return () => newSocket.close();
-  }, [receiver]);
+    socket.on('receive-ephemeral-message', ({ sender, encryptedMessage }) => {
+      console.log(`Mensaje recibido de ${sender}: ${encryptedMessage}. Key: ${key}`);
+      if (!key) {
+        addLog('No se puede descifrar el mensaje porque no se posee la clave.');
+        return;
+      }
+      const decryptedMessage = decryptMessage(encryptedMessage, key);
+      setMessages((prevMessages) => [
+        ...prevMessages,
+        { sender, message: decryptedMessage },
+      ]);
+      console.log(`Mensaje descifrado: ${decryptedMessage}`);
+    });
+
+    return () => {
+      socket.off('key-generated');
+      socket.off('receive-photons');
+      socket.off('send-bases-receiver');
+      socket.off('receive-ephemeral-message');
+    };
+  }, [socket, key, receiver]);
 
   const addLog = (message) => {
     setLog((prevLog) => [...prevLog, message]);
-  };
-
-  const joinChat = () => {
-    if (!username) {
-      addLog('Por favor, ingresa tu nombre de usuario.');
-      return;
-    }
-    socket.emit('join', { username });
-    addLog(`Usuario "${username}" conectado.`);
   };
 
   const startKeyExchange = () => {
@@ -93,8 +93,21 @@ const EphemeralMessages = () => {
       addLog('Por favor, ingresa el nombre del destinatario.');
       return;
     }
-    socket.emit('start-key-exchange', { receiver });
-    addLog(`Iniciando intercambio de claves con "${receiver}"...`);
+    socket.emit('start-key-exchange', { receiverId: receiver });
+  };
+
+  const sendMessage = (message) => {
+    if (!key) {
+      addLog('No se puede enviar el mensaje porque no se posee la clave.');
+      return;
+    }
+    const encryptedMessage = encryptMessage(message, key);
+    socket.emit('send-ephemeral-message', { receiver, encryptedMessage });
+    setMessages((prevMessages) => [
+      ...prevMessages,
+      { sender: username, message },
+    ]);
+    console.log(`Mensaje cifrado sendMessage: ${encryptedMessage}`);
   };
 
   return (
@@ -102,16 +115,14 @@ const EphemeralMessages = () => {
       <h1 className={styles.header}>Mensajes efímeros</h1>
       <div className={styles.inputContainer}>
         <label className={styles.inputLabel}>Usuario destinatario:</label>
-        <input
+        {key ? receiver : (<><input
           type="text"
           value={receiver}
           onChange={(e) => setReceiver(e.target.value)}
           placeholder="Usuario con quien establecer clave"
-          className={styles.inputField}
-        />
-        <button onClick={startKeyExchange} className={styles.startButton}>
-          Iniciar intercambio de claves
-        </button>
+          className={styles.inputField} /><button onClick={startKeyExchange} className={styles.startButton}>
+            Iniciar intercambio de claves
+          </button></>)}
         {key && <div className={styles.keyEstablished}>Llave establecida - {key}</div>}
       </div>
       <div className={styles.chatContainer}>
@@ -121,14 +132,31 @@ const EphemeralMessages = () => {
               {message}
             </div>
           ))}
+          {messages.map((msg, index) => (
+            <div key={index} className={styles.messageItem}>
+              <strong>{msg.sender}:</strong> {msg.message}
+            </div>
+          ))}
         </div>
         <div className={styles.inputMessageContainer}>
           <input
             type="text"
             placeholder="Escribe tu mensaje..."
             className={styles.inputMessageField}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') sendMessage(e.target.value);
+            }}
           />
-          <button className={styles.sendButton}>Enviar</button>
+          <button
+            className={styles.sendButton}
+            onClick={() => {
+              const input = document.querySelector(`.${styles.inputMessageField}`);
+              sendMessage(input.value);
+              input.value = '';
+            }}
+          >
+            Enviar
+          </button>
         </div>
       </div>
     </div>
