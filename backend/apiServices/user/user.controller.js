@@ -13,10 +13,10 @@ const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const oauthClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 const registerUser = async (req, res) => {
-    const { email, password } = req.body;
+    const { email, username, password } = req.body;
 
     // Verificar que la solicitud contenga usuario y contraseña
-    if (!email || !password) {
+    if (!email || !username || !password) {
         res.statusMessage = "Email y contraseña son requeridos";
         return res.status(400).json({ message: "Email y contraseña son requeridos" });
     }
@@ -44,6 +44,7 @@ const registerUser = async (req, res) => {
             passwordHash,
             publicKeyRSA,
             publicKeyECDSA,
+            username,
             privateKeyRSA,
         });
 
