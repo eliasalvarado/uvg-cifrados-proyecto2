@@ -69,6 +69,8 @@ function BlockchainViewer() {
               <tbody>
                 {chain.map((blk) => {
                   const broken = badFrom !== null && blk.block_index >= badFrom;
+                  const data =
+                         typeof blk.data === "string" ? JSON.parse(blk.data) : blk.data;
                   return (
                     <tr
                       key={blk.id}
@@ -80,9 +82,9 @@ function BlockchainViewer() {
                       </td>
                       <td className={styles.hashCell}>{blk.prev_hash}</td>
                       <td className={styles.hashCell}>{blk.hash}</td>
-                      <td>{blk.data.from}</td>
-                      <td>{blk.data.to}</td>
-                      <td className={styles.hashCell}>{blk.data.msgHash}</td>
+                      <td>{data.from}</td>
+                      <td>{data.to}</td>
+                      <td className={styles.hashCell}>{data.msgHash}</td>
                     </tr>
                   );
                 })}
