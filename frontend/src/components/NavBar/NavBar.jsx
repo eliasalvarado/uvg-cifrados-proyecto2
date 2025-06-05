@@ -33,7 +33,8 @@ function NavBar({
 	onChatOptionClick,
 	onGroupChatOptionClick,
 	onContactsOptionClick,
-	onProfileOptionClick
+	onProfileOptionClick,
+	onEphemeralMessagesOptionClick
 }) {
 
 	const { clearToken } = useContext(SessionContext);
@@ -91,8 +92,8 @@ function NavBar({
 					<span>Perfil</span>
 				</li>
 				<li
-                    onClick={() => {navigate("/ephemeral-messages")}}
-                    onKeyUp={() => {navigate("/ephemeral-messages")}}
+                    onClick={onEphemeralMessagesOptionClick}
+                    onKeyUp={onEphemeralMessagesOptionClick}
                     tabIndex={4}
                     role="button"
                 >
@@ -102,7 +103,7 @@ function NavBar({
 				<li
 					onClick={logout}
 					onKeyUp={logout}
-					tabIndex={4}
+					tabIndex={5}
 					role="button"
 				>
 					<ExitIcon className={styles.icon} />
@@ -119,4 +120,5 @@ NavBar.propTypes = {
 	onChatOptionClick: PropTypes.func.isRequired,
 	onGroupChatOptionClick: PropTypes.func.isRequired,
 	onProfileOptionClick: PropTypes.func.isRequired,
+	onEphemeralMessagesOptionClick: PropTypes.func.isRequired,
 };

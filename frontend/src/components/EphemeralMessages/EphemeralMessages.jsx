@@ -5,7 +5,7 @@ import useSocket from '../../hooks/useSocket';
 import { encryptMessage, decryptMessage } from '../../helpers/cypher/ephimeralCrypto';
 import styles from './EphemeralMessages.module.css';
 
-const EphemeralMessages = () => {
+function EphemeralMessages() {
   const token = useToken();
   const socket = useSocket();
   const [username, setUsername] = useState('');

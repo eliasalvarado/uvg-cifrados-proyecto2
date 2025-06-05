@@ -7,6 +7,7 @@ import ProfilePage from '../ProfilePage/ProfilePage';
 import { useState } from 'react';
 import ChatRoomsList from '../../components/ChatRoomsList/ChatRoomsList';
 import RoomChat from '../../components/RoomChat/RoomChat';
+import EphemeralMessages from '../../components/EphemeralMessages/EphemeralMessages';
 import useChatState from '../../hooks/useChatState';
 
 const menuOption = {
@@ -14,6 +15,7 @@ const menuOption = {
   GROUPS: 'GROUPS',
   CONTACTS: 'CONTACTS',
   PROFILE: 'PROFILE',
+  EPHEMERAL_MESSAGES: 'EPHEMERAL_MESSAGES',
 };
 function ChatPage() {
 
@@ -41,11 +43,13 @@ function ChatPage() {
         onChatOptionClick={() => setSelectedOption(menuOption.CHATS)}
         onGroupChatOptionClick={() => setSelectedOption(menuOption.GROUPS)}
         onProfileOptionClick={() => setSelectedOption(menuOption.PROFILE)}
+        onEphemeralMessagesOptionClick={() => setSelectedOption(menuOption.EPHEMERAL_MESSAGES)}
         onExitOptionClick={() => null}
       />
       {selectedOption === menuOption.CHATS && <ChatsList onSelectedUserChange={handleSingleChatSelected}/>}
       {selectedOption === menuOption.GROUPS && <ChatRoomsList onSelectedRoomChange={handleRoomChatSelected}/> }
       {selectedOption === menuOption.PROFILE && <ProfilePage />}
+      {selectedOption === menuOption.EPHEMERAL_MESSAGES && <EphemeralMessages />}
       {currentSingleChat && <SingleChat userId={currentSingleChat} username={users[currentSingleChat]?.username} />}
       {currentGroupChat && <RoomChat groupId={currentGroupChat} name={groups[currentGroupChat]?.name}/>}
 
