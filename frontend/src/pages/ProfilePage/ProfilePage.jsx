@@ -13,7 +13,7 @@ function ProfilePage() {
 
     const [isMFAOpen, openMFA, closeMFA] = usePopUp();
     const [isDeleteMFAOpen, openDeleteMFA, closeDeleteMFA] = usePopUp();
-    const { refreshToken } = useContext(SessionContext);
+    const { clearToken } = useContext(SessionContext);
     const token = useToken();
     const navigate = useNavigate();
 
@@ -54,10 +54,11 @@ function ProfilePage() {
     }
 
     const logout = () => {
+		console.log("Logout");
         localStorage.removeItem('token');
-        refreshToken();
+        clearToken();
         
-        navigate("/");
+        navigate("/", { replace: true });
     }
 
     useEffect(() => {
