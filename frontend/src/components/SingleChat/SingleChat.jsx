@@ -27,7 +27,7 @@ function SingleChat({ userId, username }) {
 	const chatContainerRef = useRef();
 	const lastChildRef = useRef();
 
-	const {sendMessage } = useSendMessage();
+	const {sendMessage ,  error: sendError} = useSendMessage();
 
 	const scrollToBottom = () => {
 		chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
@@ -78,6 +78,13 @@ function SingleChat({ userId, username }) {
 			}
 		}
 	}, [messages[userId]]);
+
+	 useEffect(() => {
+		if (sendError?.status === 503) {
+			alert(sendError.message);          
+			// resetSend();                      
+		}
+	}, [sendError]);
 
 
 	return (
