@@ -131,6 +131,9 @@ function LoginPage() {
         localStorage.setItem("privateKeyRSA", resultLogin.privateKeyRSA);
         localStorage.setItem("publicKeyRSA", resultLogin.publicKeyRSA);
 
+        localStorage.setItem("privateKeyECDSA", resultLogin.privateKeyECDSA);
+        localStorage.setItem("publicKeyECDSA", resultLogin.publicKeyECDSA);
+
         localStorage.setItem("token", resultLogin.token);
         refreshToken();
 
@@ -153,19 +156,8 @@ function LoginPage() {
         localStorage.setItem("privateKeyRSA", resultGoogleLogin.privateKeyRSA);
         localStorage.setItem("publicKeyRSA", resultGoogleLogin.publicKeyRSA);
 
-        if (resultGoogleLogin?.newUser) {
-            // Colocar la llave privada ECDSA generada en un archivo y descargarla
-            const { privateKeyECDSA } = resultGoogleLogin;
-            const blobECDSA = new Blob([privateKeyECDSA], { type: 'text/plain' });
-            const urlECDSA = URL.createObjectURL(blobECDSA);
-            const linkECDSA = document.createElement('a');
-            linkECDSA.href = urlECDSA;
-            linkECDSA.download = 'privateKeyECDSA.pem';
-            document.body.appendChild(linkECDSA);
-            linkECDSA.click();
-            document.body.removeChild(linkECDSA);
-            URL.revokeObjectURL(urlECDSA);
-        }
+        localStorage.setItem("privateKeyECDSA", resultGoogleLogin.privateKeyECDSA);
+        localStorage.setItem("publicKeyECDSA", resultGoogleLogin.publicKeyECDSA);
 
         // Guardar el token en el localStorage
         localStorage.setItem("token", resultGoogleLogin.token);
@@ -179,6 +171,9 @@ function LoginPage() {
         // Guardar la llave privada en localStorage
         localStorage.setItem("privateKeyRSA", resultMFA.privateKeyRSA);
         localStorage.setItem("publicKeyRSA", resultMFA.publicKeyRSA);
+
+        localStorage.setItem("privateKeyECDSA", resultMFA.privateKeyECDSA);
+        localStorage.setItem("publicKeyECDSA", resultMFA.publicKeyECDSA);
 
         // Guardar el token en el localStorage
         localStorage.setItem("token", resultMFA.token);

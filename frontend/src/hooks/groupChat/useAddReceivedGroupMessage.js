@@ -16,28 +16,34 @@ function useAddReceivedGroupMessage() {
     }, [groups]);
 
     const addReceivedGroupMessage = async (data) => {
-        const { message: messageEncrypted, groupId, datetime, userId, username } = data;
 
-        const group = groupsRef.current?.[groupId];
-        if (!group) {
-            console.error("Grupo no encontrado al recibir mensaje realtime:", groupId);
-            return;
+        try{
+            const { message: messageEncrypted, groupId, datetime, userId, username,verified } = data;
+
+            const group = groupsRef.current?.[groupId];
+            if (!group) {
+                console.error("Grupo no encontrado al recibir mensaje realtime:", groupId);
+                return;
+            }
+
+            const keyParsed = base64ToUint8Array(group.key);
+            const message = await decryptAES256(messageEncrypted, keyParsed);
+
+            const messageObject = getGroupMessageObject({
+                userId,
+                groupId,
+                message,
+                datetime: new Date(datetime),
+                sent: false,
+                username,
+                verified
+
+            });
+
+            addGroupChatMessage(groupId, messageObject);
+        }catch (error) {
+            console.error("Error al agregar mensaje de grupo recibido: ", data, " error: ", error);
         }
-
-        const keyParsed = base64ToUint8Array(group.key);
-        const message = await decryptAES256(messageEncrypted, keyParsed);
-
-        const messageObject = getGroupMessageObject({
-            userId,
-            groupId,
-            message,
-            datetime: new Date(datetime),
-            sent: false,
-            username,
-
-        });
-
-        addGroupChatMessage(groupId, messageObject);
     };
 
     return addReceivedGroupMessage;

@@ -41,7 +41,8 @@ function RoomChat({ groupId, name }) {
 			message,
 			userId: null,
 			datetime: new Date(),
-			sent: true
+			sent: true,
+			verified: null
 		})
 
 		addGroupChatMessage(groupId, messageObject);
@@ -109,6 +110,7 @@ function RoomChat({ groupId, name }) {
 										showTriangle={firstMessage}
 										user={firstMessage ? message.username : null}
 										refObj={index === groupMessages[groupId].length - 1 ? lastChildRef : null}
+										verified={message.verified}
 									/>
 								);
 							})

@@ -1,6 +1,7 @@
 import base64ToUint8Array from '../../helpers/base64ToUint8Array.js';
 import consts from '../../helpers/consts.js';
 import { encryptAES256 } from '../../helpers/cypher/AES-256.js';
+import { signMessage } from '../../helpers/cypher/ECDSA.js';
 import useChatState from '../useChatState.js';
 import useFetch from '../useFetch.js';
 import useToken from '../useToken.js';
@@ -26,12 +27,16 @@ function useSendGroupMessage() {
 
         const keyParsed = base64ToUint8Array(group.key);
         const messageEncrypted = await encryptAES256(message, keyParsed);
+
+        const userPrivateKeyECDSA = localStorage.getItem('privateKeyECDSA');
+        const signature = await signMessage(messageEncrypted, userPrivateKeyECDSA);
         
         callFetch({
             uri: `${consts.apiPath}/chat/group/${groupId}`,
             method: 'POST',
             body: JSON.stringify({
                 message: messageEncrypted,
+                signature: signature
             }),
             headers: {
                 'Authorization': token,

@@ -28,44 +28,48 @@ function useAddReceivedMessage() {
 
     const addReceivedMessage = async (data) => {
 
-
-        if (!token) {
-            console.error('No token found');
-            return;
-        }
-        const userData = getTokenPayload(token);
-        if (!userData) {
-            console.error('Invalid token');
-            return;
-        }
-
-
-        if (data.to === userData.id) {
-
-            // Descifrar mensaje
-            const privateKeyRSA = localStorage.getItem('privateKeyRSA');
-            if (!privateKeyRSA) {
-                console.error('Private key not found in localStorage');
+        try{
+            if (!token) {
+                console.error('No token found');
+                return;
+            }
+            const userData = getTokenPayload(token);
+            if (!userData) {
+                console.error('Invalid token');
                 return;
             }
 
-            const { message: messageEncrypted, targetKey } = data;
 
-            const message = await decryptAESRSA(messageEncrypted, targetKey, privateKeyRSA);
-            const messageObject = getMessageObject({
-                from: data.from,
-                to: data.to,
-                message,
-                datetime: new Date(data.datetime),
-                sent: false, // Indica que el mensaje fue recibido
-            })
+            if (data.to === userData.id) {
 
-            addSingleChatMessage(messageObject);
+                // Descifrar mensaje
+                const privateKeyRSA = localStorage.getItem('privateKeyRSA');
+                if (!privateKeyRSA) {
+                    console.error('Private key not found in localStorage');
+                    return;
+                }
 
-            // Si el usuario no existe, agregarlo
-            if (data.from && !users[data.from]) {
-                getUserById(data.from)
+                const { message: messageEncrypted, targetKey } = data;
+
+                const message = await decryptAESRSA(messageEncrypted, targetKey, privateKeyRSA);
+                const messageObject = getMessageObject({
+                    from: data.from,
+                    to: data.to,
+                    message,
+                    datetime: new Date(data.datetime),
+                    sent: false, // Indica que el mensaje fue recibido
+                    verified:data.verified
+                })
+
+                addSingleChatMessage(messageObject);
+
+                // Si el usuario no existe, agregarlo
+                if (data.from && !users[data.from]) {
+                    getUserById(data.from)
+                }
             }
+        }catch (error) {
+            console.error("Error al agregar mensaje simple recibido: ", data, " error: ", error);
         }
     };
 

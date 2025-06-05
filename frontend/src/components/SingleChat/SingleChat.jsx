@@ -110,6 +110,7 @@ function SingleChat({ userId, username }) {
 									date={message.datetime?.toString()}
 									showTriangle={firstMessage}
 									refObj={index === messages[userId].length - 1 ? lastChildRef : null}
+									verified={message.verified}
 								/>
 							);
 						})}

@@ -1,14 +1,14 @@
 import { executeQuery } from '../../db/connection.js';
 
-const createUser = async ({ email, passwordHash, publicKeyRSA, publicKeyECDSA, username, privateKeyRSA }) => {
-    const query = 'INSERT INTO users (email, password_hash, rsa_public_key, ecdsa_public_key, username, rsa_private_key) VALUES (?, ?, ?, ?, ?, ?)';
-    const [result] = await executeQuery(query, [email, passwordHash, publicKeyRSA, publicKeyECDSA, username, privateKeyRSA]);
+const createUser = async ({ email, passwordHash, publicKeyRSA, publicKeyECDSA, username, privateKeyRSA, privateKeyECDSA }) => {
+    const query = 'INSERT INTO users (email, password_hash, rsa_public_key, ecdsa_public_key, username, rsa_private_key, ecdsa_private_key) VALUES (?, ?, ?, ?, ?, ?, ?)';
+    const [result] = await executeQuery(query, [email, passwordHash, publicKeyRSA, publicKeyECDSA, username, privateKeyRSA, privateKeyECDSA]);
     return result.insertId;
 };
 
-const createGoogleUser = async ({ email, googleId, publicKeyRSA, publicKeyECDSA, username, privateKeyRSA }) => {
-    const query = 'INSERT INTO users (email, provider, google_id, rsa_public_key, ecdsa_public_key, username, rsa_private_key) VALUES (?, ?, ?, ?, ?, ?, ?)';
-    const [result] = await executeQuery(query, [email, 'google', googleId, publicKeyRSA, publicKeyECDSA, username, privateKeyRSA]);
+const createGoogleUser = async ({ email, googleId, publicKeyRSA, publicKeyECDSA, username, privateKeyRSA, privateKeyECDSA }) => {
+    const query = 'INSERT INTO users (email, provider, google_id, rsa_public_key, ecdsa_public_key, username, rsa_private_key, ecdsa_private_key) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+    const [result] = await executeQuery(query, [email, 'google', googleId, publicKeyRSA, publicKeyECDSA, username, privateKeyRSA, privateKeyECDSA]);
     return result.insertId;
 };
 

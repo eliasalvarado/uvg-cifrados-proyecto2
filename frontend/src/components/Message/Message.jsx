@@ -28,6 +28,7 @@ function Message({
 	viewed = false,
 	refObj = null,
 	showViewed = true,
+	verified = null
 }) {
 	const formattedTime = dayjs(date).format("HH:mm");
 
@@ -44,6 +45,8 @@ function Message({
 					{message}
 				</span>
 				<div className={styles.messageFooter}>
+					{verified == true && <span style={{color:"green",width:"100%"}}>✅</span>}
+					{verified == false && <span style={{color:"red",width:"100%"}}>❌</span>}
 					<span className={styles.time}>{formattedTime}</span>
 					{!left && showViewed && <CheckIcon className={`${styles.checkIcon} ${viewed ? styles.viewed : ""}`} />}
 				</div>

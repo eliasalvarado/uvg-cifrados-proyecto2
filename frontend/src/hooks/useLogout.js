@@ -7,6 +7,10 @@ function useLogout() {
     function logout(){
         clearToken();
         localStorage.removeItem('token');
+        localStorage.removeItem('privateKeyECDSA');
+		localStorage.removeItem('privateKeyRSA');
+		localStorage.removeItem('publicKeyRSA');
+		localStorage.removeItem('publicKeyECDSA');
     }
     return logout;
 }

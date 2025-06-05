@@ -7,12 +7,13 @@
  * @param {*} sent: Boolean indicating if the message was sent by the current user
  * @returns 
  */
-const getMessageObject = ({from, to, message, datetime, sent }) => ({
+const getMessageObject = ({from, to, message, datetime, sent, verified }) => ({
     from,
     to,
     message,
     datetime,
-    sent
+    sent,
+    verified
 })
 
 export default getMessageObject;

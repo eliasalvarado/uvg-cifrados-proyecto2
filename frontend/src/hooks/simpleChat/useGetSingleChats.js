@@ -8,7 +8,7 @@ import getUserObject from '../../helpers/dto/getUserObject.js';
 import { decryptAESRSA } from '../../helpers/cypher/AES_RSA.js';
 
 function useGetSingleChats() {
-    const {callFetch, result: fetchResult, loading, error} = useFetch();
+    const { callFetch, result: fetchResult, loading, error } = useFetch();
     const token = useToken();
     const [result, setResult] = useState(null);
 
@@ -24,49 +24,65 @@ function useGetSingleChats() {
 
     useEffect(() => {
 
-        if (!fetchResult) return;
-        const { messages, contacts } = fetchResult;
-        const privateKeyRSA = localStorage.getItem('privateKeyRSA');
+        (async () => {
 
-        // Reemplazar los mensajes simples con los obtenidos del servidor
-        const newMessages = {};
-        messages.forEach((msg) => {
-            // Desencriptar el mensaje
-            const key = msg.sent === 1 ? msg.origin_key : msg.target_key;
+            try {
 
-            const msgObject = getMessageObject({
-                from: msg.origin_user_id,
-                to: msg.target_user_id,
-                message: decryptAESRSA(msg.message, key, privateKeyRSA),
-                datetime: msg.created_at,
-                sent: msg.sent === 1
-            });
-            const userId = msgObject.sent ? msgObject.to : msgObject.from;
-            if (!newMessages[userId]) {
-                newMessages[userId] = [];
-            }
-            newMessages[userId].push(msgObject);
-        });
+                if (!fetchResult) return;
+                const { messages, contacts } = fetchResult;
+                const privateKeyRSA = localStorage.getItem('privateKeyRSA');
 
-        // Reemplazar los usuarios con los obtenidos del servidor
+                // Reemplazar los mensajes simples con los obtenidos del servidor
+                const newMessages = {};
+                const promResults = await Promise.allSettled(
+                messages.map(async (msg) => {
+                    // Desencriptar el mensaje
+                    const key = msg.sent === 1 ? msg.origin_key : msg.target_key;
 
-        const newContacts = {};
-        contacts.forEach((contact) => {
-            if (!newContacts[contact.id]) {
-                newContacts[contact.id] = getUserObject({
-                    userId: contact.id,
-                    username: contact.username,
-                    email: contact.email,
-                    rsaPublicKey: contact.rsa_public_key
+                    const msgObject = getMessageObject({
+                        from: msg.origin_user_id,
+                        to: msg.target_user_id,
+                        message: await decryptAESRSA(msg.message, key, privateKeyRSA),
+                        datetime: msg.created_at,
+                        sent: msg.sent === 1,
+                        verified: msg.isValid
+                    });
+                    const userId = msgObject.sent ? msgObject.to : msgObject.from;
+                    if (!newMessages[userId]) {
+                        newMessages[userId] = [];
+                    }
+                    newMessages[userId].push(msgObject);
+                }));
+                
+                promResults.forEach((result) => {
+                    if (result.status === 'rejected') {
+                        console.error('Error CONTROLADO al procesar mensaje:', result.reason);
+                    }
                 });
+
+                // Reemplazar los usuarios con los obtenidos del servidor
+
+                const newContacts = {};
+                contacts.forEach((contact) => {
+                    if (!newContacts[contact.id]) {
+                        newContacts[contact.id] = getUserObject({
+                            userId: contact.id,
+                            username: contact.username,
+                            email: contact.email,
+                            rsaPublicKey: contact.rsa_public_key
+                        });
+                    }
+                });
+
+                setResult({
+                    messages: newMessages,
+                    contacts: newContacts
+                });
+            } catch (err) {
+                console.error('Error al descargar datos simples:', err);
+                setResult(null);
             }
-        });
-
-        setResult({
-            messages: newMessages,
-            contacts: newContacts
-        });
-
+        })();
     }, [fetchResult]);
 
     return {
