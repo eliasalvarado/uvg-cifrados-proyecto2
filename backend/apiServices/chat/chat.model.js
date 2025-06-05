@@ -1,6 +1,7 @@
 import { userInfo } from 'os';
 import { executeQuery } from '../../db/connection.js';
 import CustomError from '../../utils/customError.js';
+import {verifySignature} from '../../utils/cypher/ECDSA.js'
 
 /**
  * Obtiene los mensajes de un usuario específico.
@@ -10,19 +11,32 @@ import CustomError from '../../utils/customError.js';
 const getUserMessages = async (userId) => {
   const query = `
     SELECT 
-      id, 
-      message, 
-      origin_user_id, 
-      target_user_id, 
-      created_at, 
-      origin_key,
-      target_key,
-      CASE WHEN ? = origin_user_id THEN 1 ELSE 0 END AS sent
-    FROM messages
+      m.id, 
+      m.message, 
+      m.origin_user_id, 
+      m.target_user_id, 
+      m.created_at, 
+      m.origin_key,
+      m.target_key,
+      CASE WHEN ? = m.origin_user_id THEN 1 ELSE 0 END AS sent,
+      m.signature,
+      u.ecdsa_public_key as signature_key
+    FROM messages m
+    INNER JOIN users u ON m.origin_user_id = u.id
     WHERE origin_user_id = ? OR target_user_id = ?;
   `;
-  const [rows] = await executeQuery(query, [userId, userId, userId]);
-  return rows;
+  try {
+    const [rows] = await executeQuery(query, [userId, userId, userId]);
+    const messages = rows.map(row => {
+      // Verificar firmas
+      const isValid = verifySignature(row.message, row.signature.replaceAll("\n","").replaceAll(" ",""), row.signature_key);
+      return { ...row, isValid, signature_key: undefined };
+    });
+
+    return messages;
+  } catch (err) {
+    return [];
+  }
 };
 
 /**
@@ -36,8 +50,7 @@ const getUserContacts = async (userId) => {
       u.id,
       u.email,
       u.username,
-      u.rsa_public_key,
-      u.ecdsa_public_key
+      u.rsa_public_key
     FROM users u
     INNER JOIN messages m ON (u.id = m.origin_user_id OR u.id = m.target_user_id)
     WHERE (m.origin_user_id = ? OR m.target_user_id = ?) AND u.id != ?;
@@ -47,21 +60,21 @@ const getUserContacts = async (userId) => {
 };
 
 
-const insertMessage = async ({message, originUserId, targetUserId, originKey, targetKey}) => {
+const insertMessage = async ({message, originUserId, targetUserId, originKey, targetKey, signature}) => {
     const query = `
-    INSERT INTO messages (message, origin_user_id, target_user_id, origin_key, target_key, created_at)
-    VALUES (?, ?, ?, ?, ?, NOW());
+    INSERT INTO messages (message, origin_user_id, target_user_id, origin_key, target_key, created_at, signature)
+    VALUES (?, ?, ?, ?, ?, NOW(), ?);
     `;
-    const [result] = await executeQuery(query, [message, originUserId, targetUserId, originKey, targetKey]);
+    const [result] = await executeQuery(query, [message, originUserId, targetUserId, originKey, targetKey, signature]);
     return result?.affectedRows === 1;
 }
 
-const insertGroupMessage = async ({message, groupId, userId}) => {
+const insertGroupMessage = async ({message, groupId, userId, signature}) => {
     const query = `
-    INSERT INTO group_messages (message, group_id, user_id, created_at)
-    VALUES (?, ?, ?, NOW());
+    INSERT INTO group_messages (message, group_id, user_id, created_at, signature)
+    VALUES (?, ?, ?, NOW(),?);
     `;
-    const [result] = await executeQuery(query, [message, groupId, userId]);
+    const [result] = await executeQuery(query, [message, groupId, userId, signature]);
     return result?.affectedRows === 1;
 }
 
@@ -199,25 +212,36 @@ const getUserGroupMessages = async (userId) => {
       gm.user_id, 
       gm.created_at, 
       CASE WHEN ? = gm.user_id THEN 1 ELSE 0 END AS sent,
-      u.username
+      u.username,
+      signature,
+      u.ecdsa_public_key as signature_key
     FROM group_messages gm
     JOIN group_members gmem ON gm.group_id = gmem.group_id
     JOIN users u ON gm.user_id = u.id
     WHERE gmem.user_id = ?
     ORDER BY gm.group_id, gm.created_at
   `;
+  try{
+    const [rows] = await executeQuery(query, [userId, userId]);
 
-  const [rows] = await executeQuery(query, [userId, userId]);
+    const messages = rows.map(row => {
+      const isValid = verifySignature(row.message, row.signature.replaceAll("\n","").replaceAll(" ",""), row.signature_key);
+      return ({
+      id: row.id,
+      message: row.message,
+      groupId: row.group_id,
+      userId: row.user_id,
+      datetime: row.created_at,
+      sent: row.sent === 1,
+      username: row.username,
+      isValid,
+      signature_key: undefined
+    })});
 
-  return rows.map(row => ({
-    id: row.id,
-    message: row.message,
-    groupId: row.group_id,
-    userId: row.user_id,
-    datetime: row.created_at,
-    sent: row.sent === 1,
-    username: row.username
-  }));
+    return messages;
+  } catch (err) {
+    return [];
+  }
 };
 
 

@@ -6,7 +6,7 @@ import { io } from "../../sockets/ioInstance.js";
 import generateAES256KeyBase64 from "../../../frontend/src/helpers/cypher/generateAES256KeyBase64.js";
 import { getUserById } from "../user/user.model.js";
 import { addBlock } from "../blockchain/blockchain.model.js";
-
+import {verifySignature} from '../../utils/cypher/ECDSA.js'
 
 
 const sendMessageController = async (req, res) => {
@@ -15,7 +15,7 @@ const sendMessageController = async (req, res) => {
 
     
     const { userId } = req.params;
-    const { message, originKey, targetKey } = req.body || {};
+    const { message, originKey, targetKey, signature } = req.body || {};
     
     if (!message){
       throw new CustomError('El mensaje es requerido', 400);
@@ -29,13 +29,31 @@ const sendMessageController = async (req, res) => {
       throw new CustomError('La llave de destino es requerida', 400);
     }
 
+    if (!signature){
+      throw new CustomError('La firma es requerida', 400);
+    }
+
+    const userData = await getUserById(userId);
+    if (!userData) {
+      throw new CustomError('Usuario destinatario no encontrado', 404);
+    }
+
+    const currentUser = await getUserById(req.user.id);
+
+    const isValidSignature = verifySignature(
+      message,
+      signature, 
+      currentUser.ecdsa_public_key
+    );
+
     // Guardar el mensaje en la base de datos
     const ok = await insertMessage({
       message,
       originUserId: req.user.id,
       targetUserId: parseInt(userId, 10),
       originKey,
-      targetKey
+      targetKey,
+      signature
     });
 
     if (!ok) {
@@ -49,7 +67,7 @@ const sendMessageController = async (req, res) => {
       from    : req.user.id,
       to      : parseInt(userId, 10),
       msgHash,
-      sig     :  ''                      // firma pendiente
+      sig: signature
     });
     
     // Emitir el mensaje al socket del usuario
@@ -60,6 +78,7 @@ const sendMessageController = async (req, res) => {
       sent: false,
       datetime: new Date(),
       targetKey,
+      verified: isValidSignature
     });
     
     res.send({ ok: true })
@@ -71,11 +90,9 @@ const sendMessageController = async (req, res) => {
 
 const getSingleChatsController = async (req, res) => {
   try {
-    console.log("holis")
     const userId = req.user.id;
     const contacts = await getUserContacts(userId);
     const messages = await getUserMessages(userId);
-    
     
     res.send({ ok: true, contacts, messages });
   } catch (ex) {
@@ -153,7 +170,7 @@ const sendGroupMessageController = async (req, res) => {
   try{
 
     const { groupId } = req.params;
-    const { message, key } = req.body ?? {};
+    const { message, key, signature } = req.body ?? {};
     const userId = req.user.id;
     
     if (!message){
@@ -172,11 +189,20 @@ const sendGroupMessageController = async (req, res) => {
       throw new CustomError('Usuario emisor de mensaje grupal no encontrado', 404);
     }
 
+    // const signature = signMessage(message, userData.ecdsa_private_key);
+
+    const isValidSignature = verifySignature(
+      message,
+      signature, 
+      userData.ecdsa_public_key
+    );
+
     // Guardar el mensaje en la base de datos
     const ok = await insertGroupMessage({
       message,
       groupId: groupIdInt,
       userId,
+      signature
     })
 
     if (!ok) {
@@ -192,7 +218,7 @@ const sendGroupMessageController = async (req, res) => {
       from    : userId,
       to      : groupIdInt,
       msgHash,
-      sig     :  ''                     // firma pendiente
+      sig: signature
     });
 
     // Emitir al room del grupo
@@ -203,6 +229,7 @@ const sendGroupMessageController = async (req, res) => {
       sent: false,
       datetime: new Date(),
       username: userData.username,
+      verified: isValidSignature
     });
     
     

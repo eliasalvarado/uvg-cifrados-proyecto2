@@ -1,5 +1,6 @@
 import consts from '../../helpers/consts.js';
 import { encryptAESRSA } from '../../helpers/cypher/AES_RSA.js';
+import { signMessage } from '../../helpers/cypher/ECDSA.js';
 import useChatState from '../useChatState.js';
 import useFetch from '../useFetch.js';
 import useToken from '../useToken.js';
@@ -30,6 +31,9 @@ function useSendMessage() {
             targetUser.rsaPublicKey,
             userPublicKeyRSA,
         );
+
+        const userPrivateKeyECDSA = localStorage.getItem('privateKeyECDSA');
+        const signature = await signMessage(textEncrypted, userPrivateKeyECDSA);
             
         callFetch({
             uri: `${consts.apiPath}/chat/single/${targetUserId}`,
@@ -37,7 +41,8 @@ function useSendMessage() {
             body: JSON.stringify({
                 message: textEncrypted,
                 targetKey: targetKeyEncrypted,
-                originKey: originKeyEncrypted
+                originKey: originKeyEncrypted,
+                signature: signature.replaceAll("\n","").replaceAll(" ","")
             }),
             headers: {
                 'Authorization': token,

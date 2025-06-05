@@ -39,7 +39,8 @@ function useGetSingleChats() {
                 to: msg.target_user_id,
                 message: decryptAESRSA(msg.message, key, privateKeyRSA),
                 datetime: msg.created_at,
-                sent: msg.sent === 1
+                sent: msg.sent === 1,
+                verified: msg.isValid
             });
             const userId = msgObject.sent ? msgObject.to : msgObject.from;
             if (!newMessages[userId]) {
@@ -47,6 +48,8 @@ function useGetSingleChats() {
             }
             newMessages[userId].push(msgObject);
         });
+
+        
 
         // Reemplazar los usuarios con los obtenidos del servidor
 

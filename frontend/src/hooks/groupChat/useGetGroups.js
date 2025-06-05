@@ -59,6 +59,7 @@ function useGetGroups() {
                             datetime: msg.datetime,
                             sent: msg.sent,
                             username: msg.username,
+                            verified: msg.isValid
                         })
 
                         if (!newMessages[msg.groupId]) {

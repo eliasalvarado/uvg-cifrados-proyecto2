@@ -109,6 +109,7 @@ function RoomChat({ groupId, name }) {
 										showTriangle={firstMessage}
 										user={firstMessage ? message.username : null}
 										refObj={index === groupMessages[groupId].length - 1 ? lastChildRef : null}
+										verified={message.verified}
 									/>
 								);
 							})
