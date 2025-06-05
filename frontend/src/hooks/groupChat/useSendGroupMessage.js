@@ -1,4 +1,6 @@
+import base64ToUint8Array from '../../helpers/base64ToUint8Array.js';
 import consts from '../../helpers/consts.js';
+import { encryptAES256 } from '../../helpers/cypher/AES-256.js';
 import useChatState from '../useChatState.js';
 import useFetch from '../useFetch.js';
 import useToken from '../useToken.js';
@@ -21,12 +23,15 @@ function useSendGroupMessage() {
             console.error("Grupo no encontrado al enviar mensaje:", groupId);
             return;
         }
-            
+
+        const keyParsed = base64ToUint8Array(group.key);
+        const messageEncrypted = await encryptAES256(message, keyParsed);
+        
         callFetch({
             uri: `${consts.apiPath}/chat/group/${groupId}`,
             method: 'POST',
             body: JSON.stringify({
-                message: message,
+                message: messageEncrypted,
             }),
             headers: {
                 'Authorization': token,
