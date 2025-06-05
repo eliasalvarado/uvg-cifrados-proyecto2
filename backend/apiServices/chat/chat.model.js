@@ -36,7 +36,8 @@ const getUserContacts = async (userId) => {
       u.id,
       u.email,
       u.username,
-      u.rsa_public_key
+      u.rsa_public_key,
+      u.ecdsa_public_key
     FROM users u
     INNER JOIN messages m ON (u.id = m.origin_user_id OR u.id = m.target_user_id)
     WHERE (m.origin_user_id = ? OR m.target_user_id = ?) AND u.id != ?;

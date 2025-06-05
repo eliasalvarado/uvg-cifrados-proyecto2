@@ -100,17 +100,8 @@ function RegisterPage() {
         localStorage.setItem("privateKeyRSA", resultRegister.privateKeyRSA);
         localStorage.setItem("publicKeyRSA", resultRegister.publicKeyRSA);
 
-        // Colocar la llave privada ECDSA generada en un archivo y descargarla
-        const { privateKeyECDSA } = resultRegister;
-        const blobECDSA = new Blob([privateKeyECDSA], { type: 'text/plain' });
-        const urlECDSA = URL.createObjectURL(blobECDSA);
-        const linkECDSA = document.createElement('a');
-        linkECDSA.href = urlECDSA;
-        linkECDSA.download = 'privateKeyECDSA.pem';
-        document.body.appendChild(linkECDSA);
-        linkECDSA.click();
-        document.body.removeChild(linkECDSA);
-        URL.revokeObjectURL(urlECDSA);
+        localStorage.setItem("privateKeyECDSA", resultRegister.privateKeyECDSA);
+        localStorage.setItem("publicKeyECDSA", resultRegister.publicKeyECDSA);
 
         localStorage.setItem("token", resultRegister.token);
         refreshToken(resultRegister.token);

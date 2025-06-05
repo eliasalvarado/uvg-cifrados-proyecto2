@@ -47,6 +47,7 @@ const registerUser = async (req, res) => {
             publicKeyECDSA,
             username,
             privateKeyRSA,
+            privateKeyECDSA
         });
 
         // Generar token JWT, con una expiración de 1 hora
@@ -110,6 +111,8 @@ const loginUser = async (req, res) => {
             token,
             privateKeyRSA: user.rsa_private_key,
             publicKeyRSA: user.rsa_public_key,
+            privateKeyECDSA: user.ecdsa_private_key,
+            publicKeyECDSA: user.ecdsa_public_key
         });
     } catch (error) {
         res.status(500).json({ message: "Error al iniciar sesión", error: error.message });
@@ -150,7 +153,8 @@ const loginGoogleUser = async (req, res) => {
             publicKeyRSA,
             publicKeyECDSA,
             username,
-            privateKeyRSA
+            privateKeyRSA,
+            privateKeyECDSA
         });
 
         user = {
@@ -218,6 +222,7 @@ const getUserInfo = async (req, res) => {
         email: user.email,
         rsa_public_key: user.rsa_public_key,
         mfa_enabled: user.mfa_enabled,
+        ecdsa_public_key: user.ecdsa_public_key,
     }
 
     res.status(200).json(response);
@@ -239,6 +244,7 @@ const getUserByIdController = async (req, res) => {
             email: user.email,
             username: user.username,
             rsaPublicKey: user.rsa_public_key,
+            ecdsaPublicKey: user.ecdsa_public_key
         });
 
     }catch(ex){
@@ -316,6 +322,8 @@ const verifyMFA = async (req, res) => {
             token,
             privateKeyRSA: user.rsa_private_key,
             publicKeyRSA: user.rsa_public_key,
+            privateKeyECDSA: user.ecdsa_private_key,
+            publicKeyECDSA: user.ecdsa_public_key
         });
     } else {
         res.statusMessage = "Código de autenticación inválido";
@@ -344,7 +352,8 @@ const searchUserController = async (req, res) => {
                 id: user.id,
                 email: user.email,
                 username: user.username,
-                rsaPublicKey: user.rsa_public_key
+                rsaPublicKey: user.rsa_public_key,
+                ecdsaPublicKey: user.ecdsa_public_key
             }
         });
         
