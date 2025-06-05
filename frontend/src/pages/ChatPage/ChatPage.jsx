@@ -3,6 +3,7 @@ import styles from './ChatPage.module.css';
 import NavBar from '../../components/NavBar/NavBar';
 import ChatsList from '../../components/ChatsList/ChatsList';
 import SingleChat from '../../components/SingleChat/SingleChat';
+import ProfilePage from '../ProfilePage/ProfilePage';
 import { useState } from 'react';
 import ChatRoomsList from '../../components/ChatRoomsList/ChatRoomsList';
 import RoomChat from '../../components/RoomChat/RoomChat';
@@ -18,8 +19,8 @@ function ChatPage() {
 
   const [selectedOption, setSelectedOption] = useState(menuOption.CHATS);
   const [currentSingleChat, setCurrentSingleChat] = useState(null);
-  const [currentRoomChat, setCurrentRoomChat] = useState(null);
-  const { users } = useChatState();
+  const [currentGroupChat, setCurrentRoomChat] = useState(null);
+  const { users, groups } = useChatState();
 
 
   const handleSingleChatSelected = (user) => {
@@ -44,8 +45,9 @@ function ChatPage() {
       />
       {selectedOption === menuOption.CHATS && <ChatsList onSelectedUserChange={handleSingleChatSelected}/>}
       {selectedOption === menuOption.GROUPS && <ChatRoomsList onSelectedRoomChange={handleRoomChatSelected}/> }
+      {selectedOption === menuOption.PROFILE && <ProfilePage />}
       {currentSingleChat && <SingleChat userId={currentSingleChat} username={users[currentSingleChat]?.username} />}
-      {currentRoomChat && <RoomChat room={currentRoomChat}/>}
+      {currentGroupChat && <RoomChat groupId={currentGroupChat} name={groups[currentGroupChat]?.name}/>}
 
     </div>
   );

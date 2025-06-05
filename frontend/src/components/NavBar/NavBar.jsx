@@ -27,13 +27,13 @@ import { MdMessage as EphemeralIcon } from "react-icons/md";
  * @param {function} props.onChatOptionClick - Función callback al hacer clic en la opción de chats activos.
  * @param {function} props.onGroupChatOptionClick - Función callback al hacer clic en la opción de grupos.
  * @param {function} props.onContactsOptionClick - Función callback al hacer clic en la opción de contactos.
- * @param {function} props.onExitOptionClick - Función callback al hacer clic en la opción de salir.
  * @param {function} props.onProfileOptionClick - Función callback al hacer clic en la opción de perfil.
  */
 function NavBar({
 	onChatOptionClick,
 	onGroupChatOptionClick,
 	onContactsOptionClick,
+	onProfileOptionClick
 }) {
 
 	const { clearToken } = useContext(SessionContext);
@@ -82,8 +82,8 @@ function NavBar({
 					<span>Contactos</span>
 				</li>
 				<li
-					onClick={() => {navigate("/profile")}}
-					onKeyUp={() => {navigate("/profile")}}
+					onClick={onProfileOptionClick}
+					onKeyUp={onProfileOptionClick}
 					tabIndex={3}
 					role="button"
 				>
@@ -118,6 +118,5 @@ export default NavBar;
 NavBar.propTypes = {
 	onChatOptionClick: PropTypes.func.isRequired,
 	onGroupChatOptionClick: PropTypes.func.isRequired,
-	onExitOptionClick: PropTypes.func.isRequired,
 	onProfileOptionClick: PropTypes.func.isRequired,
 };

@@ -1,5 +1,5 @@
 import consts from '../../helpers/consts.js';
-import { decryptAESRSA, encryptAESRSA } from '../../helpers/cypher/AES_RSA.js';
+import { encryptAESRSA } from '../../helpers/cypher/AES_RSA.js';
 import useChatState from '../useChatState.js';
 import useFetch from '../useFetch.js';
 import useToken from '../useToken.js';

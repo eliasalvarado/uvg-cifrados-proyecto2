@@ -6,20 +6,24 @@ import OAuthSuccessPage from '../../pages/OAuthSuccessPage/OAuthSuccessPage';
 import { SessionProvider } from '../../context/SessionContext';
 import { ChatProvider } from '../../context/ChatContext';
 import { SocketProvider } from '../../context/SocketContext';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 function App() {
   return (
-    <SessionProvider>
-      <ChatProvider>
-        <SocketProvider>
-          <Router>
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+      <SessionProvider>
+        <ChatProvider>
+          <SocketProvider>
+            <Router>
 
-            <IndexPage />
+              <IndexPage />
 
-          </Router>
-        </SocketProvider>
-      </ChatProvider>
-    </SessionProvider>
+            </Router>
+          </SocketProvider>
+        </ChatProvider>
+      </SessionProvider>
+    </GoogleOAuthProvider>
   );
 }
 

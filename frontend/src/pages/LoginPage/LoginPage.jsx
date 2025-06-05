@@ -25,6 +25,13 @@ function LoginPage() {
     } = useFetch();
 
     const {
+        callFetch: fetchGoogleLogin,
+        result: resultGoogleLogin,
+        loading: loadingGoogleLogin,
+        error: errorGoogleLogin
+    } = useFetch();
+
+    const {
         callFetch: fetchMFA,
         result: resultMFA,
         loading:loadingMFA,
@@ -49,13 +56,30 @@ function LoginPage() {
         });
     }
 
+    const handleGoogleAuthSuccess = (response) => {
+
+        fetchGoogleLogin({
+            uri: "/api/user/google/login",
+            method: "POST",
+            body: JSON.stringify({ token: response.credential }),
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+
+    };
+    
+    const handleGoogleAuthError = (error) => {
+        console.error("Google Login Error:", error);
+    };
+
     const handleMFA = (e) => {
         e.preventDefault();
         const { mfa_code } = form;
         if (!validateMFA()) return;
 
         fetchMFA({
-            uri: `/api/user/mfa/verify/${resultLogin.user_id}`,
+            uri: `/api/user/mfa/verify/${resultLogin?.userId || resultGoogleLogin?.userId}`,
             method: "POST",
             body: JSON.stringify({ token: mfa_code }),
             headers: {
@@ -71,7 +95,7 @@ function LoginPage() {
     };
 
     const validateUsername = () => {
-        if (form?.password?.trim().length > 0) return true;
+        if (form?.username?.trim().length > 0) return true;
         setErrors((lastValue) => ({ ...lastValue, username: "El usuario es requerido" }));
     }
 
@@ -111,6 +135,43 @@ function LoginPage() {
         refreshToken();
 
     }, [resultLogin]);
+
+    useEffect(() => {
+
+        if (!resultGoogleLogin) return;
+
+        // Verificar si el usuario tiene autenticación de dos factores habilitada
+        if (resultGoogleLogin.mfa_enabled) {
+            // Si MFA está habilitado, abrir el popup
+            openMFA();
+            return;
+        }
+
+        if (!resultGoogleLogin?.token) return;
+
+        // Guardar la llave privada en localStorage
+        localStorage.setItem("privateKeyRSA", resultGoogleLogin.privateKeyRSA);
+        localStorage.setItem("publicKeyRSA", resultGoogleLogin.publicKeyRSA);
+
+        if (resultGoogleLogin?.newUser) {
+            // Colocar la llave privada ECDSA generada en un archivo y descargarla
+            const { privateKeyECDSA } = resultGoogleLogin;
+            const blobECDSA = new Blob([privateKeyECDSA], { type: 'text/plain' });
+            const urlECDSA = URL.createObjectURL(blobECDSA);
+            const linkECDSA = document.createElement('a');
+            linkECDSA.href = urlECDSA;
+            linkECDSA.download = 'privateKeyECDSA.pem';
+            document.body.appendChild(linkECDSA);
+            linkECDSA.click();
+            document.body.removeChild(linkECDSA);
+            URL.revokeObjectURL(urlECDSA);
+        }
+
+        // Guardar el token en el localStorage
+        localStorage.setItem("token", resultGoogleLogin.token);
+        refreshToken();
+
+    }, [resultGoogleLogin]);
 
     useEffect(() => {
         if (!resultMFA?.token) return;
@@ -158,7 +219,12 @@ function LoginPage() {
                 {loadingLogin && <Spinner />}
             </div>
             <div className={styles.googleLoginContainer}>
-                <GoogleLoginButton />
+                <GoogleLoginButton
+                    handleSuccess={handleGoogleAuthSuccess}
+                    handleError={handleGoogleAuthError}
+                    loading={loadingGoogleLogin}
+                    error={errorGoogleLogin}
+                />
             </div>
             {errorLogin && <p className={styles.errorMessage}>{errorLogin.message}</p>}
           </form>
@@ -166,10 +232,10 @@ function LoginPage() {
             ¿No tienes cuenta? <Link to="/register" className={styles.registerHere}>Regístrate aquí</Link>
           </p>
             {isMFAOpen && (
-                <PopUp close={closeMFA} closeButton closeWithBackground>
+                <PopUp close={closeMFA} closeButton maxWidth={500} closeWithBackground>
                 <div className={styles.mfaContainer}>
                     <h2>Autenticación de dos factores (MFA)</h2>
-                    <p>Por favor, ingresa el código de autenticación de dos factores que se te ha enviado.</p>
+                    <p>Por favor, ingresa el código de autenticación de dos factores que aparece en tu aplicación de autenticador.</p>
                     <InputText 
                         title="Código MFA"
                         name="mfa_code"

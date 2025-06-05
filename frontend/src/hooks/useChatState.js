@@ -2,12 +2,11 @@ import { useContext } from 'react';
 import ChatContext from '../context/ChatContext';
 
 import getUserObject from '../helpers/dto/getUserObject';
+import getGroupObject from '../helpers/dto/getGroupObject';
 
 function useChatState() {
 
-    const {messages, setMessages, users, setUsers} = useContext(ChatContext);
-
-
+    const {messages, setMessages, users, setUsers, setGroups, groups, groupMessages, setGroupMessages } = useContext(ChatContext);
 
     /**
      * 
@@ -21,6 +20,16 @@ function useChatState() {
             return {
                 ...prevMessages,
                 [userId]: [...userMessages, message]
+            };
+        });
+    }
+
+    const addGroupChatMessage = (groupId, message) => {
+        setGroupMessages((prevMessages) => {
+            const groupChatMessages = prevMessages[groupId] || [];
+            return {
+                ...prevMessages,
+                [groupId]: [...groupChatMessages, message]
             };
         });
     }
@@ -47,15 +56,25 @@ function useChatState() {
          addUser({userId, username, email, rsaPublicKey});
     }
 
-    
+    const createEmptyGroup = ({groupId, name, creatorId, key}) => {
+        const groupObj = getGroupObject({name, members: [creatorId], key});
+        setGroups((prev) => {
+            if (prev[groupId]) return prev; // If group already exists, do nothing
+            return { ...prev, [groupId]: groupObj };
+        });
+    }
         
 
     return {
         messages,
         users,
+        groups,
+        groupMessages,
         addSingleChatMessage,
         createEmptyChat,
         addUser,
+        createEmptyGroup,
+        addGroupChatMessage,
     };
 }
 

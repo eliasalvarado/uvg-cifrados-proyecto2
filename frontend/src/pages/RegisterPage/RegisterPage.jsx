@@ -22,14 +22,6 @@ function RegisterPage() {
         error: errorRegister
     } = useFetch();
 
-    const {
-        callFetch: fetchKeyGen,
-        result: resultKeyGen,
-        loading: loadingKeyGen,
-        error: errorKeyGen,
-        reset: resetKeyGen,
-      } = useFetch();
-
     const handleFormChange = (e) => {
         const field = e.target.name;
         const { value } = e.target;
@@ -37,24 +29,30 @@ function RegisterPage() {
     };
 
     const validateUsername = () => {
-        if (form?.password?.trim().length > 0) return true;
+        if (form?.username?.trim().length > 0) return true;
         setErrors((lastValue) => ({ ...lastValue, username: "El usuario es requerido" }));
     }
 
     const validatePassword = () => {
-        if (form?.password?.trim().length > 0) return true;
-        setErrors((lastValue) => ({ ...lastValue, password: "La contraseña es requerida" }));
+        const password = form?.password?.trim() || "";
+        const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+        if (!password) {
+            setErrors((lastValue) => ({ ...lastValue, password: "La contraseña es requerida" }));
+            return false;
+        }
+        if (!regex.test(password)) {
+            setErrors((lastValue) => ({
+                ...lastValue,
+                password: "La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial"
+            }));
+            return false;
+        }
+        return true;
     }
 
     const validateRepeatPassword = () => {
-        if (form?.repeatPassword?.trim().length > 0) return true;
         if (form?.repeatPassword === form?.password) return true;
         setErrors((lastValue) => ({ ...lastValue, repeatPassword: "Las contraseñas no coinciden" }));
-    }
-
-    const validateAlgorithm = () => {
-        if (form?.algorithm?.trim().length > 0) return true;
-        setErrors((lastValue) => ({ ...lastValue, algorithm: "El algoritmo de cifrado es requerido" }));
     }
 
     const clearError = (e) => {
@@ -69,7 +67,6 @@ function RegisterPage() {
         if (!validateUsername()) return;
         if (!validatePassword()) return;
         if (!validateRepeatPassword()) return;
-        if (!validateAlgorithm()) return;
 
         fetchRegister({
             uri: "/api/user/register",
@@ -109,7 +106,7 @@ function RegisterPage() {
 
     return (
         <div className={styles.registerPageContainer}>
-            <h1>Registrarse</h1>
+            <h1 className={styles.title}>Registrarse</h1>
           <form className={styles.registerForm} onSubmit={handleRegister}>
             <InputText 
                 title="Usuario"
@@ -139,20 +136,6 @@ function RegisterPage() {
                 onBlur={validateRepeatPassword}
                 onFocus={clearError}
                 hidden
-            />
-            <InputSelect
-                title="Algoritmo de cifrado de archivos"
-                name="algorithm"
-                onChange={handleFormChange}
-                value={form?.algorithm}
-                error={errors?.algorithm}
-                onBlur={validateAlgorithm}
-                onFocus={clearError}
-                options={[
-                    { value: "RSA", title: "RSA" },
-                    { value: "ECC", title: "ECC" },
-                ]}
-                placeholder="Selecciona un algoritmo"
             />
             <p className={styles.infoText}>Al registrate, se descargará automáticamente tu llave privada</p>
             <div className={styles.buttonContainer}>

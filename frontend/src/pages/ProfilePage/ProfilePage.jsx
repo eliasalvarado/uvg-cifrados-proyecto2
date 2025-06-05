@@ -27,18 +27,22 @@ function ProfilePage() {
         callFetch: fetchSetupMFA,
         result: resultSetupMFA,
         loading: loadingSetupMFA,
-        error: errorSetupMFA
+        error: errorSetupMFA,
+        reset: resetSetupMFA
     } = useFetch();
 
     const {
         callFetch: fetchDeleteMFA,
         result: resultDeleteMFA,
         loading: loadingDeleteMFA,
-        error: errorDeleteMFA
+        error: errorDeleteMFA,
+        reset: resetDeleteMFA
     } = useFetch();
 
     const handleGetUserInfo = () => {
         resetUserInfo();
+        resetDeleteMFA();
+        resetSetupMFA();
         getUserInfo({
             uri: "/api/user/profile",
             method: "GET",
@@ -102,12 +106,15 @@ function ProfilePage() {
             <h1>Perfil de Usuario</h1>
         </div> 
         <div className={styles.buttonsContainer}>
-            <Button text="Activar MFA" green onClick={handleSetupMFA} />
-            <Button text="Eliminar MFA" red onClick={openDeleteMFA} />
-            <Button text="Cerrar sesión" red onClick={logout} />
+            {resultUserInfo?.mfa_enabled ? (
+                <Button text="Desactivar MFA" gray onClick={openDeleteMFA} />
+            ) : (
+                <Button text="Activar MFA" emptyBlue onClick={handleSetupMFA} />
+            )}
+            <Button text="Cerrar sesión" black onClick={logout} />
         </div>
         {isMFAOpen && (
-            <PopUp close={closeMFA} closeButton closeWithBackground callback={handleGetUserInfo}>
+            <PopUp close={closeMFA} closeButton closeWithBackground maxWidth={500} callback={handleGetUserInfo}>
                 {resultUserInfo?.mfa_enabled ? (
                     <div className={styles.mfaContainer}>
                         <h2>MFA ya está habilitado</h2>
@@ -134,17 +141,21 @@ function ProfilePage() {
             </PopUp>
         )}
         {isDeleteMFAOpen && (
-            <PopUp close={closeDeleteMFA} closeButton closeWithBackground callback={handleGetUserInfo}>
+            <PopUp close={closeDeleteMFA} closeButton closeWithBackground maxWidth={500} callback={handleGetUserInfo}>
                 <div className={styles.deleteMFAContainer}>
-                    <h2>Eliminar MFA</h2>
+                    <h2>Desactivar MFA</h2>
                     {loadingDeleteMFA ? (
                         <Spinner />
                     ) : (
                         <>
-                            <p>¿Estás seguro de que deseas eliminar la autenticación de dos factores (MFA)?</p>
-                            <Button text="Eliminar MFA" red onClick={handleDeleteMFA} />
+                            {!resultDeleteMFA && (
+                                <>
+                                    <p>¿Estás seguro de que quieres desactivar el MFA? Esta acción no se puede deshacer.</p>
+                                    <Button text="Desactivar MFA" black onClick={handleDeleteMFA} />
+                                </>
+                            )}
                             {errorDeleteMFA && <p>{errorDeleteMFA.message}</p>}
-                            {resultDeleteMFA && <p>MFA eliminado exitosamente.</p>}
+                            {resultDeleteMFA && <p>MFA desactivado exitosamente.</p>}
                         </>
                     )}
                 </div>

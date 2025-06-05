@@ -1,0 +1,2 @@
+ALTER TABLE group_messages DROP COLUMN `key`;
+ALTER TABLE `groups` ADD COLUMN `key` VARCHAR(500) NOT NULL;

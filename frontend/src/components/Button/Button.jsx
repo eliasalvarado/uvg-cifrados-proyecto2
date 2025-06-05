@@ -12,6 +12,8 @@ function Button({
   emptyRed,
   green,
   emptyBlue,
+  black,
+  gray,
   children,
   buttonRef,
   title,
@@ -24,6 +26,8 @@ function Button({
       ${red ? styles.red : ''}
       ${green ? styles.green : ''}
       ${emptyBlue ? styles.emptyBlue : ''}
+      ${black ? styles.black : ''}
+      ${gray ? styles.gray : ''}
       ${className}`}
       type={type}
       onClick={onClick}

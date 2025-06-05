@@ -1,14 +1,21 @@
 .pageContainer{
-    padding: var(--page-vertical-padding--) var(--page-horizontal-padding--);
+    padding-top: 10px;
+    height: 100vh;
+    border-right: 1px solid #ffffff24;
     display: flex;
     flex-direction: column;
+    max-width: 100%;
+    width: 400px;
     color: white;
 }
 
 .header{
     display: flex;
+    justify-content: space-between;
+    padding: 0 20px;
     align-items: center;
-    flex-direction: column;
+    margin-bottom: 20px;
+    flex-shrink: 0;
 }
 
 .buttonsContainer{
@@ -29,6 +36,18 @@
     flex-direction: column;
     align-self: center;
     gap: 1rem;
+    text-align: center;
+}
+
+.deleteMFAContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 1rem;
+    flex-direction: column;
+    align-self: center;
+    gap: 1rem;
+    text-align: center;
 }
 
 .mfaMessage{
