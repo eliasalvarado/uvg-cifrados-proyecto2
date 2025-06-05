@@ -16,7 +16,7 @@ function useAddReceivedGroupMessage() {
     }, [groups]);
 
     const addReceivedGroupMessage = async (data) => {
-        const { message: messageEncrypted, groupId, datetime, userId } = data;
+        const { message: messageEncrypted, groupId, datetime, userId, username } = data;
 
         const group = groupsRef.current?.[groupId];
         if (!group) {
@@ -33,6 +33,8 @@ function useAddReceivedGroupMessage() {
             message,
             datetime: new Date(datetime),
             sent: false,
+            username,
+
         });
 
         addGroupChatMessage(groupId, messageObject);

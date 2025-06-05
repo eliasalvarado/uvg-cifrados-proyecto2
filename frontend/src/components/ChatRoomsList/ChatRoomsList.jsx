@@ -117,7 +117,7 @@ function ChatRoomsList({ onSelectedRoomChange = null }) {
 				.map(([groupId, group]) => {
 					
 					const lastMessage = groupMessages[groupId]?.[groupMessages[groupId].length - 1];
-					const lastMessageUser = lastMessage?.sent ? "yo" : users?.[lastMessage?.userId]?.username ?? "";
+					const lastMessageUser = lastMessage?.sent ? "yo" : lastMessage?.username ?? "";
 					const lastMessageText = lastMessage?.message ?? "";
 
 					const message = lastMessageUser && lastMessageText

@@ -58,6 +58,7 @@ function useGetGroups() {
                             message: messageDecrypted,
                             datetime: msg.datetime,
                             sent: msg.sent,
+                            username: msg.username,
                         })
 
                         if (!newMessages[msg.groupId]) {
