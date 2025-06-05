@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { useEffect } from 'react';
 import useGetSingleChats from '../hooks/simpleChat/useGetSingleChats';
 import useToken from '../hooks/useToken';
+import useGetGroups from '../hooks/groupChat/useGetGroups';
 
 const ChatContext = createContext();
 
@@ -18,6 +19,7 @@ export const ChatProvider = ({ children }) => {
 
   // Hooks para obtener estado inicial
   const {getSingleChats, result: singleChatsResult } = useGetSingleChats();
+  const { getGroups, result: groupsResult } = useGetGroups();
   const token = useToken();
 
 
@@ -28,6 +30,7 @@ export const ChatProvider = ({ children }) => {
     console.log("INICIALIZANDO CHAT");
     // Inicializar la información de los chats
     getSingleChats();
+    getGroups();
 
   }, [token]);
 
@@ -40,6 +43,15 @@ export const ChatProvider = ({ children }) => {
     setUsers(contacts);
 
   }, [singleChatsResult]);
+
+  useEffect(() => {
+    if (!groupsResult) return;
+    const { groups, messages } = groupsResult;
+
+    setGroups(groups);
+    setGroupMessages(messages);
+
+  }, [groupsResult]);
 
   const data = {
     messages,

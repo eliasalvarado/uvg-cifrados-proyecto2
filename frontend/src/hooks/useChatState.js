@@ -8,8 +8,6 @@ function useChatState() {
 
     const {messages, setMessages, users, setUsers, setGroups, groups, groupMessages } = useContext(ChatContext);
 
-
-
     /**
      * 
      * @param {*} message Expects a messageObject.

@@ -21,7 +21,7 @@ function ChatRoomsList({ onSelectedRoomChange = null }) {
 
 	const { createGroup, result: successCreateGroup, error: errorCreateGroup } = useCreateGroup();
 	const { joinGroup, result: successJoinGroup, error: errorJoinGroup } = useJoinGroup();
-	const { createEmptyGroup, groups } = useChatState(); 
+	const { createEmptyGroup, groups, groupMessages, users } = useChatState(); 
 	const joinGroupSocket = useJoinGroupSocket();
 
 	const handleCreateRoom = () => {
@@ -103,15 +103,39 @@ function ChatRoomsList({ onSelectedRoomChange = null }) {
 			</header>
 
 			<ul className={`${styles.listContainer} ${scrollbarGray}`}>
-				{Object.entries(groups).map(([groupId, group]) => (
+				{Object.entries(groups)
+				.sort(([groupIdA], [groupIdB]) => {
+					const lastMessageA = groupMessages[groupIdA]?.[groupMessages[groupIdA].length - 1];
+					const lastMessageB = groupMessages[groupIdB]?.[groupMessages[groupIdB].length - 1];
+
+					if (!lastMessageA && !lastMessageB) return groupIdB - groupIdA; // Ambos grupos sin mensajes, ordenar por ID descendente
+					if (!lastMessageA) return 1; // A tiene mensajes, B no, A va primero
+					if (!lastMessageB) return -1; // B tiene mensajes, A no, B va primero
+
+					return new Date(lastMessageB.datetime) - new Date(lastMessageA.datetime); // Ordenar por fecha del último mensaje (descendente)
+				})
+				.map(([groupId, group]) => {
+					
+					const lastMessage = groupMessages[groupId]?.[groupMessages[groupId].length - 1];
+					const lastMessageUser = lastMessage?.sent ? "yo" : users?.[lastMessage?.userId]?.username ?? "";
+					const lastMessageText = lastMessage?.message ?? "";
+
+					const message = lastMessageUser && lastMessageText
+						? `${lastMessageUser}: ${lastMessageText}`
+						: lastMessageText
+
+					return (
 					<ChatItem
 						key={groupId}
 						id={groupId}
 						user={group.name}
 						onClick={() => setSelectedRoom(groupId)}
 						selected={selectedRoom === groupId}
+						message={message}
+						date={lastMessage?.datetime}
 					/>
-				))}
+					)
+				})}
 			</ul>
 		</div>
 	);

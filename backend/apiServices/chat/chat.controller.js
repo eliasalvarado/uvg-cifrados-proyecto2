@@ -1,6 +1,6 @@
 import CustomError from "../../utils/customError.js";
 import errorSender from "../../utils/errorSender.js"
-import { getGroupByName, getUserContacts, getUserMessages, insertGroup, insertGroupMember, insertGroupMessage, insertMessage, verifyIfUserIsGroupMember } from "./chat.model.js";
+import { getGroupByName, getGroupsForUser, getUserContacts, getUserGroupMessages, getUserMessages, insertGroup, insertGroupMember, insertGroupMessage, insertMessage, verifyIfUserIsGroupMember } from "./chat.model.js";
 import { io } from "../../sockets/ioInstance.js";
 import generateAES256KeyBase64 from "../../../frontend/src/helpers/cypher/generateAES256KeyBase64.js";
 
@@ -181,10 +181,28 @@ const sendGroupMessageController = async (req, res) => {
   }
 }
 
+const getGroupChatsController = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const groups = await getGroupsForUser(userId);
+    const messages = await getUserGroupMessages(userId);
+
+    if (!groups || groups.length === 0) {
+      throw new CustomError('No se encontraron grupos para el usuario', 404);
+    }
+    
+    res.send({ ok: true, groups, messages });
+  } catch (ex) {
+    console.log("Error: ",ex);
+    errorSender({ res, ex });
+  }
+}
+
 export {
   sendMessageController,
   getSingleChatsController,
   createGroupController,
   joinGroupController,
-  sendGroupMessageController
+  sendGroupMessageController,
+  getGroupChatsController,
 }
