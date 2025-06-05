@@ -42,7 +42,7 @@ function useGetGroups() {
 
             const newMessages = {};
 
-            await Promise.allSettled(
+            const promResults = await Promise.allSettled(
                 messages.map(async (msg) => {
 
                     const key = newGroups[msg.groupId]?.key;
@@ -69,7 +69,13 @@ function useGetGroups() {
                         newMessages[msg.groupId].push(messageObject);
                     }
                 })
-            )
+            );
+
+            promResults.forEach((result) => {
+                if (result.status === 'rejected') {
+                    console.error('Error CONTROLADO al procesar mensaje de grupo:', result.reason);
+                }
+            });
 
             // Desencriptar el resultado de los grupos
 
