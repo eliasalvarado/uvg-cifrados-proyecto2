@@ -59,11 +59,11 @@ function BlockchainViewer() {
                 <tr>
                   <th>#</th>
                   <th>Timestamp</th>
-                  <th>Prev Hash</th>
-                  <th>Hash</th>
+                  <th className={styles.hashCol}>Prev Hash</th>
+                  <th className={styles.hashCol}>Hash</th>
                   <th>From</th>
                   <th>To</th>
-                  <th>msgHash</th>
+                  <th className={styles.hashCol}>msgHash</th>
                 </tr>
               </thead>
               <tbody>
