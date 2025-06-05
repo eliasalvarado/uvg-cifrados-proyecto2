@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import useFetch from "../../hooks/useFetch";
 import useToken from "../../hooks/useToken";
 import consts from "../../helpers/consts";
-import styles from "./BlockchainViewer.module.css";       // crea tu CSS-module
+import styles from "./BlockchainViewer.module.css";   
 
 function BlockchainViewer() {
   const token = useToken();
