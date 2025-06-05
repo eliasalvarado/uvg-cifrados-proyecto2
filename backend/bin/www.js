@@ -1,4 +1,5 @@
 import server from '../app.js';
+const PORT = 3000;
 
 import { validateChain } from '../apiServices/blockchain/blockchain.model.js';
 
