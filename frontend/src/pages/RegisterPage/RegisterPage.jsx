@@ -167,6 +167,7 @@ function RegisterPage() {
                     <Button
                         text="Registrarse"
                         onClick={handleRegister}
+                        black
                     />
                 )}
                 {loadingRegister && <Spinner />}

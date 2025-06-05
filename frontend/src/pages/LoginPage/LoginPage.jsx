@@ -42,14 +42,14 @@ function LoginPage() {
 
         e.preventDefault();
         console.log("Login");
-        const { username, password } = form;
-        if (!validateUsername()) return;
+        const { email, password } = form;
+        if (!validateEmail()) return;
         if (!validatePassword()) return;
 
         fetchLogin({
             uri: "/api/user/login",
             method: "POST",
-            body: JSON.stringify({ email: username, password }),
+            body: JSON.stringify({ email, password }),
             headers: {
                 "Content-Type": "application/json",
             },
@@ -94,9 +94,9 @@ function LoginPage() {
         setForm((lastValue) => ({ ...lastValue, [field]: value }));
     };
 
-    const validateUsername = () => {
-        if (form?.username?.trim().length > 0) return true;
-        setErrors((lastValue) => ({ ...lastValue, username: "El usuario es requerido" }));
+    const validateEmail = () => {
+        if (form?.email?.trim().length > 0) return true;
+        setErrors((lastValue) => ({ ...lastValue, email: "El correo electrónico es requerido" }));
     }
 
     const validatePassword = () => {
@@ -190,12 +190,12 @@ function LoginPage() {
           <h1 className={styles.title}>Iniciar sesión</h1>
           <form className={styles.loginForm} onSubmit={handleLogin}>
             <InputText 
-                title="Usuario"
-                name="username"
+                title="Correo electrónico"
+                name="email"
                 onChange={handleFormChange}
-                value={form?.username}
-                error={errors?.username}
-                onBlur={validateUsername}
+                value={form?.email}
+                error={errors?.email}
+                onBlur={validateEmail}
                 onFocus={clearError}
             />
             <InputText 
@@ -214,6 +214,7 @@ function LoginPage() {
                         text="Iniciar sesión"
                         onClick={handleLogin}
                         loading={loadingLogin}
+                        black
                     />
                 )}
                 {loadingLogin && <Spinner />}
@@ -251,6 +252,7 @@ function LoginPage() {
                                 text="Verificar código"
                                 onClick={handleMFA}
                                 loading={loadingMFA}
+                                black
                             />
                         )}
                         {loadingMFA && <Spinner />}
