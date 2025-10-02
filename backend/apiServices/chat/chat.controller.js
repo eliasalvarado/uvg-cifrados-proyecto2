@@ -70,7 +70,7 @@ const sendMessageController = async (req, res) => {
       sig: signature
     });
 
-    console.log("VERIFIED: ",isValidSignature)
+    // console.log("VERIFIED: ",isValidSignature)
     
     // Emitir el mensaje al socket del usuario
     io.to(userId.toString()).emit('chat_message', {
@@ -85,7 +85,7 @@ const sendMessageController = async (req, res) => {
     
     res.send({ ok: true })
   }catch(ex){
-    console.log(ex)
+    // console.log(ex)
     errorSender({res, ex })
   }
 }
@@ -98,8 +98,8 @@ const getSingleChatsController = async (req, res) => {
     
     res.send({ ok: true, contacts, messages });
   } catch (ex) {
-    console.log("Error: ",ex);
-    errorSender({ res, ex });
+    // console.log("Error: ",ex);
+    errorSender({ res, ex, defaultError: 'Error al obtener chats individuales.' });
   }
 }
 
@@ -134,8 +134,8 @@ const createGroupController = async (req, res) => {
 
     res.send({ ok: true, groupId, name, creatorId: req.user.id, key: keyBase64 });
   } catch (ex) {
-    console.log(ex);
-    errorSender({ res, ex });
+    // console.log(ex);
+    errorSender({ res, ex, defaultError: 'Error al crear el grupo.' });
   }
 }
 
@@ -162,8 +162,8 @@ const joinGroupController = async (req, res) => {
 
     res.send({ ok: true, groupId, name: groupName, newMemberId: req.user.id, key });
   } catch (ex) {
-    console.log(ex);
-    errorSender({ res, ex });
+    // console.log(ex);
+    errorSender({ res, ex, defaultError: 'Error al unirse al grupo.' });
   }
 }
 
@@ -223,7 +223,7 @@ const sendGroupMessageController = async (req, res) => {
       sig: signature
     });
 
-    console.log("VERIFIED: ",isValidSignature)
+    // console.log("VERIFIED: ",isValidSignature)
 
     // Emitir al room del grupo
     io.to(`group_${groupIdInt}`).emit('chat_group_message', {
@@ -239,8 +239,8 @@ const sendGroupMessageController = async (req, res) => {
     
     res.send({ ok: true })
   }catch(ex){
-    console.log(ex)
-    errorSender({res, ex })
+    // console.log(ex)
+    errorSender({res, ex, defaultError: 'Error al enviar el mensaje grupal.' })
   }
 }
 
@@ -256,8 +256,8 @@ const getGroupChatsController = async (req, res) => {
     
     res.send({ ok: true, groups, messages });
   } catch (ex) {
-    console.log("Error: ",ex);
-    errorSender({ res, ex });
+    // console.log("Error: ",ex);
+    errorSender({ res, ex, defaultError: 'Error al obtener los chats de grupo.' });
   }
 }
 

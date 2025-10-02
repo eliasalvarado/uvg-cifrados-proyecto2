@@ -1,5 +1,6 @@
 import mysql from 'mysql2';
 import consts from '../utils/consts.js';
+import errorSender from '../utils/errorSender.js';
 
 const connection = mysql.createConnection({
   host: consts.db.host,
@@ -14,6 +15,8 @@ const executeQuery = (query, params) => {
   return new Promise((resolve, reject) => {
     connection.execute(query, params, (error, results, fields) => {
       if (error) {
+        // Manejo de errores con errorSender
+        errorSender({ res: null, ex: error });
         return reject(error);
       }
       resolve([results, fields]);

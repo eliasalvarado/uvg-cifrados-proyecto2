@@ -2,6 +2,7 @@ import { userInfo } from 'os';
 import { executeQuery } from '../../db/connection.js';
 import CustomError from '../../utils/customError.js';
 import {verifySignature} from '../../utils/cypher/ECDSA.js'
+import errorSender from '../../utils/errorSender.js';
 
 /**
  * Obtiene los mensajes de un usuario específico.
@@ -34,12 +35,13 @@ const getUserMessages = async (userId) => {
       return { ...row, isValid, signature_key: undefined };
     });
 
-    console.log("Messages", messages);
+    // console.log("Messages", messages);
 
     return messages;
 
   } catch (err) {
-    console.error("Error al obtener mensajes:", err);
+    // console.error("Error al obtener mensajes:", err);
+    errorSender({ res: null, ex: err, defaultError: 'Error al obtener mensajes.' });
     return [];
   }
 };
@@ -102,7 +104,8 @@ const insertGroup = async ({ name, creatorId, key }) => {
     if (error.code === 'ER_DUP_ENTRY') {
       throw new CustomError(`El grupo con nombre "${name}" ya existe.`, 409);
     }
-    throw error;
+    errorSender({ res: null, ex: error, defaultError: 'Error al crear el grupo.' });
+    return null;
   }
 };
 
@@ -123,7 +126,8 @@ const insertGroupMember = async ({ groupId, userId }) => {
     if (error.code === 'ER_DUP_ENTRY') {
       throw new CustomError('El usuario ya es miembro del grupo.', 409);
     }
-    throw error;
+    errorSender({ res: null, ex: error, defaultError: 'Error al añadir miembro al grupo.' });
+    return null;
   }
 };
 
@@ -245,6 +249,8 @@ const getUserGroupMessages = async (userId) => {
 
     return messages;
   } catch (err) {
+    // console.error("Error al obtener mensajes grupales:", err);
+    errorSender({ res: null, ex: err, defaultError: 'Error al obtener mensajes grupales.' });
     return [];
   }
 };

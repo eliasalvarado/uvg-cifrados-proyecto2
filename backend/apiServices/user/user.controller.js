@@ -7,6 +7,7 @@ import { createUser, createGoogleUser, getUserByEmail, getUserById, saveMFASecre
 import { generateRSAKeys } from '../../utils/cypher/RSA.js';
 import { generateECDSAKeys } from '../../utils/cypher/ECDSA.js'
 import CustomError from '../../utils/customError.js';
+import errorSender from '../../utils/errorSender.js';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;  
@@ -66,8 +67,8 @@ const registerUser = async (req, res) => {
             privateKeyECDSA
         });
     } catch (error) {
-        console.log("Error al crear el usuario:", error);
-        res.status(500).json({ message: 'Ocurrió un error al crear el usuario:', error });
+        // console.log("Error al crear el usuario:", error);
+        errorSender({ res, ex: error, defaultError: 'Ocurrió un error al crear el usuario.' });
     }
 }
 
@@ -115,7 +116,7 @@ const loginUser = async (req, res) => {
             publicKeyECDSA: user.ecdsa_public_key
         });
     } catch (error) {
-        res.status(500).json({ message: "Error al iniciar sesión", error: error.message });
+        errorSender({ res, ex: error, defaultError: 'Error al iniciar sesión.' });
     }
 }
 
@@ -248,7 +249,7 @@ const getUserByIdController = async (req, res) => {
         });
 
     }catch(ex){
-        console.log(ex);
+        // console.log(ex);
         errorSender({res, ex });
     }
 }
@@ -276,58 +277,63 @@ const setupMFA = async (req, res) => {
 
 const deleteMFA = async (req, res) => {
     const userId = req.user && req.user.id; // Obtener el ID del usuario desde el token JWT
-    console.log('User ID for MFA deletion:', userId);
+    // console.log('User ID for MFA deletion:', userId);
 
-    // Eliminar el secreto de la base de datos
-    const deleted = await deleteMFASecret(userId);
-    if (!deleted) {
-        res.statusMessage = "Error al eliminar la autenticación de dos factores";
-        return res.status(500).json({ message: 'Error al eliminar la autenticación de dos factores' });
+    try {
+        // Eliminar el secreto de la base de datos
+        const deleted = await deleteMFASecret(userId);
+        if (!deleted) {
+            throw new CustomError('Error al eliminar la autenticación de dos factores', 500);
+        }
+
+        res.status(200).json({ message: 'Autenticación de dos factores eliminada exitosamente' });
+    } catch (error) {
+        errorSender({ res, ex: error, defaultError: 'Error al eliminar la autenticación de dos factores.' });
     }
-
-    res.status(200).json({ message: 'Autenticación de dos factores eliminada exitosamente' });
 }
 
 const verifyMFA = async (req, res) => {
     const { userId } = req.params;
     const { token } = req.body;
 
-    console.log('Token received:', token);
-    console.log('User ID received:', userId);
+    // console.log('Token received:', token);
+    // console.log('User ID received:', userId);
 
-    // Obtener el secreto del usuario de la base de datos
-    const user = await getUserById(userId);
-    if (!user) {
-        return res.status(404).json({ message: 'Usuario no encontrado' });
-    }
+    try {
+        // Obtener el secreto del usuario de la base de datos
+        const user = await getUserById(userId);
+        if (!user) {
+            throw new CustomError('Usuario no encontrado', 404);
+        }
 
-    // Verificar el token
-    const verified = speakeasy.totp.verify({
-        secret: user.totp_secret,
-        encoding: 'base32',
-        token,
-    });
-
-    if (verified) {
-
-        // Generar el token JWT, con una expiración de 1 hora
-        const token = jwt.sign(
-            { id: user.id, email: user.email },
-            JWT_SECRET,
-            { expiresIn: '1h' }
-        );
-
-        return res.status(200).json({ 
-            message: 'Token verificado exitosamente',
+        // Verificar el token
+        const verified = speakeasy.totp.verify({
+            secret: user.totp_secret,
+            encoding: 'base32',
             token,
-            privateKeyRSA: user.rsa_private_key,
-            publicKeyRSA: user.rsa_public_key,
-            privateKeyECDSA: user.ecdsa_private_key,
-            publicKeyECDSA: user.ecdsa_public_key
         });
-    } else {
-        res.statusMessage = "Código de autenticación inválido";
-        return res.status(401).json({ message: 'Código de autenticación inválido' });
+
+        if (verified) {
+            // Generar el token JWT, con una expiración de 1 hora
+            const token = jwt.sign(
+                { id: user.id, email: user.email },
+                JWT_SECRET,
+                { expiresIn: '1h' }
+            );
+
+            return res.status(200).json({ 
+                message: 'Token verificado exitosamente',
+                token,
+                privateKeyRSA: user.rsa_private_key,
+                publicKeyRSA: user.rsa_public_key,
+                privateKeyECDSA: user.ecdsa_private_key,
+                publicKeyECDSA: user.ecdsa_public_key
+            });
+        } else {
+            throw new CustomError('Código de autenticación inválido', 401);
+        }
+    } catch (error) {
+        errorSender({ res, ex: error, defaultError: 'Error al verificar el código de autenticación.' });
     }
 }
 
@@ -358,7 +364,7 @@ const searchUserController = async (req, res) => {
         });
         
     }catch(ex){
-    console.log(ex)
+    // console.log(ex)
         errorSender({res, ex })
    }
 

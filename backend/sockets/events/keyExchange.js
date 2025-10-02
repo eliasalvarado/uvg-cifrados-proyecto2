@@ -4,22 +4,24 @@ import {
   measurePhotons,
   compareBasesAndGenerateKey,
 } from '../../utils/QKD/keyGenerator.js'
+import errorSender from '../../utils/errorSender.js';
 
 export default function registerKeyExchange(io, socket, chatData) {
   socket.on('start-key-exchange', ({ receiverId }) => {
-    console.log(`Usuario "${socket.user.email}" ha iniciado un intercambio de claves con el usuario ID "${receiverId}"`);
-
-    const receiverSocket = [...io.sockets.sockets.values()].find(
-      (s) => s.user.email === receiverId
-    );
-
-    if (!receiverSocket) {
-      console.error(`El usuario con ID "${receiverId}" no está conectado`);
-      socket.emit('key-exchange-error', { message: `El usuario "${receiverId}" no está conectado.` });
-      return;
-    }
     try {
-      console.log(`Iniciando intercambio de claves entre "${socket.user.email}" y "${receiverSocket.user.email}"`);
+      // console.log(`Usuario "${socket.user.email}" ha iniciado un intercambio de claves con el usuario ID "${receiverId}"`);
+
+      const receiverSocket = [...io.sockets.sockets.values()].find(
+        (s) => s.user.email === receiverId
+      );
+
+      if (!receiverSocket) {
+        // console.error(`El usuario con ID "${receiverId}" no está conectado`);
+        socket.emit('key-exchange-error', { message: `El usuario "${receiverId}" no está conectado.` });
+        return;
+      }
+
+      // console.log(`Iniciando intercambio de claves entre "${socket.user.email}" y "${receiverSocket.user.email}"`);
       const { bits: senderBits, bases: senderBases } = generateBitsBases();
       const photons = encodePhotons(senderBits, senderBases);
 
@@ -37,21 +39,22 @@ export default function registerKeyExchange(io, socket, chatData) {
         photons,
         length: photons.length,
       });
-      console.log(`Fotones enviados a "${receiverSocket.user.email}"`);
+      // console.log(`Fotones enviados a "${receiverSocket.user.email}"`);
     } catch (error) {
-      console.error(`Error durante el intercambio de claves: ${error.message}`);
+      // console.error(`Error durante el intercambio de claves: ${error.message}`);
+      errorSender({ res: null, ex: error, defaultError: 'Error durante el intercambio de claves.' });
       socket.emit('key-exchange-error', { message: `Error durante el intercambio de claves: ${error.message}` });
     }
   });
 
   socket.on('measure-photons', ({ receiverBases, senderId }) => {
     try {
-      console.log(`Usuario "${socket.user.email}" está midiendo fotones para el intercambio con "${senderId}"`);
+      // console.log(`Usuario "${socket.user.email}" está midiendo fotones para el intercambio con "${senderId}"`);
       const chatKey = `${senderId}-${socket.user.email}`;
       const senderData = chatData[chatKey];
 
       if (!senderData) {
-        console.error(`No se encontraron datos para el intercambio entre "${senderId}" y "${socket.user.email}"`);
+        // console.error(`No se encontraron datos para el intercambio entre "${senderId}" y "${socket.user.email}"`);
         return;
       }
 
@@ -66,9 +69,10 @@ export default function registerKeyExchange(io, socket, chatData) {
       );
 
       senderSocket.emit('send-bases-receiver', { receiverBases, receiverBits });
-      console.log(`Bases del receptor enviadas a "${senderId}"`);
+      // console.log(`Bases del receptor enviadas a "${senderId}"`);
     } catch (error) {
-      console.error(`Error durante la medición de fotones: ${error.message}`);
+      // console.error(`Error durante la medición de fotones: ${error.message}`);
+      errorSender({ res: null, ex: error, defaultError: 'Error durante la medición de fotones.' });
       socket.emit('key-exchange-error', { message: `Error durante la medición de fotones: ${error.message}` });
     }
   });
@@ -79,7 +83,7 @@ export default function registerKeyExchange(io, socket, chatData) {
       const senderData = chatData[chatKey];
 
       if (!senderData) {
-        console.error(`No se encontraron datos para el intercambio entre "${socket.user.email}" y "${receiverId}"`);
+        // console.error(`No se encontraron datos para el intercambio entre "${socket.user.email}" y "${receiverId}"`);
         return;
       }
 
@@ -94,9 +98,10 @@ export default function registerKeyExchange(io, socket, chatData) {
       receiverSocket.emit('key-generated', { keyGenerated: key });
 
       delete chatData[chatKey];
-      console.log('Clave generada y enviada a ambos usuarios:', key.join(''));
+      // console.log('Clave generada y enviada a ambos usuarios:', key.join(''));
     } catch (error) {
-      console.error(`Error durante la comparación de bases: ${error.message}`);
+      // console.error(`Error durante la comparación de bases: ${error.message}`);
+      errorSender({ res: null, ex: error, defaultError: 'Error durante la comparación de bases.' });
       socket.emit('key-exchange-error', { message: `Error durante la comparación de bases: ${error.message}` });
     }
   });
