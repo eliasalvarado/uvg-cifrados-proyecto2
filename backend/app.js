@@ -1,10 +1,10 @@
 import 'dotenv/config';
 import express from 'express';
-import cors from 'cors';
 import http from 'http';
 import { connection } from './db/connection.js';
 import { startSocketServer } from './sockets/ioInstance.js';
 import indexRoutes from './routes/index.js';
+import errorSender from './utils/errorSender.js';
 import { start } from 'repl';
 import helmet from 'helmet';
 
@@ -36,17 +36,8 @@ const allowedOrigins = [ // Frontend en desarrollo
   'http://127.0.0.1:5173', // Alternativa
 ];
 
-const corsOptions = {
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Origen no permitido por la política CORS'));
-    }
-  },
-};
+// Eliminación del middleware de CORS para aplicar la Política del Mismo Origen (SOP)
 
-app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('./public'));
@@ -68,8 +59,42 @@ app.use((req, res, next) => {
 Mitigación del error:
 Falta de cabecera Anti-Clickjacking
 */
+app.use(helmet.frameguard({ action: 'deny' }));
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        frameAncestors: ["'none'"],
+      },
+    },
+    frameguard: {
+      action: 'deny',
+    },
+  })
+);
+
+// Middleware para forzar las cabeceras de seguridad
 app.use((req, res, next) => {
   res.setHeader('X-Frame-Options', 'DENY');
+  next();
+});
+
+app.use((req, res, next) => {
+    res.setHeader("Content-Security-Policy", "frame-ancestors 'self'");
+    next();
+});
+
+/* 
+-------------- IMPLEMENTACIÓN --------------
+Middleware para forzar el encabezado Access-Control-Allow-Origin
+*/
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  } else {
+    res.setHeader('Access-Control-Allow-Origin', 'DENY');
+  }
   next();
 });
 

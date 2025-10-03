@@ -21,5 +21,9 @@ export default defineConfig({
     proxy: {
       '/api': 'http://localhost:3000/',
     },
+    headers: {
+      'X-Frame-Options': 'DENY',
+      'Content-Security-Policy': "frame-ancestors 'none'",
+    },
   },
 });
