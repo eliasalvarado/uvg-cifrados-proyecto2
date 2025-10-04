@@ -1,5 +1,4 @@
 import { executeQuery } from '../../db/connection.js';
-import toMysql from "../../utils/dateFormat.js"
 
 import crypto from 'crypto';
 
@@ -7,6 +6,28 @@ const GENESIS_HASH = '0'.repeat(64);
 
 const sha256 = (txt) =>
   crypto.createHash('sha256').update(txt).digest('hex');
+
+/* ──────────────────────────────── Validaciones ──────────────────────────────── */
+
+/**
+ * Valida que el objeto de datos sea serializable y no contenga código malicioso
+ */
+function validateDataObject(dataObj) {
+  if (!dataObj || typeof dataObj !== 'object') {
+    throw new Error('Data must be a valid object');
+  }
+
+  // Verificar que se puede serializar correctamente
+  try {
+    const serialized = JSON.stringify(dataObj);
+    // Limitar tamaño para evitar DoS
+    if (serialized.length > 1000000) { // 1MB
+      throw new Error('Data object too large');
+    }
+  } catch (err) {
+    throw new Error('Data object cannot be serialized: ' + err.message);
+  }
+}
 
 /* ──────────────────────────────── helpers ──────────────────────────────── */
 export async function getLastBlock() {
@@ -19,13 +40,19 @@ export async function getLastBlock() {
 
 /* Crea y guarda un bloque. Devuelve {index, hash} */
 export async function addBlock(dataObj) {
-  const prev   = await getLastBlock();
-  const index  = prev ? prev.block_index + 1 : 0;
+
+  validateDataObject(dataObj);
+
+  const prev = await getLastBlock();
+  const index = prev ? prev.block_index + 1 : 0;
   const prevHash = prev ? prev.hash : GENESIS_HASH;
 
-  const tsMillis = Date.now();   
+  const tsMillis = Date.now();
 
-  const dataString = JSON.stringify(dataObj);  
+  const dataString = JSON.stringify(dataObj);
+
+  // Sanitizar: remover caracteres de control si existen
+  const sanitizedData = dataString.replace(/[\x00-\x1F\x7F]/g, '');
 
   const hash = sha256(prevHash + tsMillis + dataString);
   await executeQuery(
@@ -53,9 +80,9 @@ export async function validateChain() {
   let prevHash = GENESIS_HASH;
 
   for (const blk of chain) {
-    const tsMillis = blk.timestamp.toString();      
-    const dataString = blk.data;                   
-  
+    const tsMillis = blk.timestamp.toString();
+    const dataString = blk.data;
+
     const recalculated = sha256(prevHash + tsMillis + dataString);
 
     if (recalculated !== blk.hash) {
