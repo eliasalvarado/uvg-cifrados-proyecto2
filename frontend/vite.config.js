@@ -22,8 +22,9 @@ export default defineConfig({
       '/api': 'http://localhost:3000/',
     },
     headers: {
+      'X-Content-Type-Options': 'nosniff',
       'X-Frame-Options': 'DENY',
-      'Content-Security-Policy': "frame-ancestors 'none'",
+      'Content-Security-Policy': "default-src 'self'; script-src 'self'; style-src 'self'; frame-ancestors 'none';",
     },
   },
 });

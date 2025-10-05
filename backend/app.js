@@ -7,6 +7,7 @@ import indexRoutes from './routes/index.js';
 import errorSender from './utils/errorSender.js';
 import { start } from 'repl';
 import helmet from 'helmet';
+import cors from 'cors';
 
 connection.connect((err) => {
   if (err) {
@@ -75,13 +76,12 @@ app.use(
 
 // Middleware para forzar las cabeceras de seguridad
 app.use((req, res, next) => {
+  res.setHeader(
+    'Content-Security-Policy',
+    "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; frame-ancestors 'none';"
+  );
   res.setHeader('X-Frame-Options', 'DENY');
   next();
-});
-
-app.use((req, res, next) => {
-    res.setHeader("Content-Security-Policy", "frame-ancestors 'self'");
-    next();
 });
 
 /* 
@@ -97,6 +97,29 @@ app.use((req, res, next) => {
   }
   next();
 });
+
+/* 
+-------------- IMPLEMENTACIÓN --------------
+Middleware de CORS con configuración restrictiva
+*/
+const corsOptions = {
+  origin: (origin, callback) => {
+    const allowedOrigins = [
+      'http://localhost:5173',
+      'http://127.0.0.1:5173',
+    ];
+
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('CORS policy: This origin is not allowed'));
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
+
+app.use(cors(corsOptions));
 
 // Routes
 app.use('/', indexRoutes);
