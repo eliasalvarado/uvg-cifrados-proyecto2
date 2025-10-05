@@ -1,5 +1,6 @@
 import { executeQuery } from '../../db/connection.js';
-
+import CustomError from '../../utils/customError.js';
+import { detectXSSAttempt, detectSQLInjectionAttempt } from '../../utils/stringFormatValidators.js';
 import crypto from 'crypto';
 
 const GENESIS_HASH = '0'.repeat(64);
@@ -14,18 +15,30 @@ const sha256 = (txt) =>
  */
 function validateDataObject(dataObj) {
   if (!dataObj || typeof dataObj !== 'object') {
-    throw new Error('Data must be a valid object');
+    throw new CustomError('El objeto ingresado no es válido', 400);
   }
 
   // Verificar que se puede serializar correctamente
   try {
     const serialized = JSON.stringify(dataObj);
+
+    if (detectXSSAttempt(serialized)) {
+      throw new CustomError('El objeto contiene un potencial intento de XSS', 400);
+    }
+
+    if (detectSQLInjectionAttempt(serialized)) {
+      throw new CustomError('El objeto contiene un potencial intento de inyección SQL', 400);
+    }
+
     // Limitar tamaño para evitar DoS
     if (serialized.length > 1000000) { // 1MB
-      throw new Error('Data object too large');
+      throw new CustomError('El objeto es demasiado grande', 400);
     }
   } catch (err) {
-    throw new Error('Data object cannot be serialized: ' + err.message);
+    if (err instanceof CustomError) {
+      throw err;
+    }
+    throw new CustomError('El objeto no es serializable', 400);
   }
 }
 

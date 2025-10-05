@@ -2,6 +2,7 @@ import { executeQuery } from '../../db/connection.js';
 import CustomError from '../../utils/customError.js';
 import { verifySignature } from '../../utils/cypher/ECDSA.js'
 import errorSender from '../../utils/errorSender.js';
+import { detectXSSAttempt, detectSQLInjectionAttempt } from '../../utils/stringFormatValidators.js';
 
 /* ──────────────────────────────── Validaciones ──────────────────────────────── */
 
@@ -24,6 +25,14 @@ const validateMessage = (message) => {
     throw new CustomError('El mensaje debe ser texto', 400);
   }
 
+  if (detectXSSAttempt(message)) {
+    throw new CustomError('El mensaje contiene un potencial intento de XSS', 400);
+  }
+
+  if (detectSQLInjectionAttempt(message)) {
+    throw new CustomError('El mensaje contiene un potencial intento de inyección SQL', 400);
+  }
+
   const trimmed = message.trim();
 
   if (trimmed.length === 0) {
@@ -43,6 +52,14 @@ const validateMessage = (message) => {
 const validateGroupName = (name) => {
   if (typeof name !== 'string') {
     throw new CustomError('El nombre del grupo debe ser texto', 400);
+  }
+
+  if (detectXSSAttempt(name)) {
+    throw new CustomError('El nombre contiene un potencial intento de XSS', 400);
+  }
+
+  if (detectSQLInjectionAttempt(name)) {
+    throw new CustomError('El nombre contiene un potencial intento de inyección SQL', 400);
   }
 
   const trimmed = name.trim();
@@ -71,6 +88,14 @@ const validateKey = (key, keyType = 'Clave') => {
     throw new CustomError(`${keyType} inválida`, 400);
   }
 
+  if (detectXSSAttempt(key)) {
+    throw new CustomError('La llave contiene un potencial intento de XSS', 400);
+  }
+
+  if (detectSQLInjectionAttempt(key)) {
+    throw new CustomError('La llave contiene un potencial intento de inyección SQL', 400);
+  }
+
   const trimmed = key.trim();
 
   if (trimmed.length === 0) {
@@ -94,6 +119,14 @@ const validateSignature = (signature) => {
 
   if (typeof signature !== 'string') {
     throw new CustomError('Firma inválida', 400);
+  }
+
+  if (detectXSSAttempt(signature)) {
+    throw new CustomError('La firma contiene un potencial intento de XSS', 400);
+  }
+
+  if (detectSQLInjectionAttempt(signature)) {
+    throw new CustomError('La firma contiene un potencial intento de inyección SQL', 400);
   }
 
   const trimmed = signature.trim();
@@ -148,6 +181,13 @@ const getUserMessages = async (userId) => {
       // Verificar firmas
       let isValid = false;
       try {
+        const message = row.message || '';
+        if (detectSQLInjectionAttempt(message)) {
+          throw new CustomError('El mensaje contiene un potencial intento de inyección SQL', 400);
+        }
+        if (detectXSSAttempt(message)) {
+          throw new CustomError('El mensaje contiene un potencial intento de XSS', 400);
+        }
         const cleanSignature = sanitizeSignature(row.signature);
         isValid = verifySignature(row.message, cleanSignature, row.signature_key);
       } catch (err) {
@@ -228,7 +268,7 @@ const insertMessage = async ({ message, originUserId, targetUserId, originKey, t
     VALUES (?, ?, ?, ?, ?, NOW(), ?);
     `;
 
-    const[result] = await executeQuery(query, [
+    const [result] = await executeQuery(query, [
       validMessage,
       validOriginId,
       validTargetId,
@@ -522,10 +562,19 @@ const getUserGroupMessages = async (userId) => {
     const messages = rows.map(row => {
       let isValid = false;
       try {
+        const message = row.message || '';
+        if (detectSQLInjectionAttempt(message)) {
+          throw new CustomError('El mensaje contiene un potencial intento de inyección SQL', 400);
+        }
+        if (detectXSSAttempt(message)) {
+          throw new CustomError('El mensaje contiene un potencial intento de XSS', 400);
+        }
         const cleanSignature = sanitizeSignature(row.signature);
         isValid = verifySignature(row.message, cleanSignature, row.signature_key);
       } catch (err) {
-        console.error('Error verificando firma grupal:', err.message);
+        if (err instanceof CustomError) {
+          errorSender({ res: null, ex: err, defaultError: 'Error al verificar firma de mensaje grupal.' });
+        }
       }
 
       return {

@@ -1,14 +1,22 @@
 import { executeQuery } from '../../db/connection.js';
 import CustomError from '../../utils/customError.js';
+import { detectXSSAttempt, detectSQLInjectionAttempt } from '../../utils/stringFormatValidators.js';
 
 /* ──────────────────────────────── Validaciones ──────────────────────────────── */
-
 /**
  * Valida un email
  */
 const validateEmail = (email) => {
     if (typeof email !== 'string') {
         throw new CustomError('Email debe ser texto', 400);
+    }
+
+    if (detectXSSAttempt(email)) {
+        throw new CustomError('El texto contiene un potencial intento de XSS', 400);
+    }
+
+    if (detectSQLInjectionAttempt(email)) {
+        throw new CustomError('El texto contiene un potencial intento de inyección SQL', 400);
     }
 
     const trimmed = email.trim().toLowerCase();
@@ -36,6 +44,14 @@ const validateEmail = (email) => {
 const validateUsername = (username) => {
     if (typeof username !== 'string') {
         throw new CustomError('Username debe ser texto', 400);
+    }
+
+    if (detectXSSAttempt(username)) {
+        throw new CustomError('El texto contiene un potencial intento de XSS', 400);
+    }
+
+    if (detectSQLInjectionAttempt(username)) {
+        throw new CustomError('El texto contiene un potencial intento de inyección SQL', 400);
     }
 
     const trimmed = username.trim();
@@ -75,6 +91,14 @@ const validatePasswordHash = (hash) => {
         throw new CustomError('Hash de password inválido', 400);
     }
 
+    if (detectXSSAttempt(hash)) {
+        throw new CustomError('El texto contiene un potencial intento de XSS', 400);
+    }
+
+    if (detectSQLInjectionAttempt(hash)) {
+        throw new CustomError('El texto contiene un potencial intento de inyección SQL', 400);
+    }
+
     const trimmed = hash.trim();
 
     if (trimmed.length < 20) {
@@ -100,6 +124,15 @@ const validateKey = (key, keyType = 'Clave pública', isPublic = false,) => {
     if (typeof key !== 'string') {
         throw new CustomError(`${keyType} inválida`, 400);
     }
+
+    if (detectXSSAttempt(key)) {
+        throw new CustomError('El texto contiene un potencial intento de XSS', 400);
+    }
+
+    if (detectSQLInjectionAttempt(key)) {
+        throw new CustomError('El texto contiene un potencial intento de inyección SQL', 400);
+    }
+
     const trimmed = key.trim();
 
 
@@ -120,6 +153,14 @@ const validateKey = (key, keyType = 'Clave pública', isPublic = false,) => {
 const validateGoogleId = (googleId) => {
     if (typeof googleId !== 'string') {
         throw new CustomError('Google ID inválido', 400);
+    }
+
+    if (detectXSSAttempt(googleId)) {
+        throw new CustomError('El texto contiene un potencial intento de XSS', 400);
+    }
+
+    if (detectSQLInjectionAttempt(googleId)) {
+        throw new CustomError('El texto contiene un potencial intento de inyección SQL', 400);
     }
 
     const trimmed = googleId.trim();
@@ -143,6 +184,14 @@ const validateMFASecret = (secret) => {
         throw new CustomError('Secreto MFA inválido', 400);
     }
 
+    if (detectXSSAttempt(secret)) {
+        throw new CustomError('El texto contiene un potencial intento de XSS', 400);
+    }
+
+    if (detectSQLInjectionAttempt(secret)) {
+        throw new CustomError('El texto contiene un potencial intento de inyección SQL', 400);
+    }
+
     const trimmed = secret.trim();
 
     if (trimmed.length < 16) {
@@ -162,6 +211,14 @@ const validateMFASecret = (secret) => {
 const validateSearchTerm = (term) => {
     if (typeof term !== 'string') {
         throw new CustomError('Término de búsqueda inválido', 400);
+    }
+
+    if (detectXSSAttempt(term)) {
+        throw new CustomError('El texto contiene un potencial intento de XSS', 400);
+    }
+
+    if (detectSQLInjectionAttempt(term)) {
+        throw new CustomError('El texto contiene un potencial intento de inyección SQL', 400);
     }
 
     const trimmed = term.trim();
@@ -189,7 +246,9 @@ const createUser = async ({ email, passwordHash, publicKeyRSA, publicKeyECDSA, u
         const validPrivateKeyRSA = validateKey(privateKeyRSA, 'Clave privada RSA');
         const validPrivateKeyECDSA = validateKey(privateKeyECDSA, 'Clave privada ECDSA');
 
-        const query = 'INSERT INTO users (email, password_hash, rsa_public_key, ecdsa_public_key, username, rsa_private_key, ecdsa_private_key) VALUES (?, ?, ?, ?, ?, ?, ?)';
+        const query = 'INSERT INTO users ('
+            + 'email, password_hash, rsa_public_key, ecdsa_public_key, username, rsa_private_key, ecdsa_private_key'
+            + ') VALUES (?, ?, ?, ?, ?, ?, ?)';
         const [result] = await executeQuery(query, [
             validEmail,
             validPasswordHash,
