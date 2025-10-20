@@ -304,7 +304,11 @@ Si deseas contribuir al proyecto, por favor sigue los siguientes pasos:
 
 <p align="right">(<a href="#readme-top">Ir al inicio</a>)</p>
 
-
+## 👥 Análisis SonarQube + Dependency-Check
+1. owasp-dependency-check --format HTML --out ./dependency-check-reports
+2.	sonar-scanner
+3. http://localhost:9000/dashboard?id=uvg_cifrados_proyecto2
+   - /More/Dependency-Check (Se abre en una nueva pestaña)
 
 <!-- IMAGES -->
 [NodeJS]: https://img.shields.io/badge/node.js-339933?style=flat&logo=Node.js&logoColor=white
