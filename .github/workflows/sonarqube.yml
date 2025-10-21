@@ -100,7 +100,12 @@ jobs:
           )
           Write-Host "Running sonar-scanner at: $scanner"
           Write-Host "Args: -Dsonar.host.url=*** -Dsonar.login=*** -Dsonar.projectKey=$projectKey -Dsonar.sources=."
-          & $scanner @args
+          # Instead of invoking the .bat (which may pick a different JVM), invoke the scanner main class directly with the JAVA_HOME java
+          if (-not $env:JAVA_HOME) { Write-Host 'JAVA_HOME not set, cannot run java explicitly'; exit 1 }
+          $javaExe = Join-Path $env:JAVA_HOME 'bin\java'
+          $libCp = "$env:SONAR_SCANNER_HOME\lib\*"
+          Write-Host "Invoking scanner via: $javaExe -cp $libCp org.sonarsource.scanner.cli.Main"
+          & $javaExe -cp $libCp org.sonarsource.scanner.cli.Main @args
 
       - name: Done
         run: echo "SonarQube analysis completed"
