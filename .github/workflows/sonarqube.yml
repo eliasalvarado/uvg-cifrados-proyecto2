@@ -63,8 +63,11 @@ jobs:
         shell: powershell
         run: |
           $scannerHome = "${{ runner.temp }}\sonar-scanner\sonar-scanner-4.8.0.2856-windows"
-          echo "##[set-env name=SONAR_SCANNER_HOME]$scannerHome"
-          echo "##[add-path]$scannerHome\bin"
+          # Set environment variable SONAR_SCANNER_HOME using the new GITHUB_ENV file
+          Write-Output "SONAR_SCANNER_HOME=$scannerHome" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          # Add scanner bin to PATH using the new GITHUB_PATH file
+          $binPath = Join-Path $scannerHome 'bin'
+          Write-Output $binPath | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
       - name: Run SonarScanner
         env:
@@ -76,7 +79,9 @@ jobs:
           # cd backend
           $projectKey = '${{ secrets.SONAR_PROJECT_KEY }}'
           if (-not $projectKey) { Write-Host 'SONAR_PROJECT_KEY secret not set. Set repository secret SONAR_PROJECT_KEY.'; exit 1 }
-          $scanner = Join-Path $env:RUNNER_TEMP 'sonar-scanner\sonar-scanner-4.8.0.2856-windows\bin\sonar-scanner.bat'
+          # Use SONAR_SCANNER_HOME set previously
+          if (-not $env:SONAR_SCANNER_HOME) { Write-Host 'SONAR_SCANNER_HOME is not set'; exit 1 }
+          $scanner = Join-Path $env:SONAR_SCANNER_HOME 'bin\sonar-scanner.bat'
           & $scanner -Dsonar.host.url=$env:SONAR_HOST_URL -Dsonar.login=$env:SONAR_TOKEN -Dsonar.projectKey=$projectKey -Dsonar.sources=.
 
       - name: Done
