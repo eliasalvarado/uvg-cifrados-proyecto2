@@ -82,7 +82,16 @@ jobs:
           # Use SONAR_SCANNER_HOME set previously
           if (-not $env:SONAR_SCANNER_HOME) { Write-Host 'SONAR_SCANNER_HOME is not set'; exit 1 }
           $scanner = Join-Path $env:SONAR_SCANNER_HOME 'bin\sonar-scanner.bat'
-          & $scanner -Dsonar.host.url=$env:SONAR_HOST_URL -Dsonar.login=$env:SONAR_TOKEN -Dsonar.projectKey=$projectKey -Dsonar.sources=.
+          # Build argument list as strings to avoid PowerShell parsing issues with leading dashes
+          $args = @(
+            "-Dsonar.host.url=$env:SONAR_HOST_URL",
+            "-Dsonar.login=$env:SONAR_TOKEN",
+            "-Dsonar.projectKey=$projectKey",
+            "-Dsonar.sources=."
+          )
+          Write-Host "Running sonar-scanner at: $scanner"
+          Write-Host "Args: -Dsonar.host.url=*** -Dsonar.login=*** -Dsonar.projectKey=$projectKey -Dsonar.sources=."
+          & $scanner @args
 
       - name: Done
         run: echo "SonarQube analysis completed"
