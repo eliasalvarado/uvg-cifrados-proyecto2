@@ -15,6 +15,9 @@ function EphemeralMessages() {
   const [key, setKey] = useState(null);
   const [messages, setMessages] = useState([]);
 
+  // Generador simple de ids únicas para usar como key en listas
+  const genId = () => `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+
   const {
     callFetch: getUserInfo,
     result: resultUserInfo,
@@ -60,13 +63,13 @@ function EphemeralMessages() {
       addLog(`Clave generada: ${keyGenerated.join('')}`);
     });
 
-    socket.on('receive-photons', ({ senderId, photons, length }) => {
+    socket.on('receive-photons', ({ senderId, length }) => {
       const basesBob = Array.from({ length }, () => (Math.random() < 0.5 ? '↕' : '↗'));
       setReceiver(senderId);
       socket.emit('measure-photons', { receiverBases: basesBob, senderId });
     });
 
-    socket.on('send-bases-receiver', ({ receiverBases, receiverBits }) => {
+    socket.on('send-bases-receiver', ({ receiverBases }) => {
       socket.emit('compare-bases', { receiverBases, receiverId: receiver });
     });
 
@@ -79,9 +82,8 @@ function EphemeralMessages() {
       const decryptedMessage = decryptMessage(encryptedMessage, key);
       setMessages((prevMessages) => [
         ...prevMessages,
-        { sender, message: decryptedMessage },
+        { id: genId(), sender, message: decryptedMessage },
       ]);
-      //console.log(`Mensaje descifrado: ${decryptedMessage}`);
     });
 
     return () => {
@@ -94,7 +96,8 @@ function EphemeralMessages() {
   }, [socket, key, receiver]);
 
   const addLog = (message) => {
-    setLog((prevLog) => [...prevLog, message]);
+    const entry = { id: genId(), text: message };
+    setLog((prevLog) => [...prevLog, entry]);
   };
 
   const startKeyExchange = () => {
@@ -118,7 +121,7 @@ function EphemeralMessages() {
     socket.emit('send-ephemeral-message', { receiver, encryptedMessage });
     setMessages((prevMessages) => [
       ...prevMessages,
-      { sender: username, message },
+      { id: genId(), sender: username, message },
     ]);
     console.log(`Mensaje cifrado sendMessage: ${encryptedMessage}`);
   };
@@ -129,7 +132,8 @@ function EphemeralMessages() {
       <div className={styles.inputContainer}>
         {key && !isEditingReceiver ? (
           <>
-            <label className={styles.inputLabel}>Chat con:</label>
+            {/* Visual label for the receiver display — not a form label to avoid misleading association */}
+            <span className={styles.inputLabel}>Chat con:</span>
             <div className={styles.receiverDisplay}>{receiver}</div>
             <button
               onClick={() => setIsEditingReceiver(true)}
@@ -140,8 +144,12 @@ function EphemeralMessages() {
           </>
         ) : (
           <>
-            <label className={styles.inputLabel}>Usuario destinatario:</label>
+            {/* Properly associate label with the input via htmlFor/id */}
+            <label htmlFor="ephemeral-receiver-input" className={styles.inputLabel}>
+              Usuario destinatario:
+            </label>
             <input
+              id="ephemeral-receiver-input"
               type="text"
               value={receiver}
               onChange={(e) => setReceiver(e.target.value)}
@@ -157,14 +165,14 @@ function EphemeralMessages() {
       </div>
       <div className={styles.chatContainer}>
         <div className={styles.messagesList}>
-          {log.map((message, index) => (
-            <div key={index} className={styles.messageItem}>
-              {message}
+          {log.map((entry) => (
+            <div key={entry.id} className={styles.messageItem}>
+              {entry.text}
             </div>
           ))}
-          {messages.map((msg, index) => (
+          {messages.map((msg) => (
             <div
-              key={index}
+              key={msg.id}
               className={`${styles.messageItem} ${
                 msg.sender === username ? styles.sentMessage : styles.receivedMessage
               }`}
@@ -178,6 +186,7 @@ function EphemeralMessages() {
             type="text"
             placeholder="Escribe tu mensaje..."
             className={styles.inputMessageField}
+            aria-label="Mensaje efímero"
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
                 sendMessage(e.target.value);
