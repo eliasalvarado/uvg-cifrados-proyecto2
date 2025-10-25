@@ -6,6 +6,9 @@
   font-size: 16px;
   cursor: pointer;
   height: fit-content;
+  /* Azul del tema de asigbo (default) */
+  background-color: #16337F;
+  color: white;
 }
 
 .button:disabled, .button:disabled:hover {
@@ -20,13 +23,6 @@
 
 .button:not(:disabled):hover {
   opacity: 0.7;
-}
-
-/* Azul del tema de asigbo (default) */
-
-.button {
-  background-color: #16337F;
-  color: white;
 }
 
 .button:active {
