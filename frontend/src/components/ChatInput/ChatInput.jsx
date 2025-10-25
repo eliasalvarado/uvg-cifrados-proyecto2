@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import styles from "./ChatInput.module.css";
-import { IoSend as SendIcon } from "react-icons/io5";
+import { IoSend as SendIcon , IoClose as CloseIcon } from "react-icons/io5";
 import { MdAttachFile as AttachFileIcon } from "react-icons/md";
-import { IoClose as CloseIcon } from "react-icons/io5";
+
 
 /**
  * Componente de entrada de chat que permite al usuario escribir mensajes y adjuntar archivos.
@@ -42,11 +42,6 @@ function ChatInput({ onSend=null, onFileSend=null, onKeyUp=null}) {
 		if (onKeyUp) onKeyUp(e);
 	};
 
-	const handleFileChange = (e) => {
-		setFile(e.target.files[0]);
-		setText("");
-	};
-
   const clearFile = () => {
     setFile(null);
     setText("");
@@ -59,47 +54,15 @@ function ChatInput({ onSend=null, onFileSend=null, onKeyUp=null}) {
 
 	return (
 		<div className={styles.inputContainer}>
-			<label
-				className={styles.button}
-				onClick={handleSend}
-        htmlFor="fileInput"
-			>
-				<AttachFileIcon />
-				<input
-          id="fileInput"
-					type="file"
-					className={styles.inputFile}
-					onChange={handleFileChange}
-          ref={fileInputRef}
-				/>
-			</label>
-
-			{!file && (
-				<>
-					<input
-						type="text"
-						className={styles.input}
-						placeholder="Escribe un mensaje"
-						value={text}
-						onChange={(e) => setText(e.target.value)}
-						onKeyUp={handleKeyUp}
-						ref={textInputRef}
-					/>
-				</>
-			)}
-
-			{file && (
-				<>
-					<button
-						className={`${styles.button} ${styles.cancelFileButton}`}
-						onClick={clearFile}
-					>
-						<CloseIcon />
-					</button>
-					<span className={styles.fileName}>{file.name}</span>
-				</>
-			)}
-
+			<input
+				type="text"
+				className={styles.input}
+				placeholder="Escribe un mensaje"
+				value={text}
+				onChange={(e) => setText(e.target.value)}
+				onKeyUp={handleKeyUp}
+				ref={textInputRef}
+			/>
 			<button
 				className={styles.button}
 				onClick={handleSend}
