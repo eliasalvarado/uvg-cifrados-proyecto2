@@ -1,6 +1,6 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import styles from './GoogleLoginButton.module.css';
-import { FaGoogle as GoogleIcon} from "react-icons/fa";
 import { GoogleLogin } from '@react-oauth/google';
 import Spinner from '../Spinner';
 
@@ -26,3 +26,10 @@ const GoogleLoginButton = ({ handleSuccess, handleError, loading, error }) => {
 };
 
 export default GoogleLoginButton;
+
+GoogleLoginButton.propTypes = {
+  handleSuccess: PropTypes.func.isRequired,
+  handleError: PropTypes.func,
+  loading: PropTypes.bool,
+  error: PropTypes.object,
+};
