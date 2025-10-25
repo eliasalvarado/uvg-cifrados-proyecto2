@@ -49,7 +49,10 @@ Button.propTypes = {
   emptyRed: PropTypes.bool,
   green: PropTypes.bool,
   emptyBlue: PropTypes.bool,
+  black: PropTypes.bool,
+  gray: PropTypes.bool,
   children: PropTypes.node,
+  buttonRef: PropTypes.oneOfType([PropTypes.func, PropTypes.object]),
   title: PropTypes.string,
 };
 
@@ -61,9 +64,12 @@ Button.defaultProps = {
   emptyRed: false,
   green: false,
   emptyBlue: false,
+  black: false,
+  gray: false,
   type: 'button',
   disabled: false,
   children: null,
+  buttonRef: null,
   title: null,
 };
 export default Button;
