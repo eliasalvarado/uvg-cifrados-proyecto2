@@ -5,6 +5,9 @@
   grid-template-rows: min-content min-content;
   align-items: center;
   cursor: pointer;
+  width: 100%;
+  text-align: start;
+  background-color: transparent;
 }
 
 .chatItem:hover{

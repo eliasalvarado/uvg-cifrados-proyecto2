@@ -51,12 +51,11 @@ function ChatItem({
   }
 
 	return (
-		<li
+		<button
 			className={`${styles.chatItem} ${selected ? styles.selected : ""}`}
 			onClick={handleClick}
 			tabIndex={0}
 			onKeyUp={handleClick}
-			role="button"
 		>
 			<UserPicture
 				name={user}
@@ -70,7 +69,7 @@ function ChatItem({
 			<span className={styles.date}>{formatDate(date)}</span>
 			<p className={styles.lastMessage}>{message}</p>
 			{notViewed > 0 && <span className={styles.notViewed}>{notViewed}</span>}
-		</li>
+		</button>
 	);
 }
 
