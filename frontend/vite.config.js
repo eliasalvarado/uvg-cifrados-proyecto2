@@ -24,7 +24,7 @@ export default defineConfig({
     headers: {
       'X-Content-Type-Options': 'nosniff',
       'X-Frame-Options': 'DENY',
-      'Content-Security-Policy': "default-src 'self'; script-src 'self'; style-src 'self'; frame-ancestors 'none';",
+      'Content-Security-Policy': "default-src 'self' 'unsafe-inline' data:; script-src 'self' 'unsafe-inline' 'unsafe-eval' ws: http: https:; style-src 'self' 'unsafe-inline' data:; img-src 'self' data:; connect-src 'self' ws: http: https:; frame-ancestors 'none';",
     },
   },
 });

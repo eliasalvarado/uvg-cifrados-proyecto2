@@ -78,7 +78,7 @@ app.use(
 app.use((req, res, next) => {
   res.setHeader(
     'Content-Security-Policy',
-    "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; frame-ancestors 'none';"
+    "default-src 'self' 'unsafe-inline' data:; script-src 'self' 'unsafe-inline' 'unsafe-eval' ws: http: https:; style-src 'self' 'unsafe-inline' data:; img-src 'self' data:; connect-src 'self' ws: http: https:; frame-ancestors 'none';"
   );
   res.setHeader('X-Frame-Options', 'DENY');
   next();
