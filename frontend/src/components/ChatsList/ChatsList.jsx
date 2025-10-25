@@ -59,8 +59,8 @@ function ChatsList({ onSelectedUserChange = null }) {
         {Object.keys(messages)
           .sort((userId1, userId2) => {
             // Ordenar por fecha del último mensaje (chats nuevos van al inicio)
-            const lastMessage1 = messages[userId1].slice(-1)[0];
-            const lastMessage2 = messages[userId2].slice(-1)[0];
+            const lastMessage1 = messages[userId1].at(-1);
+            const lastMessage2 = messages[userId2].at(-1);
             if (lastMessage1 === undefined && lastMessage2 === undefined) return userId1 < userId2 ? -1 : 1; // Si no hay mensajes, ordenar por nombre
             if (lastMessage1 === undefined) return -1; // Mantener los chats sin mensajes al inicio
             if (lastMessage2 === undefined) return -1;
@@ -68,7 +68,7 @@ function ChatsList({ onSelectedUserChange = null }) {
           })
           .map((userId) => {
 
-            const lastMessage = messages[userId].slice(-1)[0];
+            const lastMessage = messages[userId].at(-1);
 
             return (
               <ChatItem
