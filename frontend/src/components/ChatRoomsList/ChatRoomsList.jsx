@@ -21,7 +21,7 @@ function ChatRoomsList({ onSelectedRoomChange = null }) {
 
 	const { createGroup, result: successCreateGroup, error: errorCreateGroup } = useCreateGroup();
 	const { joinGroup, result: successJoinGroup, error: errorJoinGroup } = useJoinGroup();
-	const { createEmptyGroup, groups, groupMessages, users } = useChatState(); 
+	const { createEmptyGroup, groups, groupMessages } = useChatState(); 
 	const joinGroupSocket = useJoinGroupSocket();
 
 	const handleCreateRoom = () => {
@@ -105,8 +105,8 @@ function ChatRoomsList({ onSelectedRoomChange = null }) {
 			<ul className={`${styles.listContainer} ${scrollbarGray}`}>
 				{Object.entries(groups)
 				.sort(([groupIdA], [groupIdB]) => {
-					const lastMessageA = groupMessages[groupIdA]?.[groupMessages[groupIdA].length - 1];
-					const lastMessageB = groupMessages[groupIdB]?.[groupMessages[groupIdB].length - 1];
+					const lastMessageA = groupMessages[groupIdA]?.at(-1);
+					const lastMessageB = groupMessages[groupIdB]?.at(-1);
 
 					if (!lastMessageA && !lastMessageB) return groupIdB - groupIdA; // Ambos grupos sin mensajes, ordenar por ID descendente
 					if (!lastMessageA) return 1; // A tiene mensajes, B no, A va primero
@@ -116,7 +116,7 @@ function ChatRoomsList({ onSelectedRoomChange = null }) {
 				})
 				.map(([groupId, group]) => {
 					
-					const lastMessage = groupMessages[groupId]?.[groupMessages[groupId].length - 1];
+					const lastMessage = groupMessages[groupId]?.at(-1);
 					const lastMessageUser = lastMessage?.sent ? "yo" : lastMessage?.username ?? "";
 					const lastMessageText = lastMessage?.message ?? "";
 

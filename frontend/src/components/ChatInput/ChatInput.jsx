@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import styles from "./ChatInput.module.css";
-import { IoSend as SendIcon , IoClose as CloseIcon } from "react-icons/io5";
-import { MdAttachFile as AttachFileIcon } from "react-icons/md";
+import { IoSend as SendIcon } from "react-icons/io5";
 
 
 /**
