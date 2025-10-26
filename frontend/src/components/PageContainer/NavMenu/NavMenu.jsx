@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { IoLogOut, IoCalendarNumber as CalendarIcon } from 'react-icons/io5';
 import { HiHome } from 'react-icons/hi';
 import { MdSpaceDashboard as DashboardIcon } from 'react-icons/md';
-// import {MdOutlinePayment as PaymentIcon } from 'react-icons/md';
 import { NavLink } from 'react-router-dom';
 import styles from './NavMenu.module.css';
 import UserPicture from '../../UserPicture';
@@ -31,12 +30,12 @@ function NavMenu({
 }) {
   const { logout, loading } = useLogout();
 
-  const responsibleRoles = [
+  const responsibleRoles = new Set([
     consts.roles.admin,
     consts.roles.activityResponsible,
     consts.roles.asigboAreaResponsible,
     consts.roles.promotionResponsible,
-  ];
+  ]);
 
   return (
     <div className={`${styles.navMenu} ${className}`} ref={menuRef}>
@@ -94,7 +93,6 @@ NavMenu.propTypes = {
   toggler: PropTypes.func,
   roles: PropTypes.arrayOf(PropTypes.string),
   hasImage: PropTypes.bool,
-  // eslint-disable-next-line react/forbid-prop-types
   menuRef: PropTypes.any,
 };
 
