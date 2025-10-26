@@ -103,7 +103,7 @@ function SingleChat({ userId, username }) {
 							const firstMessage = index === 0 || messages[userId]?.[index - 1]?.from !== message.from;
 							return (
 								<Message
-									key={index}
+									key={message.datetime?.toString()}
 									left={!message.sent}
 									message={message.message}
 									date={message.datetime?.toString()}
