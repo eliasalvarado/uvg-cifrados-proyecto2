@@ -1,5 +1,5 @@
-import path from 'path';
-import { fileURLToPath } from 'url';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import express from 'express';
 import userRouter from '../apiServices/user/user.route.js';
 import consts from '../utils/consts.js';
