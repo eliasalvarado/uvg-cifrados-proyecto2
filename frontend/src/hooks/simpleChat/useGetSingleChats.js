@@ -1,8 +1,7 @@
-import { useState } from 'react';
+import { useState , useEffect } from 'react';
 import consts from '../../helpers/consts.js';
 import useFetch from '../useFetch.js';
 import useToken from '../useToken.js';
-import { useEffect } from 'react';
 import getMessageObject from '../../helpers/dto/getMessageObject.js';
 import getUserObject from '../../helpers/dto/getUserObject.js';
 import { decryptAESRSA } from '../../helpers/cypher/AES_RSA.js';
@@ -54,16 +53,16 @@ function useGetSingleChats() {
                     newMessages[userId].push(msgObject);
                 }));
                 
-                promResults.forEach((result) => {
+                for (const result of promResults) {
                     if (result.status === 'rejected') {
                         console.error('Error CONTROLADO al procesar mensaje:', result.reason);
                     }
-                });
+                };
 
                 // Reemplazar los usuarios con los obtenidos del servidor
 
                 const newContacts = {};
-                contacts.forEach((contact) => {
+                for (const contact of contacts) {
                     if (!newContacts[contact.id]) {
                         newContacts[contact.id] = getUserObject({
                             userId: contact.id,
@@ -72,7 +71,7 @@ function useGetSingleChats() {
                             rsaPublicKey: contact.rsa_public_key
                         });
                     }
-                });
+                };
 
                 setResult({
                     messages: newMessages,

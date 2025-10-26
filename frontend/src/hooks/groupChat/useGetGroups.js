@@ -30,7 +30,7 @@ function useGetGroups() {
             const { groups, messages } = groupsResult;
 
             const newGroups = {};
-            groups.forEach((group) => {
+            for (const group of groups) {
                 const groupObject = getGroupObject({
                     groupId: group.groupId,
                     name: group.name,
@@ -38,7 +38,7 @@ function useGetGroups() {
                     key: group.key,
                 });
                 newGroups[group.groupId] = groupObject;
-            });
+            };
 
             const newMessages = {};
 
@@ -71,11 +71,11 @@ function useGetGroups() {
                 })
             );
 
-            promResults.forEach((result) => {
+            for (const result of promResults) {
                 if (result.status === 'rejected') {
                     console.error('Error CONTROLADO al procesar mensaje de grupo:', result.reason);
                 }
-            });
+            };
 
             // Desencriptar el resultado de los grupos
 
