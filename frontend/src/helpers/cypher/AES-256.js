@@ -10,11 +10,13 @@ const uint8ArrayToString = (bytes) => {
 };
 
 const uint8ArrayToBase64 = (bytes) => {
-  return btoa(String.fromCharCode(...bytes));
+  // Use fromCodePoint to correctly handle Unicode code points
+  return btoa(String.fromCodePoint(...bytes));
 };
 
 const base64ToUint8Array = (base64) => {
-  return new Uint8Array(atob(base64).split('').map(char => char.charCodeAt(0)));
+  // Use codePointAt to correctly get Unicode code points
+  return new Uint8Array(atob(base64).split('').map(char => char.codePointAt(0)));
 };
 
 // Generar key aleatoria AES-256 (32 bytes)
