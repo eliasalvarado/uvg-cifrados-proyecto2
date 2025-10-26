@@ -46,23 +46,25 @@ function useFetch() {
       else res = await reply.text();
 
       setResult(res ?? true);
-    } else if (reply.status !== 403) {
-      let parsedError = null;
+    } else {
+      // If forbidden, force logout first (avoid negated condition)
+      if (reply.status === 403) {
+        logout();
+        return;
+      }
 
+      let parsedError = null;
       try {
         parsedError = await reply.json();
-      // eslint-disable-next-line no-unused-vars
       } catch (e) {
         // No se pudo convertir el error a json
+        console.error('Error parsing fetch error response as JSON:', e);
       }
+
       setError({
         status: reply?.status,
         message: parsedError?.err?.trim() || reply?.statusMessage?.trim() || parsedError?.error?.trim() || parsedError?.message?.trim() || reply?.statusText?.trim() || 'Ocurrió un error.',
       });
-    } else {
-      // Forbidden error, force logout
-      logout();
-      return;
     }
 
     setLoading(false);
