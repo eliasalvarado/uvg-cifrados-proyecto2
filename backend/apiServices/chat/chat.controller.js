@@ -2,7 +2,7 @@ import CustomError from "../../utils/customError.js";
 import errorSender from "../../utils/errorSender.js"
 import sha256Hex from "../../utils/cypher/hash.js"
 import { getGroupByName, getGroupsForUser, getUserContacts, getUserGroupMessages, getUserMessages, insertGroup, insertGroupMember, insertGroupMessage, insertMessage, verifyIfUserIsGroupMember } from "./chat.model.js";
-import { io } from "../../sockets/ioInstance.js";
+import { getIo } from "../../sockets/ioInstance.js";
 import generateAES256KeyBase64 from "../../../frontend/src/helpers/cypher/generateAES256KeyBase64.js";
 import { getUserById } from "../user/user.model.js";
 import { addBlock } from "../blockchain/blockchain.model.js";
@@ -73,15 +73,20 @@ const sendMessageController = async (req, res) => {
     // console.log("VERIFIED: ",isValidSignature)
     
     // Emitir el mensaje al socket del usuario
-    io.to(userId.toString()).emit('chat_message', {
-      from: req.user.id,
-      message: message?.toString(),
-      to: Number.parseInt(userId, 10),
-      sent: false,
-      datetime: new Date(),
-      targetKey,
-      verified: isValidSignature
-    });
+    const ioInstance = getIo();
+    if (ioInstance) {
+      ioInstance.to(userId.toString()).emit('chat_message', {
+        from: req.user.id,
+        message: message?.toString(),
+        to: Number.parseInt(userId, 10),
+        sent: false,
+        datetime: new Date(),
+        targetKey,
+        verified: isValidSignature
+      });
+    } else {
+      console.warn('Socket server no inicializado. No se emitió chat_message');
+    }
     
     res.send({ ok: true })
   }catch(ex){
@@ -221,15 +226,20 @@ const sendGroupMessageController = async (req, res) => {
     // console.log("VERIFIED: ",isValidSignature)
 
     // Emitir al room del grupo
-    io.to(`group_${groupIdInt}`).emit('chat_group_message', {
-      message: message?.toString(),
-      groupId: groupIdInt,
-      userId,
-      sent: false,
-      datetime: new Date(),
-      username: userData.username,
-      verified: isValidSignature
-    });
+    const ioInstance2 = getIo();
+    if (ioInstance2) {
+      ioInstance2.to(`group_${groupIdInt}`).emit('chat_group_message', {
+        message: message?.toString(),
+        groupId: groupIdInt,
+        userId,
+        sent: false,
+        datetime: new Date(),
+        username: userData.username,
+        verified: isValidSignature
+      });
+    } else {
+      console.warn('Socket server no inicializado. No se emitió chat_group_message');
+    }
     
     
     res.send({ ok: true })

@@ -7,6 +7,8 @@ import { isHealthy } from '../utils/blockchainHealth.js';
 
 let io = null;
 
+const getIo = () => io;
+
 const startSocketServer = async (server) => {
 
     io = new Server(server, {
@@ -62,4 +64,4 @@ const startSocketServer = async (server) => {
 
 }
 
-export {io, startSocketServer};
+export { startSocketServer, getIo };
