@@ -1,11 +1,9 @@
 import 'dotenv/config';
 import express from 'express';
-import http from 'http';
+import http from 'node:http';
 import { connection } from './db/connection.js';
 import { startSocketServer } from './sockets/ioInstance.js';
 import indexRoutes from './routes/index.js';
-import errorSender from './utils/errorSender.js';
-import { start } from 'repl';
 import helmet from 'helmet';
 import cors from 'cors';
 
@@ -32,10 +30,10 @@ app.disable('x-powered-by');
 Mitigación del error:
 Configuración Incorrecta Cross-Domain
 */
-const allowedOrigins = [ // Frontend en desarrollo
+const allowedOrigins = new Set([ // Frontend en desarrollo
   'http://localhost:5173',
   'http://127.0.0.1:5173', // Alternativa
-];
+]);
 
 // Eliminación del middleware de CORS para aplicar la Política del Mismo Origen (SOP)
 
@@ -90,7 +88,7 @@ Middleware para forzar el encabezado Access-Control-Allow-Origin
 */
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  if (allowedOrigins.includes(origin)) {
+  if (allowedOrigins.has(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
   } else {
     res.setHeader('Access-Control-Allow-Origin', 'DENY');
