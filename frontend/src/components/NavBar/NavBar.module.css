@@ -3,9 +3,19 @@
   width: 80px;
 }
 
+.navButton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #242424;
+  cursor: pointer;
+  background-color: transparent;
+  border: none;
+}
+
 .navBar ul{
   list-style: none;
-  padding: 0;
   margin: 0;
   padding: 20px 0;
   height: 100vh;

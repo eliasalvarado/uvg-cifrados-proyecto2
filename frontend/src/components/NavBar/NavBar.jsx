@@ -56,72 +56,51 @@ function NavBar({
 	return (
 		<nav className={styles.navBar}>
 			<ul>
-				<li
-					onClick={onChatOptionClick}
-					onKeyUp={onChatOptionClick}
-					tabIndex={0}
-					role="button"
-				>
-					<ChatIcon className={styles.icon} />
-					<span>Chats activos</span>
+				<li>
+					<button type="button" className={styles.navButton} onClick={onChatOptionClick}>
+						<ChatIcon className={styles.icon} />
+						<span>Chats activos</span>
+					</button>
 				</li>
-				<li
-					onClick={onGroupChatOptionClick}
-					onKeyUp={onGroupChatOptionClick}
-					tabIndex={1}
-					role="button"
-				>
-					<img
-						src={GroupChatIcon}
-						alt="Group chat"
-						className={styles.groupChatIcon}
-					/>
-					<span>Grupos</span>
+				<li>
+					<button type="button" className={styles.navButton} onClick={onGroupChatOptionClick}>
+						<img
+							src={GroupChatIcon}
+							alt="Group chat"
+							className={styles.groupChatIcon}
+						/>
+						<span>Grupos</span>
+					</button>
 				</li>
-				<li
-					onClick={onContactsOptionClick}
-					onKeyUp={onContactsOptionClick}
-					tabIndex={2}
-					role="button"
-					>
-					<ContactIcon className={styles.icon} />
-					<span>Contactos</span>
+				<li>
+					<button type="button" className={styles.navButton} onClick={onContactsOptionClick}>
+						<ContactIcon className={styles.icon} />
+						<span>Contactos</span>
+					</button>
 				</li>
-				<li
-					onClick={onProfileOptionClick}
-					onKeyUp={onProfileOptionClick}
-					tabIndex={3}
-					role="button"
-				>
-					<ProfileIcon className={styles.icon} />
-					<span>Perfil</span>
+				<li>
+					<button type="button" className={styles.navButton} onClick={onProfileOptionClick}>
+						<ProfileIcon className={styles.icon} />
+						<span>Perfil</span>
+					</button>
 				</li>
-				<li
-                    onClick={onEphemeralMessagesOptionClick}
-                    onKeyUp={onEphemeralMessagesOptionClick}
-                    tabIndex={4}
-                    role="button"
-                >
-                    <EphemeralIcon className={styles.icon} />
-                    <span>Mensajes efímeros</span>
-                </li>
-				<li
-                    onClick={onBlockChainOptionClick}
-                    onKeyUp={onBlockChainOptionClick}
-                    tabIndex={5}
-                    role="button"
-                >
-                    <BlockChainIcon className={styles.icon} />
-                    <span>Blockchain</span>
-                </li>
-				<li
-					onClick={logout}
-					onKeyUp={logout}
-					tabIndex={5}
-					role="button"
-				>
-					<ExitIcon className={styles.icon} />
-					<span>Salir</span>
+				<li>
+					<button type="button" className={styles.navButton} onClick={onEphemeralMessagesOptionClick}>
+						<EphemeralIcon className={styles.icon} />
+						<span>Mensajes efímeros</span>
+					</button>
+				</li>
+				<li>
+					<button type="button" className={styles.navButton} onClick={onBlockChainOptionClick}>
+						<BlockChainIcon className={styles.icon} />
+						<span>Blockchain</span>
+					</button>
+				</li>
+				<li>
+					<button type="button" className={styles.navButton} onClick={logout}>
+						<ExitIcon className={styles.icon} />
+						<span>Salir</span>
+					</button>
 				</li>
 			</ul>
 		</nav>
