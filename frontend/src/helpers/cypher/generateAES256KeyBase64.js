@@ -1,4 +1,4 @@
-import { randomBytes } from 'crypto';
+import { randomBytes } from 'node:crypto';
 
 /**
  * Genera una clave AES-256 aleatoria y la devuelve en formato Base64.
