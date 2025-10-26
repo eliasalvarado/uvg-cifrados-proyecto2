@@ -1,4 +1,4 @@
-import { createContext,  useEffect, useRef} from 'react';
+import { createContext,  useEffect, useRef, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import useToken from '../hooks/useToken';
 import { io } from 'socket.io-client';
@@ -73,9 +73,9 @@ export const SocketProvider = ({ children }) => {
 
   
 
-  const data = {
-    socket: socketRef.current
-  };
+  const data = useMemo(() => ({
+    socket: socketRef.current,
+  }), [socketRef.current]);
 
   return (
     <SocketContext.Provider value={data}>
