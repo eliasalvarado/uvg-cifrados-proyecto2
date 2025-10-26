@@ -20,7 +20,7 @@ import getGroupMessageObject from "../../helpers/dto/getGroupMessageObject";
  */
 function RoomChat({ groupId, name }) {
 
-	const { groupMessages, users, addGroupChatMessage } = useChatState();
+	const { groupMessages, addGroupChatMessage } = useChatState();
 
 	const {sendGroupMessage, error: errorSendGroupMessage} = useSendGroupMessage();
 
@@ -33,7 +33,6 @@ function RoomChat({ groupId, name }) {
 	}
 
 	const handleSend = (message) => {
-		//sendRoomMessage(room, text);
 		forceScrollRef.current = true; // Forzar scroll al final al recibir mensajes
 		sendGroupMessage({ groupId, message });
 
@@ -100,10 +99,11 @@ function RoomChat({ groupId, name }) {
 					<ul className={styles.messagesList}>
 						{
 							groupMessages[groupId]?.map((message, index) => {
+								console.log("Message in RoomChat:", message);
 								const firstMessage = index === 0 || groupMessages[groupId][index - 1].userId !== message.userId;
 								return (
 									<Message
-										key={index}
+										key={message.datetime.toString()}
 										left={!message.sent}
 										message={message.message}
 										date={new Date(message.datetime).toString()}
