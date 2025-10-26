@@ -19,13 +19,35 @@ function UserPicture({
   showStatus = false,
   isActive = false,
 }) {
+  const wrapperClass = className ? `${styles.userPicture} ${className}` : styles.userPicture;
+
+  const inner = (
+    <div className={`${styles.nameCircle} ${showStatus ? styles.showStatus : ''} ${isActive ? styles.active : ''}`}>
+      {name ? name.charAt(0) : 'X'}
+    </div>
+  );
+
+  // If an onClick handler is provided, render a native button to ensure accessibility
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        className={wrapperClass}
+        title={name}
+        onClick={onClick}
+        aria-label={`Usuario ${name}`}
+      >
+        {inner}
+      </button>
+    );
+  }
+
   return (
     <div
-      className={`${styles.userPicture} ${className}`}
+      className={wrapperClass}
       title={name}
-      onClick={onClick}
     >
-      <div className={`${styles.nameCircle} ${showStatus ? styles.showStatus : ''} ${isActive ? styles.active : ''}`}>{name ? name.charAt(0) : 'X'}</div>
+      {inner}
     </div>
   );
 }
