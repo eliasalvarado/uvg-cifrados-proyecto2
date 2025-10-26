@@ -3,13 +3,11 @@ import { useNavigate } from "react-router-dom";
 import PropTypes from 'prop-types';
 import styles from "./NavBar.module.css";
 import SessionContext from "../../context/SessionContext";
-import { IoChatbubbles as ChatIcon } from "react-icons/io5";
+import { IoChatbubbles as ChatIcon , IoExitSharp as ExitIcon } from "react-icons/io5";
 import GroupChatIcon from "../../assets/icons/group-chat.svg";
 import { RiContactsBook3Fill as ContactIcon } from "react-icons/ri";
-import { IoExitSharp as ExitIcon } from "react-icons/io5";
-import { MdAccountCircle as ProfileIcon } from "react-icons/md";
-import { MdMessage as EphemeralIcon } from "react-icons/md";
-import { MdToken as BlockChainIcon } from "react-icons/md";
+import { MdAccountCircle as ProfileIcon , MdMessage as EphemeralIcon , MdToken as BlockChainIcon } from "react-icons/md";
+
 
 /**
  * Componente de barra de navegación para una aplicación de chat.
@@ -135,6 +133,8 @@ export default NavBar;
 NavBar.propTypes = {
 	onChatOptionClick: PropTypes.func.isRequired,
 	onGroupChatOptionClick: PropTypes.func.isRequired,
+	onContactsOptionClick: PropTypes.func.isRequired,
 	onProfileOptionClick: PropTypes.func.isRequired,
 	onEphemeralMessagesOptionClick: PropTypes.func.isRequired,
+	onBlockChainOptionClick: PropTypes.func.isRequired,
 };

@@ -3,7 +3,6 @@ import styles from "./RegisterPage.module.css";
 import useFetch from "../../hooks/useFetch";
 import SessionContext from "../../context/SessionContext";
 import InputText from "../../components/InputText";
-import InputSelect from "../../components/InputSelect";
 import Button from "../../components/Button";
 import Spinner from "../../components/Spinner";
 import { useNavigate } from "react-router-dom";
