@@ -18,11 +18,11 @@ async function signMessage(message, privateKeyPem) {
   const pemKey = privateKeyPem
     .replace(/-----BEGIN PRIVATE KEY-----/, '')
     .replace(/-----END PRIVATE KEY-----/, '')
-    .replace(/\s/g, '');
+    .replaceAll(/\s/g, '');
     
-  const keyBuffer = Uint8Array.from(atob(pemKey), c => c.charCodeAt(0));
+  const keyBuffer = Uint8Array.from(atob(pemKey), c => c.codePointAt(0));
 
-  const cryptoKey = await window.crypto.subtle.importKey(
+  const cryptoKey = await globalThis.crypto.subtle.importKey(
     'pkcs8',
     keyBuffer,
     {
@@ -35,7 +35,7 @@ async function signMessage(message, privateKeyPem) {
 
   const messageBuffer = new TextEncoder().encode(message);
 
-  const signature = await window.crypto.subtle.sign(
+  const signature = await globalThis.crypto.subtle.sign(
     {
       name: 'ECDSA',
       hash: 'SHA-256'
@@ -48,7 +48,7 @@ async function signMessage(message, privateKeyPem) {
   const r = signatureArray.slice(0, signatureArray.length / 2);
   const s = signatureArray.slice(signatureArray.length / 2);
   const derSignature = encodeDER(r, s);
-  const signatureFinal = btoa(String.fromCharCode(...derSignature));
+  const signatureFinal = btoa(String.fromCodePoint(...derSignature));
 
   return signatureFinal
 }
