@@ -7,7 +7,7 @@ function OAuthSuccessPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(globalThis.location.search);
     const token = params.get('token');
 
     if (token) {
