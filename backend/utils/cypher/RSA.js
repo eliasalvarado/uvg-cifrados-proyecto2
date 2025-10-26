@@ -1,4 +1,4 @@
-import { publicEncrypt, privateDecrypt, generateKeyPairSync } from 'crypto';
+import { publicEncrypt, privateDecrypt, generateKeyPairSync } from 'node:crypto';
 
 /**
  * 

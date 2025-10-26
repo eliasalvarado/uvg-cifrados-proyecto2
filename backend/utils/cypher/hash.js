@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 
 function sha256Hex(buf) {
   return crypto.createHash('sha256').update(buf).digest('hex');
