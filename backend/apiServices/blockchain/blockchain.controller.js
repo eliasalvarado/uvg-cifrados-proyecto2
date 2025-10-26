@@ -13,7 +13,6 @@ export async function createTransaction(req, res) {
     const { index, hash } = await addBlock({ from, to, msgHash, sig });
     res.status(201).json({ message: 'Bloque añadido', index, hash });
   } catch (err) {
-    // console.error(err);
     errorSender({ res, ex: err, defaultError: 'Error al crear bloque.' });
   }
 }
@@ -25,7 +24,6 @@ export async function listTransactions(req, res) {
     const validation = await validateChain();
     res.json({ chain, validation });
   } catch (err) {
-    // console.error(err);
     errorSender({ res, ex: err, defaultError: 'Error al obtener blockchain.' });
   }
 }

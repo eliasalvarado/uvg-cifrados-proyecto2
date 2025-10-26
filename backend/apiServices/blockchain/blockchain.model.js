@@ -1,7 +1,7 @@
 import { executeQuery } from '../../db/connection.js';
 import CustomError from '../../utils/customError.js';
 import { detectXSSAttempt, detectSQLInjectionAttempt } from '../../utils/stringFormatValidators.js';
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 
 const GENESIS_HASH = '0'.repeat(64);
 
@@ -63,9 +63,6 @@ export async function addBlock(dataObj) {
   const tsMillis = Date.now();
 
   const dataString = JSON.stringify(dataObj);
-
-  // Sanitizar: remover caracteres de control si existen
-  const sanitizedData = dataString.replace(/[\x00-\x1F\x7F]/g, '');
 
   const hash = sha256(prevHash + tsMillis + dataString);
   await executeQuery(
