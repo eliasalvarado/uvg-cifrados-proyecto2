@@ -1,6 +1,5 @@
-import { createContext, useState } from 'react';
+import { createContext, useState , useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { useEffect } from 'react';
 import useGetSingleChats from '../hooks/simpleChat/useGetSingleChats';
 import useToken from '../hooks/useToken';
 import useGetGroups from '../hooks/groupChat/useGetGroups';
@@ -53,7 +52,7 @@ export const ChatProvider = ({ children }) => {
 
   }, [groupsResult]);
 
-  const data = {
+  const data = useMemo(() => ({
     messages,
     setMessages,
     users,
@@ -62,7 +61,7 @@ export const ChatProvider = ({ children }) => {
     setGroups,
     groupMessages,
     setGroupMessages,
-  };
+  }), [messages, users, groups, groupMessages]);
 
   return (
     <ChatContext.Provider value={data}>
