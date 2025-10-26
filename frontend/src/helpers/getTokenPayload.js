@@ -7,14 +7,14 @@
  *
  * @returns {Object} Payload del token en formato JSON {id, email}
  */
-export default (token) => {
+export default function getTokenPayload(token) {
   if (typeof token !== 'string') throw new Error('Token Invalido.');
 
   const encodedPayload = token.split('.')[1];
   if (!encodedPayload) throw new Error('Token Invalido.');
 
   // Reemplazar caracteres Base64URL por Base64 estándar
-  const base64 = encodedPayload.replace(/-/g, '+').replace(/_/g, '/');
+  const base64 = encodedPayload.replaceAll(/-/g, '+').replaceAll(/_/g, '/');
   const padded = base64.padEnd(base64.length + (4 - (base64.length % 4)) % 4, '=');
 
   const json = atob(padded); // Decodificar Base64
