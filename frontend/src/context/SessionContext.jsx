@@ -1,5 +1,5 @@
 import React, {
-  createContext, useEffect, useState,
+  createContext, useEffect, useState, useCallback, useMemo,
 } from 'react';
 import PropTypes from 'prop-types';
 
@@ -7,22 +7,22 @@ const SessionContext = createContext();
 function SessionProvider({ children }) {
   const [token, setToken] = useState(null);
 
-  const refreshToken = () => {
+  const refreshToken = useCallback(() => {
     const token = localStorage.getItem('token');
     if (token) {
       setToken(token);
     }
-  };
+  }, []);
 
-  const clearToken = () => {
+  const clearToken = useCallback(() => {
     setToken(null);
-  };
+  }, []);
 
-  const data = {
+  const data = useMemo(() => ({
     token,
     refreshToken,
     clearToken,
-  };
+  }), [token, refreshToken, clearToken]);
 
   useEffect(() => {
     refreshToken();
