@@ -7,7 +7,7 @@
  */
 const getGroupObject = ({name, members, key}) => ({
     name,
-    members: members ? members : [],
+    members: members || [],
     key: key || null,
 })
 
