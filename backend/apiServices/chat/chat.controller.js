@@ -50,7 +50,7 @@ const sendMessageController = async (req, res) => {
     const ok = await insertMessage({
       message,
       originUserId: req.user.id,
-      targetUserId: parseInt(userId, 10),
+      targetUserId: Number.parseInt(userId, 10),
       originKey,
       targetKey,
       signature
@@ -65,7 +65,7 @@ const sendMessageController = async (req, res) => {
 
      await addBlock({
       from    : req.user.id,
-      to      : parseInt(userId, 10),
+      to      : Number.parseInt(userId, 10),
       msgHash,
       sig: signature
     });
@@ -76,7 +76,7 @@ const sendMessageController = async (req, res) => {
     io.to(userId.toString()).emit('chat_message', {
       from: req.user.id,
       message: message?.toString(),
-      to: parseInt(userId, 10),
+      to: Number.parseInt(userId, 10),
       sent: false,
       datetime: new Date(),
       targetKey,
@@ -98,7 +98,6 @@ const getSingleChatsController = async (req, res) => {
     
     res.send({ ok: true, contacts, messages });
   } catch (ex) {
-    // console.log("Error: ",ex);
     errorSender({ res, ex, defaultError: 'Error al obtener chats individuales.' });
   }
 }
@@ -134,7 +133,6 @@ const createGroupController = async (req, res) => {
 
     res.send({ ok: true, groupId, name, creatorId: req.user.id, key: keyBase64 });
   } catch (ex) {
-    // console.log(ex);
     errorSender({ res, ex, defaultError: 'Error al crear el grupo.' });
   }
 }
@@ -152,7 +150,7 @@ const joinGroupController = async (req, res) => {
     }
 
     const memberAdded = await insertGroupMember({
-      groupId: parseInt(groupId, 10),
+      groupId: Number.parseInt(groupId, 10),
       userId: req.user.id
     });
 
@@ -162,7 +160,6 @@ const joinGroupController = async (req, res) => {
 
     res.send({ ok: true, groupId, name: groupName, newMemberId: req.user.id, key });
   } catch (ex) {
-    // console.log(ex);
     errorSender({ res, ex, defaultError: 'Error al unirse al grupo.' });
   }
 }
@@ -172,14 +169,14 @@ const sendGroupMessageController = async (req, res) => {
   try{
 
     const { groupId } = req.params;
-    const { message, key, signature } = req.body ?? {};
+    const { message, signature } = req.body ?? {};
     const userId = req.user.id;
     
     if (!message){
       throw new CustomError('El mensaje es requerido', 400);
     }
 
-    const groupIdInt = parseInt(groupId, 10);
+    const groupIdInt = Number.parseInt(groupId, 10);
     // Verificar que el usuario es miembro del grupo
     const isMember = await verifyIfUserIsGroupMember(groupId, req.user.id);
     if (!isMember) {
@@ -190,8 +187,6 @@ const sendGroupMessageController = async (req, res) => {
     if (!userData) {
       throw new CustomError('Usuario emisor de mensaje grupal no encontrado', 404);
     }
-
-    // const signature = signMessage(message, userData.ecdsa_private_key);
 
     const isValidSignature = verifySignature(
       message,
@@ -256,7 +251,6 @@ const getGroupChatsController = async (req, res) => {
     
     res.send({ ok: true, groups, messages });
   } catch (ex) {
-    // console.log("Error: ",ex);
     errorSender({ res, ex, defaultError: 'Error al obtener los chats de grupo.' });
   }
 }

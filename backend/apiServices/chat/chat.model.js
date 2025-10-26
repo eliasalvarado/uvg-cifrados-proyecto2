@@ -143,7 +143,7 @@ const validateSignature = (signature) => {
  */
 const sanitizeSignature = (signature) => {
   if (!signature) return null;
-  return signature.replace(/[\n\s]/g, '');
+  return signature.replaceAll(/\s/g, '');
 };
 
 /* ──────────────────────────────── Funciones ──────────────────────────────── */
@@ -201,8 +201,6 @@ const getUserMessages = async (userId) => {
         signature_key: undefined // No exponer la clave en la respuesta
       };
     });
-
-    // console.log("Messages", messages);
 
     return messages;
   } catch (err) {
@@ -509,7 +507,8 @@ const getGroupsForUser = async (userId) => {
     // Agrupar los resultados por groupId
     const groupsMap = new Map();
 
-    rows.forEach(({ groupId, name, key, creatorId, memberId }) => {
+    for (const row of rows) {
+      const { groupId, name, key, creatorId, memberId } = row;
       if (!groupsMap.has(groupId)) {
         groupsMap.set(groupId, {
           groupId,
@@ -520,7 +519,7 @@ const getGroupsForUser = async (userId) => {
         });
       }
       groupsMap.get(groupId).members.push(memberId);
-    });
+    };
 
     return Array.from(groupsMap.values());
   } catch (err) {
