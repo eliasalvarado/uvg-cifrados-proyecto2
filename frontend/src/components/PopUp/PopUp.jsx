@@ -16,12 +16,10 @@ function PopUp({
   };
 
   const handleCloseWithBackground = (e) => {
-    if (e.target === e.currentTarget) {
-      e.stopPropagation();
-
-      if (closeWithBackground) {
-        closeAnimation();
-      }
+    // When called from the overlay button (native) or from the wrapper
+    e.stopPropagation();
+    if (closeWithBackground) {
+      closeAnimation();
     }
   };
 
@@ -36,15 +34,17 @@ function PopUp({
     <div
       className={styles.popUp}
       ref={refPopUp}
-      onClick={handleCloseWithBackground}
-      onKeyUp={handleCloseWithBackground}
-      role="button"
-      tabIndex="0"
     >
+      {/* overlay implemented as a native button to provide mouse/keyboard/touch support */}
+      <button
+        type="button"
+        className={styles.popUpOverlay}
+        onClick={handleCloseWithBackground}
+        aria-label="Cerrar"
+      />
       <div className={`${styles.popUpBody} ${styles.scrollbarGray}`} style={{ maxWidth: `${maxWidth}px` }}>
         <div className={styles.popUpHeader}>
           {closeButton ? (
-            // eslint-disable-next-line jsx-a11y/control-has-associated-label
             <button
               className={styles.xIcon}
               onClick={handleCloseWithButton}
