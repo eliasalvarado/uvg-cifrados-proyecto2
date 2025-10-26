@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 
 function verifySignature(message, signature, publicKeyPem) {
   if (!message || !signature || !publicKeyPem) {
@@ -14,7 +14,8 @@ function verifySignature(message, signature, publicKeyPem) {
       },
       Buffer.from(signature, 'base64')
     );
-  } catch (Exception) {
+  } catch (error) {
+    console.error(`Error durante la verificación de firma: ${error.message}`);
     return false
   }
 }
