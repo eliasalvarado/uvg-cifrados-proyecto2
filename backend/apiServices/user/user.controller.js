@@ -67,7 +67,6 @@ const registerUser = async (req, res) => {
             privateKeyECDSA
         });
     } catch (error) {
-        // console.log("Error al crear el usuario:", error);
         errorSender({ res, ex: error, defaultError: 'Ocurrió un error al crear el usuario.' });
     }
 }
@@ -143,7 +142,26 @@ const loginGoogleUser = async (req, res) => {
     // Verificar si el usuario ya existe en la base de datos
     let user = await getUserByEmail(email);
 
-    if (!user) {
+    if (user) {
+        // Si el usuario ya existe, verificar si tiene autenticación de dos factores habilitada
+        if (user.mfa_enabled) {
+            return res.status(200).json({ message: "MFA habilitada. Ingresa el código de tu autenticador.", userId: user.id, mfa_enabled: true });
+        }
+        // Si el usuario ya existe y no tiene MFA habilitada, generar un nuevo token JWT
+        const token = jwt.sign(
+            { id: user.id, email: user.email },
+            JWT_SECRET,
+            { expiresIn: '1h' }
+        );
+        res.status(200).json({
+            message: "Login exitoso",
+            token,
+            privateKeyRSA: user.rsa_private_key,
+            publicKeyRSA: user.rsa_public_key,
+            publicKeyECDSA: user.ecdsa_public_key,
+            privateKeyECDSA: user.ecdsa_private_key,
+        });
+    } else {
         // Si el usuario no existe, crear uno nuevo
         const { publicKey: publicKeyRSA, privateKey: privateKeyRSA } = generateRSAKeys();
         const { publicKey: publicKeyECDSA, privateKey: privateKeyECDSA } = generateECDSAKeys();
@@ -186,30 +204,11 @@ const loginGoogleUser = async (req, res) => {
             privateKeyECDSA: user.ecdsa_private_key,
             newUser: true
         });
-    } else {
-        // Si el usuario ya existe, verificar si tiene autenticación de dos factores habilitada
-        if (user.mfa_enabled) {
-            return res.status(200).json({ message: "MFA habilitada. Ingresa el código de tu autenticador.", userId: user.id, mfa_enabled: true });
-        }
-        // Si el usuario ya existe y no tiene MFA habilitada, generar un nuevo token JWT
-        const token = jwt.sign(
-            { id: user.id, email: user.email },
-            JWT_SECRET,
-            { expiresIn: '1h' }
-        );
-        res.status(200).json({
-            message: "Login exitoso",
-            token,
-            privateKeyRSA: user.rsa_private_key,
-            publicKeyRSA: user.rsa_public_key,
-            publicKeyECDSA: user.ecdsa_public_key,
-            privateKeyECDSA: user.ecdsa_private_key,
-        });
     }
 }
 
 const getUserInfo = async (req, res) => {
-    const userId = req.user && req.user.id; // Obtener el ID del usuario desde el token JWT
+    const userId = req?.user?.id; // Obtener el ID del usuario desde el token JWT
 
     // Obtener el usuario de la base de datos
     const user = await getUserById(userId);
@@ -249,14 +248,13 @@ const getUserByIdController = async (req, res) => {
         });
 
     }catch(ex){
-        // console.log(ex);
         errorSender({res, ex });
     }
 }
     
 
 const setupMFA = async (req, res) => {
-    const userId = req.user && req.user.id; // Obtener el ID del usuario desde el token JWT
+    const userId = req?.user?.id; // Obtener el ID del usuario desde el token JWT
 
     // Generar secreto
     const secret = speakeasy.generateSecret({
@@ -276,8 +274,7 @@ const setupMFA = async (req, res) => {
 }
 
 const deleteMFA = async (req, res) => {
-    const userId = req.user && req.user.id; // Obtener el ID del usuario desde el token JWT
-    // console.log('User ID for MFA deletion:', userId);
+    const userId = req?.user?.id; // Obtener el ID del usuario desde el token JWT
 
     try {
         // Eliminar el secreto de la base de datos
@@ -295,9 +292,6 @@ const deleteMFA = async (req, res) => {
 const verifyMFA = async (req, res) => {
     const { userId } = req.params;
     const { token } = req.body;
-
-    // console.log('Token received:', token);
-    // console.log('User ID received:', userId);
 
     try {
         // Obtener el secreto del usuario de la base de datos
@@ -364,7 +358,6 @@ const searchUserController = async (req, res) => {
         });
         
     }catch(ex){
-    // console.log(ex)
         errorSender({res, ex })
    }
 
