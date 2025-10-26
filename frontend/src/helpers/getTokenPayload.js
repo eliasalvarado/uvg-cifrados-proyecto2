@@ -14,7 +14,7 @@ export default function getTokenPayload(token) {
   if (!encodedPayload) throw new Error('Token Invalido.');
 
   // Reemplazar caracteres Base64URL por Base64 estándar
-  const base64 = encodedPayload.replaceAll(/-/g, '+').replaceAll(/_/g, '/');
+  const base64 = encodedPayload.replaceAll('-', '+').replaceAll('_', '/');
   const padded = base64.padEnd(base64.length + (4 - (base64.length % 4)) % 4, '=');
 
   const json = atob(padded); // Decodificar Base64
