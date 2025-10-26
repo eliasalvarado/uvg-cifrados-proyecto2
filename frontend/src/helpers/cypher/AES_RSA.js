@@ -23,7 +23,7 @@ const encryptAESRSA = async (text, targetPublicKey, originPublicKey) => {
 const decryptAESRSA = async (textEncrypted, keyEncrypted, privateKey) => {
     try{
     // Desencriptar la key AES con la llave privada RSA
-    const key = await decryptRSA(keyEncrypted, privateKey);
+    const key = decryptRSA(keyEncrypted, privateKey);
     // Desencriptar el texto con la key AES
     const text = await decryptAES256(textEncrypted, key);
 
