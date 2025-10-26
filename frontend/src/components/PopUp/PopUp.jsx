@@ -45,11 +45,10 @@ function PopUp({
         <div className={styles.popUpHeader}>
           {closeButton ? (
             // eslint-disable-next-line jsx-a11y/control-has-associated-label
-            <div
+            <button
               className={styles.xIcon}
               onClick={handleCloseWithButton}
               onKeyUp={handleCloseWithButton}
-              role="button"
               tabIndex="0"
             />
           ) : null}

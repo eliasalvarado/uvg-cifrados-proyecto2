@@ -58,6 +58,8 @@
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
+    background-color: transparent;
+    border: none;
     width: var(--iconSize);
     height: var(--iconSize);
     cursor: pointer;
