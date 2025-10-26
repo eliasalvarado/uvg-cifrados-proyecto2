@@ -4,16 +4,17 @@
     flex-direction: column;
     width: 100%;
     position: relative;
-    font-family: 'Montserrat';
+    font-family: 'Montserrat, Helvetica, Arial, Verdana';
     font-size: 16px;
     height: fit-content;
     color: white;
+    border: none;
 }
 
 .inputField {
     padding: 10px;
     border-radius: 5px;
-    font-family: 'Montserrat';
+    font-family: 'Montserrat, Helvetica, Arial, Verdana';
     background-color: #39393b !important;
     color: white;
     border: 1px solid #555;
@@ -35,10 +36,6 @@
     align-items: center;
     pointer-events: none;
     color: white;
-}
-
-.inputTextContainer {
-    border: none;
 }
 
 .inputTextContainer input:focus {
