@@ -1,4 +1,4 @@
-import { createCipheriv, createDecipheriv, randomBytes } from 'crypto';
+import { createCipheriv, createDecipheriv, randomBytes } from 'node:crypto';
 
 /**
  * 
@@ -8,7 +8,7 @@ import { createCipheriv, createDecipheriv, randomBytes } from 'crypto';
  */
 export const encrypt = (text, key) => {
   const iv = randomBytes(16);
-  const cipher = createCipheriv('aes-256-cbc', key, iv);
+  const cipher = createCipheriv('aes-256-gcm', key, iv);
   let encrypted = cipher.update(text, 'utf-8', 'hex');
   encrypted += cipher.final('hex');
   // Retorna el IV concatenado al inicio
