@@ -1,6 +1,6 @@
 import CustomError from './customError.js';
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 
 /**
  * Se encarga del empaquetamiento y envío uniforme del error.
