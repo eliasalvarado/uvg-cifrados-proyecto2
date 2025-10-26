@@ -1,4 +1,3 @@
-// import PropTypes from 'prop-types';
 import styles from './ChatPage.module.css';
 import NavBar from '../../components/NavBar/NavBar';
 import ChatsList from '../../components/ChatsList/ChatsList';
@@ -23,17 +22,17 @@ function ChatPage() {
 
   const [selectedOption, setSelectedOption] = useState(menuOption.CHATS);
   const [currentSingleChat, setCurrentSingleChat] = useState(null);
-  const [currentGroupChat, setCurrentRoomChat] = useState(null);
+  const [currentGroupChat, setCurrentGroupChat] = useState(null);
   const { users, groups } = useChatState();
 
 
   const handleSingleChatSelected = (user) => {
     setCurrentSingleChat(user);
-    setCurrentRoomChat(null);
+    setCurrentGroupChat(null);
   }
 
   const handleRoomChatSelected = (room) => {
-    setCurrentRoomChat(room);
+    setCurrentGroupChat(room);
     setCurrentSingleChat(null);
   }
 
