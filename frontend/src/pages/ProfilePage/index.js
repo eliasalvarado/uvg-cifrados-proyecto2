@@ -1,2 +1,1 @@
-import ProfilePage from "./ProfilePage";
-export default ProfilePage;
+export { default } from "./ProfilePage";

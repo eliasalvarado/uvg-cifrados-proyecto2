@@ -1,2 +1,1 @@
-import OAuthSuccessPage from "./OAuthSuccessPage";
-export default OAuthSuccessPage;
+export { default } from "./OAuthSuccessPage";
