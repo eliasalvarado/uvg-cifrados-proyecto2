@@ -96,7 +96,7 @@ jobs:
           Set-Location backend
           $args = @(
             "-Dsonar.host.url=$env:SONAR_HOST_URL",
-            "-Dsonar.login=$token"
+            "-Dsonar.token=$token"
           )
           Write-Host "Invoking scanner for backend via: $javaExe -cp $libCp org.sonarsource.scanner.cli.Main"
           & $javaExe -cp $libCp org.sonarsource.scanner.cli.Main @args
@@ -129,7 +129,7 @@ jobs:
           Set-Location frontend
           $args = @(
             "-Dsonar.host.url=$env:SONAR_HOST_URL",
-            "-Dsonar.login=$token"
+            "-Dsonar.token=$token"
           )
           Write-Host "Invoking scanner for frontend via: $javaExe -cp $libCp org.sonarsource.scanner.cli.Main"
           & $javaExe -cp $libCp org.sonarsource.scanner.cli.Main @args
