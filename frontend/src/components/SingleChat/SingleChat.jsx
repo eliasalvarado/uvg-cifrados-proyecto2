@@ -81,8 +81,7 @@ function SingleChat({ userId, username }) {
 
 	 useEffect(() => {
 		if (sendError?.status === 503) {
-			alert(sendError.message);          
-			// resetSend();                      
+			alert(sendError.message);
 		}
 	}, [sendError]);
 
@@ -99,9 +98,9 @@ function SingleChat({ userId, username }) {
 				ref={chatContainerRef}
 			>
 				<ul className={styles.messagesList}>
-					{messages[userId] &&
-						messages[userId].map((message, index) => {
-							const firstMessage = index === 0 || messages[userId][index - 1].from !== message.from;
+					{messages[userId]?.
+						map((message, index) => {
+							const firstMessage = index === 0 || messages[userId]?.[index - 1]?.from !== message.from;
 							return (
 								<Message
 									key={index}
@@ -126,6 +125,6 @@ function SingleChat({ userId, username }) {
 export default SingleChat;
 
 SingleChat.propTypes = {
-	user: PropTypes.string.isRequired,
+	userId: PropTypes.string.isRequired,
 	username: PropTypes.string.isRequired
 };
