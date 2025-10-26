@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import useToken from '@hooks/useToken';
-// import LogoLetrasBlancas from '../../assets/General/Copia de Transparente (letras blancas).png';
 import LogoLetrasBlancas from '@assets/logo/logo_blanco.png';
 import TopBar from './TopBar/TopBar';
 import getTokenPayload from '../../helpers/getTokenPayload';
@@ -18,9 +17,9 @@ import NavMenu from './NavMenu/NavMenu';
  *
  */
 function PageContainer({ children }) {
-  const [isToggled, setToggle] = useState(false);
-  const [isShown, setShown] = useState(false);
-  const [isMobile, setMobile] = useState(false);
+  const [isToggled, setIsToggled] = useState(false);
+  const [isShown, setIsShown] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [payload, setPayload] = useState({});
   const token = useToken();
 
@@ -33,12 +32,12 @@ function PageContainer({ children }) {
     function handleWindow() {
       if (window.innerWidth < 768 || window.innerHeight < 500) {
         if (!isMobile) {
-          setToggle(false);
+          setIsToggled(false);
         }
-        setMobile(true);
+        setIsMobile(true);
       } else {
-        setMobile(false);
-        setToggle(false);
+        setIsMobile(false);
+        setIsToggled(false);
       }
     }
 
@@ -47,34 +46,34 @@ function PageContainer({ children }) {
       // Cerrar menu al presionar fuera de este o del botón toogle
       if (!menuButtonRef?.current?.contains(target)
       && !menuRef?.current?.contains(target)) {
-        setToggle(false);
+        setIsToggled(false);
       }
     };
 
     handleWindow();
-    window.addEventListener('resize', handleWindow);
-    window.addEventListener('click', handlePageClick);
+    globalThis.addEventListener('resize', handleWindow);
+    globalThis.addEventListener('click', handlePageClick);
 
     return () => {
-      window.removeEventListener('resize', handleWindow);
-      window.removeEventListener('click', handlePageClick);
+      globalThis.removeEventListener('resize', handleWindow);
+      globalThis.removeEventListener('click', handlePageClick);
     };
   }, []);
 
   // Efecto para obtener la información del usuario, si esta devuelve algún "falsy"
   // no debe mostrarse ningún tipo de información
   useEffect(() => {
-    if (token === undefined || token === null) setShown(false);
+    if (token === undefined || token === null) setIsShown(false);
     else {
-      setShown(true);
-      setToggle(false);
+      setIsShown(true);
+      setIsToggled(false);
       setPayload(getTokenPayload(token));
     }
   }, [token]);
 
   // Función de despliegue o retracción de sidebar
   const toggleMenu = () => {
-    setToggle(!isToggled);
+    setIsToggled(!isToggled);
   };
 
   return (
