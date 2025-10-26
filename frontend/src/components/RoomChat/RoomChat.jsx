@@ -99,7 +99,6 @@ function RoomChat({ groupId, name }) {
 					<ul className={styles.messagesList}>
 						{
 							groupMessages[groupId]?.map((message, index) => {
-								console.log("Message in RoomChat:", message);
 								const firstMessage = index === 0 || groupMessages[groupId][index - 1].userId !== message.userId;
 								return (
 									<Message
