@@ -9,6 +9,12 @@ describe('stringFormatValidators', () => {
     it('returns false for safe strings', () => {
       expect(detectSQLInjectionAttempt('hello world')).toBe(false);
     });
+
+    it('returns false for non-string inputs and empty string', () => {
+      expect(detectSQLInjectionAttempt(null)).toBe(false);
+      expect(detectSQLInjectionAttempt(123)).toBe(false);
+      expect(detectSQLInjectionAttempt('')).toBe(false);
+    });
   });
 
   describe('detectXSSAttempt', () => {
@@ -18,6 +24,12 @@ describe('stringFormatValidators', () => {
 
     it('returns false for plain text', () => {
       expect(detectXSSAttempt('just text')).toBe(false);
+    });
+
+    it('returns false for non-string inputs and empty string', () => {
+      expect(detectXSSAttempt(undefined)).toBe(false);
+      expect(detectXSSAttempt({})).toBe(false);
+      expect(detectXSSAttempt('')).toBe(false);
     });
   });
 });

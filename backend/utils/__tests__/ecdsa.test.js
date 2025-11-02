@@ -15,4 +15,11 @@ describe('ECDSA', () => {
   it('returns false for invalid inputs', () => {
     expect(verifySignature('', '', '')).toBe(false);
   });
+
+  it('returns false when crypto.verify throws', () => {
+    const spy = jest.spyOn(crypto, 'verify').mockImplementation(() => { throw new Error('boom'); });
+    const ok = verifySignature('m', 's', 'pk');
+    expect(ok).toBe(false);
+    spy.mockRestore();
+  });
 });

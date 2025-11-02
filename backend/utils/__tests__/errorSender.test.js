@@ -34,4 +34,20 @@ describe('errorSender', () => {
     expect(res.status).toHaveBeenCalledWith(501);
     expect(res.send).toHaveBeenCalledWith({ err: 'def', status: 501, ok: false });
   });
+
+  it('does not create logs dir when it already exists', async () => {
+    // change mock to simulate existing dir
+    const fs = require('node:fs');
+    fs.existsSync.mockReturnValue(true);
+    fs.mkdirSync.mockClear();
+    const res = {
+      statusMessage: '',
+      status: jest.fn().mockReturnThis(),
+      send: jest.fn(),
+    };
+    const ex = new Error('x');
+    await errorSender({ res, ex });
+    expect(fs.mkdirSync).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalled();
+  });
 });
