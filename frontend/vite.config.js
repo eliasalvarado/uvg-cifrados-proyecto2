@@ -5,6 +5,17 @@ import path from 'path';
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: './src/setupTests.js',
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'lcov'],
+      all: true,
+      include: ['src/**/*.{js,jsx}'],
+    },
+  },
   resolve: {
     alias: [
       { find: '@', replacement: path.resolve(__dirname, './src') },
