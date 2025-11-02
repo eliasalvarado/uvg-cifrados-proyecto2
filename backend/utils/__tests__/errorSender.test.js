@@ -50,4 +50,19 @@ describe('errorSender', () => {
     expect(fs.mkdirSync).not.toHaveBeenCalled();
     expect(res.status).toHaveBeenCalled();
   });
+
+  it('uses 500 when CustomError has undefined status', async () => {
+    const fs = require('node:fs');
+    fs.existsSync.mockReturnValue(false);
+    fs.mkdirSync.mockClear();
+    const res = {
+      statusMessage: '',
+      status: jest.fn().mockReturnThis(),
+      send: jest.fn(),
+    };
+    const ex = new CustomError('no-status', undefined);
+    await errorSender({ res, ex });
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith({ err: 'no-status', status: 500, ok: false });
+  });
 });

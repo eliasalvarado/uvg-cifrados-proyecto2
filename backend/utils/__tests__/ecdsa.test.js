@@ -18,8 +18,10 @@ describe('ECDSA', () => {
 
   it('returns false when crypto.verify throws', () => {
     const spy = jest.spyOn(crypto, 'verify').mockImplementation(() => { throw new Error('boom'); });
+    const errSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
     const ok = verifySignature('m', 's', 'pk');
     expect(ok).toBe(false);
     spy.mockRestore();
+    errSpy.mockRestore();
   });
 });

@@ -7,6 +7,14 @@ describe('QKD keyGenerator', () => {
     expect(bases).toHaveLength(10);
   });
 
+  it('generateBitsBases default length is 50 and values valid', () => {
+    const { bits, bases } = generateBitsBases();
+    expect(bits).toHaveLength(50);
+    expect(bases).toHaveLength(50);
+    expect(bits.every(b => b === 0 || b === 1)).toBe(true);
+    expect(bases.every(b => b === '↕' || b === '↗')).toBe(true);
+  });
+
   it('encode and measure photons roundtrip', () => {
     const bits = [0,1,1,0];
     const bases = ['↕','↗','↕','↗'];
