@@ -49,6 +49,63 @@ describe('user.model', () => {
     expect(res).toBeNull();
   });
 
+  test('validation helpers direct tests (exports)', async () => {
+    // ensure stringFormat validators are not flagging
+    jest.doMock('../../../utils/stringFormatValidators.js', () => ({ detectXSSAttempt: () => false, detectSQLInjectionAttempt: () => false }));
+    const model = await import('../user.model.js');
+    // validateEmail
+    expect(model.validateEmail('ok@example.com')).toBe('ok@example.com');
+    await expect(() => model.validateEmail('bad-email')).toThrow('Formato de email inválido');
+    // validateUsername
+    expect(model.validateUsername('username_ok')).toBe('username_ok');
+    await expect(() => model.validateUsername('ab')).toThrow('Username debe tener al menos 3 caracteres');
+    // validatePasswordHash
+    expect(model.validatePasswordHash('a'.repeat(20))).toBe('a'.repeat(20));
+    await expect(() => model.validatePasswordHash('short')).toThrow('Hash de password inválido');
+    // validateGoogleId / MFA / search term
+    await expect(() => model.validateGoogleId('')).toThrow('Google ID no puede estar vacío');
+    await expect(() => model.validateMFASecret('shortsecret')).toThrow('Secreto MFA demasiado corto');
+    await expect(() => model.validateSearchTerm('   ')).toThrow('Término de búsqueda vacío');
+  });
+
+  test('createGoogleUser success and duplicate and db error', async () => {
+    jest.resetModules();
+    const mockExecute = jest.fn().mockResolvedValue([{ insertId: 88 }]);
+    jest.doMock('../../../db/connection.js', () => ({ executeQuery: mockExecute }));
+    const model = await import('../user.model.js');
+    const id = await model.createGoogleUser({ email: 'g@gg.com', googleId: 'gid123', publicKeyRSA: 'r', publicKeyECDSA: 'e', username: 'ggg', privateKeyRSA: 'pr', privateKeyECDSA: 'pe' });
+    expect(id).toBe(88);
+
+    jest.resetModules();
+    const mockExecute2 = jest.fn().mockRejectedValue({ code: 'ER_DUP_ENTRY' });
+    jest.doMock('../../../db/connection.js', () => ({ executeQuery: mockExecute2 }));
+    const model2 = await import('../user.model.js');
+    await expect(model2.createGoogleUser({ email: 'g@gg.com', googleId: 'gid123', publicKeyRSA: 'r', publicKeyECDSA: 'e', username: 'ggg', privateKeyRSA: 'pr', privateKeyECDSA: 'pe' })).rejects.toThrow('El email o username ya está registrado');
+  });
+
+  test('validateKey optional public and required private behavior', async () => {
+    const model = await import('../user.model.js');
+    // public key optional
+    expect(model.validateKey(null, 'Clave pública RSA', true)).toBeNull();
+    // private key required
+    await expect(() => model.validateKey(null, 'Clave privada RSA', false)).toThrow('Clave privada RSA es obligatoria');
+  });
+
+  test('validateUserId accepts and rejects', async () => {
+    const model = await import('../user.model.js');
+    expect(model.validateUserId('5')).toBe(5);
+    await expect(() => model.validateUserId('0')).toThrow('ID de usuario inválido');
+  });
+
+  test('createUser throws 500 on unexpected DB error', async () => {
+    jest.resetModules();
+    const mockExecute = jest.fn().mockRejectedValue(new Error('boom'));
+    jest.doMock('../../../db/connection.js', () => ({ executeQuery: mockExecute }));
+    const model = await import('../user.model.js');
+    await expect(model.createUser({ email: 'a@b.com', username: 'uuu', passwordHash: 'x'.repeat(20), publicKeyRSA: null, publicKeyECDSA: null, privateKeyRSA: 'p', privateKeyECDSA: 'p' })).rejects.toThrow('Error al crear usuario');
+  });
+
+
   test('validation helpers and db branches', async () => {
     jest.resetModules();
   const model = await import('../user.model.js');

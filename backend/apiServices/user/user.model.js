@@ -398,5 +398,14 @@ export {
     getUserById,
     saveMFASecret,
     deleteMFASecret,
-    searchUserByEmailOrUsername
+    searchUserByEmailOrUsername,
+    // export validation helpers for unit testing
+    validateEmail,
+    validateUsername,
+    validateUserId,
+    validatePasswordHash,
+    validateKey,
+    validateGoogleId,
+    validateMFASecret,
+    validateSearchTerm
 }

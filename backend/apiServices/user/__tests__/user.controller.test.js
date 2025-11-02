@@ -150,7 +150,8 @@ describe('user.controller', () => {
     expect(status).toHaveBeenCalledWith(200);
   });
 
-  test('loginGoogleUser missing token and oauth verify error -> errorSender', async () => {
+  test('loginGoogleUser flows: missing token, existing user branches and new user created', async () => {
+    // missing token
     jest.resetModules();
     let controller = await import('../user.controller.js');
     let req = { body: {} };
@@ -160,15 +161,50 @@ describe('user.controller', () => {
     await controller.loginGoogleUser(req, res);
     expect(status).toHaveBeenCalledWith(400);
 
-    // oauth verify throws -> errorSender
+    // existing user with MFA enabled
     jest.resetModules();
-  // mock google-auth-library so OAuth2Client.verifyIdToken throws
-  jest.doMock('google-auth-library', () => ({ OAuth2Client: function() { return { verifyIdToken: async () => { throw new Error('bad') } } } }));
-    const mockErrorSender = jest.fn();
-    jest.doMock('../../../utils/errorSender.js', () => mockErrorSender);
+    const mockUser = { id: 9, email: 'e@e.com', mfa_enabled: true, rsa_private_key: 'p', rsa_public_key: 'q', ecdsa_private_key: 'r', ecdsa_public_key: 's' };
+    const mockGet = jest.fn().mockResolvedValue(mockUser);
+    jest.doMock('../user.model.js', () => ({ getUserByEmail: mockGet }));
+    jest.doMock('google-auth-library', () => ({ OAuth2Client: function() { return { verifyIdToken: async () => ({ getPayload: () => ({ email: 'e@e.com', sub: 'gid', name: 'Name' }) }) } } }));
     controller = await import('../user.controller.js');
     req = { body: { token: 'tok' } };
-    res = {};
-    await expect(controller.loginGoogleUser(req, res)).rejects.toThrow('bad');
+    json = jest.fn();
+    status = jest.fn().mockReturnValue({ json });
+    res = { status };
+    await controller.loginGoogleUser(req, res);
+    expect(status).toHaveBeenCalledWith(200);
+
+    // existing user without MFA
+    jest.resetModules();
+    const mockUser2 = { id: 10, email: 'f@f.com', mfa_enabled: false, rsa_private_key: 'p', rsa_public_key: 'q', ecdsa_private_key: 'r', ecdsa_public_key: 's' };
+    const mockGet2 = jest.fn().mockResolvedValue(mockUser2);
+    jest.doMock('../user.model.js', () => ({ getUserByEmail: mockGet2 }));
+    jest.doMock('jsonwebtoken', () => ({ sign: jest.fn().mockReturnValue('tokjwt') }));
+    jest.doMock('google-auth-library', () => ({ OAuth2Client: function() { return { verifyIdToken: async () => ({ getPayload: () => ({ email: 'f@f.com', sub: 'gid2', name: 'F' }) }) } } }));
+    controller = await import('../user.controller.js');
+    req = { body: { token: 'tok' } };
+    json = jest.fn();
+    status = jest.fn().mockReturnValue({ json });
+    res = { status };
+    await controller.loginGoogleUser(req, res);
+    expect(status).toHaveBeenCalledWith(200);
+
+    // new user created path
+    jest.resetModules();
+    const mockGet3 = jest.fn().mockResolvedValue(null);
+    const mockCreateGoogle = jest.fn().mockResolvedValue(123);
+    jest.doMock('../user.model.js', () => ({ getUserByEmail: mockGet3, createGoogleUser: mockCreateGoogle }));
+    jest.doMock('../../../utils/cypher/RSA.js', () => ({ generateRSAKeys: () => ({ publicKey: 'rp', privateKey: 'rk' }) }));
+    jest.doMock('../../../utils/cypher/ECDSA.js', () => ({ generateECDSAKeys: () => ({ publicKey: 'ep', privateKey: 'ek' }) }));
+    jest.doMock('google-auth-library', () => ({ OAuth2Client: function() { return { verifyIdToken: async () => ({ getPayload: () => ({ email: 'n@n.com', sub: 'gidn', name: 'N' }) }) } } }));
+    jest.doMock('jsonwebtoken', () => ({ sign: jest.fn().mockReturnValue('newjwt') }));
+    controller = await import('../user.controller.js');
+    req = { body: { token: 'tok' } };
+    json = jest.fn();
+    status = jest.fn().mockReturnValue({ json });
+    res = { status };
+    await controller.loginGoogleUser(req, res);
+    expect(status).toHaveBeenCalledWith(201);
   });
 });
