@@ -264,4 +264,63 @@ describe('chat.model', () => {
     await expect(model.getUserContacts(1)).rejects.toThrow('Error al obtener contactos');
     expect(mockErrorSender).toHaveBeenCalled();
   });
+
+  test('insertGroup rejects when key is not string', async () => {
+    jest.doMock('../../../db/connection.js', () => ({ executeQuery: jest.fn() }));
+    jest.doMock('../../../utils/stringFormatValidators.js', () => ({ detectXSSAttempt: () => false, detectSQLInjectionAttempt: () => false }));
+    const model = await import('../chat.model.js');
+    await expect(model.insertGroup({ name: 'g', creatorId: 1, key: 123 })).rejects.toThrow('Clave del grupo inválida');
+  });
+
+  test('insertGroup rejects when name too long', async () => {
+    const longName = 'a'.repeat(101);
+    jest.doMock('../../../db/connection.js', () => ({ executeQuery: jest.fn() }));
+    jest.doMock('../../../utils/stringFormatValidators.js', () => ({ detectXSSAttempt: () => false, detectSQLInjectionAttempt: () => false }));
+    const model = await import('../chat.model.js');
+    await expect(model.insertGroup({ name: longName, creatorId: 1, key: 'k' })).rejects.toThrow('demasiado largo');
+  });
+
+  test('insertMessage without signature works (signature optional)', async () => {
+    const mockExecute = jest.fn().mockResolvedValue([{ affectedRows: 1 }, {}]);
+    jest.doMock('../../../db/connection.js', () => ({ executeQuery: mockExecute }));
+    jest.doMock('../../../utils/stringFormatValidators.js', () => ({ detectXSSAttempt: () => false, detectSQLInjectionAttempt: () => false }));
+    const model = await import('../chat.model.js');
+    const ok = await model.insertMessage({ message: 'hi', originUserId: 1, targetUserId: 2, originKey: 'k', targetKey: 'k2' });
+    expect(ok).toBe(true);
+  });
+
+  test('getUserMessages SQL injection in message logs error and returns isValid false', async () => {
+    const rows = [ { id: 1, message: 'bad', origin_user_id: 2, target_user_id: 3, created_at: '2020', origin_key: '', target_key: '', signature: 'sig', signature_key: 'pub' } ];
+    const mockExecute = jest.fn().mockResolvedValue([rows, []]);
+    jest.doMock('../../../db/connection.js', () => ({ executeQuery: mockExecute }));
+    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+    jest.doMock('../../../utils/stringFormatValidators.js', () => ({ detectXSSAttempt: () => false, detectSQLInjectionAttempt: () => true }));
+    jest.doMock('../../../utils/cypher/ECDSA.js', () => ({ verifySignature: () => true }));
+    const model = await import('../chat.model.js');
+    const msgs = await model.getUserMessages(3);
+    expect(msgs[0].isValid).toBe(false);
+    expect(consoleError).toHaveBeenCalled();
+    consoleError.mockRestore();
+  });
+
+  test('getUserGroupMessages XSS detected calls errorSender', async () => {
+    const rows = [{ id: 1, message: '<script>', group_id: 2, user_id: 3, created_at: 't', sent: 0, username: 'u', signature: 's', signature_key: 'pub' }];
+    const mockExecute = jest.fn().mockResolvedValue([rows, []]);
+    jest.doMock('../../../db/connection.js', () => ({ executeQuery: mockExecute }));
+    const mockErrorSender = jest.fn();
+    jest.doMock('../../../utils/errorSender.js', () => mockErrorSender);
+    jest.doMock('../../../utils/stringFormatValidators.js', () => ({ detectXSSAttempt: () => true, detectSQLInjectionAttempt: () => false }));
+    jest.doMock('../../../utils/cypher/ECDSA.js', () => ({ verifySignature: () => true }));
+    const model = await import('../chat.model.js');
+    const msgs = await model.getUserGroupMessages(3);
+    expect(mockErrorSender).toHaveBeenCalled();
+    expect(msgs[0].isValid).toBe(false);
+  });
+
+  test('insertGroup rejects when key empty string', async () => {
+    jest.doMock('../../../db/connection.js', () => ({ executeQuery: jest.fn() }));
+    jest.doMock('../../../utils/stringFormatValidators.js', () => ({ detectXSSAttempt: () => false, detectSQLInjectionAttempt: () => false }));
+    const model = await import('../chat.model.js');
+    await expect(model.insertGroup({ name: 'g', creatorId: 1, key: '   ' })).rejects.toThrow('Clave del grupo no puede estar vacía');
+  });
 });
