@@ -59,4 +59,116 @@ describe('user.controller', () => {
     await controller.deleteMFA(req, res);
     expect(status).toHaveBeenCalledWith(200);
   });
+
+  test('registerUser success and createUser throws -> errorSender called', async () => {
+    // success path
+    jest.resetModules();
+    const mockGetUser = jest.fn().mockResolvedValue(null);
+    const mockCreate = jest.fn().mockResolvedValue(77);
+    jest.doMock('../user.model.js', () => ({ getUserByEmail: mockGetUser, createUser: mockCreate }));
+    jest.doMock('argon2', () => ({ hash: jest.fn().mockResolvedValue('hashed') }));
+  // mock utils paths relative to the __tests__ folder
+  jest.doMock('../../../utils/cypher/RSA.js', () => ({ generateRSAKeys: () => ({ publicKey: 'rp', privateKey: 'rk' }) }));
+  jest.doMock('../../../utils/cypher/ECDSA.js', () => ({ generateECDSAKeys: () => ({ publicKey: 'ep', privateKey: 'ek' }) }));
+    jest.doMock('jsonwebtoken', () => ({ sign: jest.fn().mockReturnValue('tkn') }));
+    let controller = await import('../user.controller.js');
+    let req = { body: { email: 'ok@ok.com', username: 'u', password: 'passwordlong' } };
+    let json = jest.fn();
+    let status = jest.fn().mockReturnValue({ json });
+    let res = { status };
+    await controller.registerUser(req, res);
+    expect(status).toHaveBeenCalledWith(201);
+
+    // createUser throws -> errorSender
+    jest.resetModules();
+    const mockGet2 = jest.fn().mockResolvedValue(null);
+    const mockCreate2 = jest.fn().mockRejectedValue(new Error('boom'));
+    const mockErrorSender = jest.fn();
+    jest.doMock('../user.model.js', () => ({ getUserByEmail: mockGet2, createUser: mockCreate2 }));
+  jest.doMock('../../../utils/errorSender.js', () => mockErrorSender);
+    jest.doMock('argon2', () => ({ hash: jest.fn().mockResolvedValue('h') }));
+    jest.doMock('../../../utils/cypher/RSA.js', () => ({ generateRSAKeys: () => ({ publicKey: 'rp', privateKey: 'rk' }) }));
+    jest.doMock('../../../utils/cypher/ECDSA.js', () => ({ generateECDSAKeys: () => ({ publicKey: 'ep', privateKey: 'ek' }) }));
+    controller = await import('../user.controller.js');
+    req = { body: { email: 'err@err.com', username: 'u', password: 'passwordlong' } };
+    res = {};
+    await controller.registerUser(req, res);
+    expect(mockErrorSender).toHaveBeenCalled();
+  });
+
+  test('loginUser flows: not found, invalid password, mfa enabled, success', async () => {
+    jest.resetModules();
+    // not found
+    let mockGet = jest.fn().mockResolvedValue(null);
+    jest.doMock('../user.model.js', () => ({ getUserByEmail: mockGet }));
+    let controller = await import('../user.controller.js');
+    let req = { body: { email: 'no@u.com', password: 'p' } };
+    let json = jest.fn();
+    let status = jest.fn().mockReturnValue({ json });
+    let res = { status };
+    await controller.loginUser(req, res);
+    expect(status).toHaveBeenCalledWith(401);
+
+    // invalid password
+    jest.resetModules();
+    const mockGet2 = jest.fn().mockResolvedValue({ id: 1, password_hash: 'h' });
+    jest.doMock('../user.model.js', () => ({ getUserByEmail: mockGet2 }));
+    jest.doMock('argon2', () => ({ verify: jest.fn().mockResolvedValue(false) }));
+    controller = await import('../user.controller.js');
+    req = { body: { email: 'u@u.com', password: 'bad' } };
+    json = jest.fn();
+    status = jest.fn().mockReturnValue({ json });
+    res = { status };
+    await controller.loginUser(req, res);
+    expect(status).toHaveBeenCalledWith(401);
+
+    // mfa enabled
+    jest.resetModules();
+    const mockGet3 = jest.fn().mockResolvedValue({ id: 2, password_hash: 'h', mfa_enabled: true });
+    jest.doMock('../user.model.js', () => ({ getUserByEmail: mockGet3 }));
+    jest.doMock('argon2', () => ({ verify: jest.fn().mockResolvedValue(true) }));
+    controller = await import('../user.controller.js');
+    req = { body: { email: 'u@u.com', password: 'ok' } };
+    json = jest.fn();
+    status = jest.fn().mockReturnValue({ json });
+    res = { status };
+    await controller.loginUser(req, res);
+    expect(status).toHaveBeenCalledWith(200);
+
+    // success
+    jest.resetModules();
+    const mockGet4 = jest.fn().mockResolvedValue({ id: 3, password_hash: 'h', mfa_enabled: false, rsa_private_key: 'p', rsa_public_key: 'q', ecdsa_private_key: 'r', ecdsa_public_key: 's' });
+    jest.doMock('../user.model.js', () => ({ getUserByEmail: mockGet4 }));
+    jest.doMock('argon2', () => ({ verify: jest.fn().mockResolvedValue(true) }));
+    jest.doMock('jsonwebtoken', () => ({ sign: jest.fn().mockReturnValue('tkn') }));
+    controller = await import('../user.controller.js');
+    req = { body: { email: 'u@u.com', password: 'ok' } };
+    json = jest.fn();
+    status = jest.fn().mockReturnValue({ json });
+    res = { status };
+    await controller.loginUser(req, res);
+    expect(status).toHaveBeenCalledWith(200);
+  });
+
+  test('loginGoogleUser missing token and oauth verify error -> errorSender', async () => {
+    jest.resetModules();
+    let controller = await import('../user.controller.js');
+    let req = { body: {} };
+    let json = jest.fn();
+    let status = jest.fn().mockReturnValue({ json });
+    let res = { status };
+    await controller.loginGoogleUser(req, res);
+    expect(status).toHaveBeenCalledWith(400);
+
+    // oauth verify throws -> errorSender
+    jest.resetModules();
+  // mock google-auth-library so OAuth2Client.verifyIdToken throws
+  jest.doMock('google-auth-library', () => ({ OAuth2Client: function() { return { verifyIdToken: async () => { throw new Error('bad') } } } }));
+    const mockErrorSender = jest.fn();
+    jest.doMock('../../../utils/errorSender.js', () => mockErrorSender);
+    controller = await import('../user.controller.js');
+    req = { body: { token: 'tok' } };
+    res = {};
+    await expect(controller.loginGoogleUser(req, res)).rejects.toThrow('bad');
+  });
 });
