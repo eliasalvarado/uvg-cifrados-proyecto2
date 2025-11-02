@@ -137,9 +137,55 @@ describe('user.model', () => {
     const mockExecute3 = jest.fn().mockResolvedValue([{ affectedRows: 1 }]);
     jest.doMock('../../../db/connection.js', () => ({ executeQuery: mockExecute3 }));
     const model4 = await import('../user.model.js');
-    const saved = await model4.saveMFASecret(1, 'secretbase32long');
+    const saved = await model4.saveMFASecret(1, 'secret123456789012');
     expect(saved).toBe(true);
     const deleted = await model4.deleteMFASecret(1);
     expect(deleted).toBe(true);
+  });
+
+  test('getUserByEmail throws generic on DB error', async () => {
+    jest.resetModules();
+    const mockExecute = jest.fn().mockRejectedValue(new Error('boom'));
+    jest.doMock('../../../db/connection.js', () => ({ executeQuery: mockExecute }));
+    const model = await import('../user.model.js');
+    await expect(model.getUserByEmail('a@b.com')).rejects.toThrow('Error al obtener usuario');
+  });
+
+  test('getUserById throws generic on DB error', async () => {
+    jest.resetModules();
+    const mockExecute = jest.fn().mockRejectedValue(new Error('boom'));
+    jest.doMock('../../../db/connection.js', () => ({ executeQuery: mockExecute }));
+    const model = await import('../user.model.js');
+    await expect(model.getUserById(1)).rejects.toThrow('Error al obtener usuario');
+  });
+
+  test('saveMFASecret throws generic on DB error', async () => {
+    jest.resetModules();
+    const mockExecute = jest.fn().mockRejectedValue(new Error('boom'));
+    jest.doMock('../../../db/connection.js', () => ({ executeQuery: mockExecute }));
+    const model = await import('../user.model.js');
+    await expect(model.saveMFASecret(1, 'secret123456789012')).rejects.toThrow('Error al guardar secreto MFA');
+  });
+
+  test('deleteMFASecret throws generic on DB error', async () => {
+    jest.resetModules();
+    const mockExecute = jest.fn().mockRejectedValue(new Error('boom'));
+    jest.doMock('../../../db/connection.js', () => ({ executeQuery: mockExecute }));
+    const model = await import('../user.model.js');
+    await expect(model.deleteMFASecret(1)).rejects.toThrow('Error al eliminar secreto MFA');
+  });
+
+  test('searchUserByEmailOrUsername throws generic on DB error', async () => {
+    jest.resetModules();
+    const mockExecute = jest.fn().mockRejectedValue(new Error('boom'));
+    jest.doMock('../../../db/connection.js', () => ({ executeQuery: mockExecute }));
+    const model = await import('../user.model.js');
+    await expect(model.searchUserByEmailOrUsername('term')).rejects.toThrow('Error al buscar usuario');
+  });
+
+  test('validateKey throws when too long', async () => {
+    const model = await import('../user.model.js');
+    const long = 'a'.repeat(10001);
+    await expect(() => model.validateKey(long, 'Clave pública RSA', true)).toThrow('Clave pública RSA demasiado larga');
   });
 });

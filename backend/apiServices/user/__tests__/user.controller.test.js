@@ -207,4 +207,83 @@ describe('user.controller', () => {
     await controller.loginGoogleUser(req, res);
     expect(status).toHaveBeenCalledWith(201);
   });
+
+  test('registerUser when user already exists returns 400', async () => {
+    jest.resetModules();
+    const mockGet = jest.fn().mockResolvedValue({ id: 1 });
+    jest.doMock('../user.model.js', () => ({ getUserByEmail: mockGet }));
+    const controller = await import('../user.controller.js');
+    const req = { body: { email: 'exists@e.com', username: 'u', password: 'passlong' } };
+    const json = jest.fn();
+    const status = jest.fn().mockReturnValue({ json });
+    const res = { status };
+    await controller.registerUser(req, res);
+    expect(status).toHaveBeenCalledWith(400);
+  });
+
+  test('getUserInfo returns 200 when user exists', async () => {
+    const mockGet = jest.fn().mockResolvedValue({ id: 2, username: 'u', email: 'u@u.com', rsa_public_key: 'r', ecdsa_public_key: 'e', mfa_enabled: false });
+    jest.doMock('../user.model.js', () => ({ getUserById: mockGet }));
+    const controller = await import('../user.controller.js');
+    const json = jest.fn();
+    const status = jest.fn().mockReturnValue({ json });
+    const req = { user: { id: 2 } };
+    const res = { status };
+    await controller.getUserInfo(req, res);
+    expect(status).toHaveBeenCalledWith(200);
+    expect(json).toHaveBeenCalledWith(expect.objectContaining({ id: 2, email: 'u@u.com', username: 'u' }));
+  });
+
+  test('getUserByIdController success returns 200', async () => {
+    jest.resetModules();
+    const mockGet = jest.fn().mockResolvedValue({ id: 3, email: 'e@e.com', username: 'name', rsa_public_key: 'r', ecdsa_public_key: 'e' });
+    jest.doMock('../user.model.js', () => ({ getUserById: mockGet }));
+    const controller = await import('../user.controller.js');
+    const json = jest.fn();
+    const status = jest.fn().mockReturnValue({ json });
+    const req = { params: { userId: '3' } };
+    const res = { status };
+    await controller.getUserByIdController(req, res);
+    expect(status).toHaveBeenCalledWith(200);
+    expect(json).toHaveBeenCalledWith(expect.objectContaining({ id: 3, email: 'e@e.com' }));
+  });
+
+  test('deleteMFA when delete fails calls errorSender', async () => {
+    jest.resetModules();
+    const mockDelete = jest.fn().mockResolvedValue(false);
+    const mockErrorSender = jest.fn();
+    jest.doMock('../user.model.js', () => ({ deleteMFASecret: mockDelete }));
+    jest.doMock('../../../utils/errorSender.js', () => mockErrorSender);
+    const controller = await import('../user.controller.js');
+    const req = { user: { id: 5 } };
+    const res = {};
+    await controller.deleteMFA(req, res);
+    expect(mockErrorSender).toHaveBeenCalled();
+  });
+
+  test('searchUserController missing param calls errorSender', async () => {
+    jest.resetModules();
+    const mockErrorSender = jest.fn();
+    jest.doMock('../../../utils/errorSender.js', () => mockErrorSender);
+    const controller = await import('../user.controller.js');
+    const req = { params: {} };
+    const res = {};
+    await controller.searchUserController(req, res);
+    expect(mockErrorSender).toHaveBeenCalled();
+  });
+
+  test('searchUserController returns 200 when user found', async () => {
+    jest.resetModules();
+    const mockSearch = jest.fn().mockResolvedValue({ id: 7, email: 's@e.com', username: 'search', rsa_public_key: 'r', ecdsa_public_key: 'e' });
+    jest.doMock('../user.model.js', () => ({ searchUserByEmailOrUsername: mockSearch }));
+    const controller = await import('../user.controller.js');
+    const json = jest.fn();
+    const status = jest.fn().mockReturnValue({ json });
+    const req = { params: { search: 'search' } };
+    const res = { status };
+    await controller.searchUserController(req, res);
+    expect(status).toHaveBeenCalledWith(200);
+    expect(json).toHaveBeenCalledWith(expect.objectContaining({ ok: true, result: expect.objectContaining({ id: 7 }) }));
+  });
+
 });
