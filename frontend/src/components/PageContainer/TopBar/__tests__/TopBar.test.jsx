@@ -26,4 +26,15 @@ describe('TopBar', () => {
     fireEvent.click(btn);
     expect(toggler).toHaveBeenCalled();
   });
+
+  it('TopBar without toggler', () => {
+    render(
+      <MemoryRouter>
+        <TopBar logo="/logo.png" name="Luis" showToggler={false} />
+      </MemoryRouter>
+    );
+    expect(screen.getByAltText('Logo de ASIGBO')).toBeInTheDocument();
+    expect(screen.getByTestId('user-info')).toHaveTextContent('Luis');
+    expect(screen.queryByRole('button')).toBeNull();
+  });
 });

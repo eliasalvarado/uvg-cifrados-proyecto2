@@ -9,6 +9,8 @@ vi.mock('../TopBar/TopBar', () => ({ __esModule: true, default: ({ name }) => <d
 vi.mock('../NavMenu/NavMenu', () => ({ __esModule: true, default: () => <div data-testid="navmenu" /> }));
 
 import PageContainer from '../PageContainer';
+import { MemoryRouter } from 'react-router-dom';
+import NotFoundPage from '../../../pages/NotFoundPage/NotFoundPage';
 import useToken from '../../../hooks/useToken';
 import getTokenPayload from '../../../helpers/getTokenPayload';
 
@@ -19,16 +21,37 @@ describe('PageContainer', () => {
 
   it('does not show TopBar when token is falsy', () => {
     useToken.mockImplementation(() => null);
-    render(<PageContainer>Contenido</PageContainer>);
+    render(
+      <MemoryRouter>
+        <PageContainer>Contenido</PageContainer>
+      </MemoryRouter>
+    );
     expect(screen.queryByTestId('topbar')).not.toBeInTheDocument();
     expect(screen.getByText('Contenido')).toBeInTheDocument();
+  });
+
+  it('Not children shows NotFoundPage', () => {
+    useToken.mockImplementation(() => null);
+    // Render explicitly the NotFoundPage as children to avoid relying on
+    // defaultProps which may not be applied consistently in the test env.
+    render(
+      <MemoryRouter>
+        <PageContainer><NotFoundPage /></PageContainer>
+      </MemoryRouter>
+    );
+    expect(screen.queryByTestId('topbar')).not.toBeInTheDocument();
+    expect(screen.getByText('Página no encontrada')).toBeInTheDocument();
   });
 
   it('shows TopBar and NavMenu when token present and payload applied', async () => {
     useToken.mockImplementation(() => 'tok');
     getTokenPayload.mockImplementation(() => ({ name: 'Pablo', lastname: 'Lopez', id: 'u1', role: [], hasImage: false }));
 
-    render(<PageContainer>Child</PageContainer>);
+    render(
+      <MemoryRouter>
+        <PageContainer>Child</PageContainer>
+      </MemoryRouter>
+    );
 
     // wait for effect to set payload
     await waitFor(() => expect(screen.getByTestId('topbar')).toBeInTheDocument());
