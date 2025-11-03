@@ -53,6 +53,8 @@ function ChatInput({ onSend=null, onFileSend=null, onKeyUp=null}) {
 
 	return (
 		<div className={styles.inputContainer}>
+			{/* hidden file input to allow file attachments and testing */}
+			<input data-testid="file-input" type="file" ref={fileInputRef} onChange={(e) => setFile(e.target.files[0] || null)} style={{ display: 'none' }} />
 			<input
 				type="text"
 				className={styles.input}
