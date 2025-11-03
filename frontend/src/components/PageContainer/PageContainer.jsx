@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import useToken from '@hooks/useToken';
-import LogoLetrasBlancas from '@assets/logo/logo_blanco.png';
 import TopBar from './TopBar/TopBar';
 import getTokenPayload from '../../helpers/getTokenPayload';
 import styles from './PageContainer.module.css';
@@ -81,7 +80,6 @@ function PageContainer({ children }) {
       {isShown ? (
         <TopBar
           toggler={toggleMenu}
-          logo={LogoLetrasBlancas}
           name={`${payload.name} ${payload.lastname}`}
           showToggler={isMobile}
           idUser={payload.id}

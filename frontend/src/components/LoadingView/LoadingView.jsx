@@ -3,7 +3,7 @@ import styles from './LoadingView.module.css';
 
 function LoadingView() {
   return (
-    <div className={styles.loadingView}>
+    <div data-testid="loading" className={styles.loadingView}>
       <div className={styles.spinner1}>
         <div className={styles.spinner2}>
           <div className={styles.spinner3} />

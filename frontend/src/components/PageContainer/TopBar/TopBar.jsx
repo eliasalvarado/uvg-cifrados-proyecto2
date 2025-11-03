@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
-import MenuIcon from '../../../assets/icons/MenuIcon';
+import MenuIcon from '../../../assets/icons/MenuIcon.svg';
 import styles from './TopBar.module.css';
 import UserInfo from '../UserInfo/UserInfo';
 /**
@@ -28,7 +28,7 @@ function TopBar({
         {/* Botón toggle */}
         {showToggler ? (
           <button className={styles.icon} onClick={toggler} type="button" ref={menuButtonRef}>
-            <MenuIcon fill="none" stroke="#ffffff" />
+            <img src={MenuIcon} alt="Menú de navegación" />
           </button>
         ) : undefined}
 

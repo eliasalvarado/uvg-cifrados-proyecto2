@@ -5,7 +5,6 @@ import { HiHome } from 'react-icons/hi';
 import { MdSpaceDashboard as DashboardIcon } from 'react-icons/md';
 import { NavLink } from 'react-router-dom';
 import styles from './NavMenu.module.css';
-import UserPicture from '../../UserPicture';
 import useLogout from '../../../hooks/useLogout';
 import NavMenuButton from '../NavMenuButton/NavMenuButton';
 import consts from '../../../helpers/consts';
@@ -26,7 +25,7 @@ import LoadingView from '../../LoadingView/LoadingView';
  */
 
 function NavMenu({
-  idUser, name, className, toggler, roles, hasImage, menuRef,
+  name, className, toggler, roles, menuRef,
 }) {
   const { logout, loading } = useLogout();
 
@@ -40,13 +39,6 @@ function NavMenu({
   return (
     <div className={`${styles.navMenu} ${className}`} ref={menuRef}>
       <div className={styles.profile}>
-        <UserPicture
-          className={styles.profilePicture}
-          name={name}
-          idUser={idUser}
-          hasImage={hasImage}
-          onClick={toggler}
-        />
         <span className={styles.profileName}>{name}</span>
       </div>
       <div className={styles.buttons}>
@@ -54,7 +46,7 @@ function NavMenu({
           <NavLink to="/" onClick={toggler || undefined}>
             <NavMenuButton icon={<HiHome />} label="Inicio" className={styles.optionIcon} />
           </NavLink>
-          {roles?.some((role) => responsibleRoles.includes(role)) && (
+          {roles?.some((role) => responsibleRoles.has(role)) && (
             <NavLink to="/panel" onClick={toggler || undefined}>
               <NavMenuButton
                 icon={<DashboardIcon />}
