@@ -1,6 +1,6 @@
-projectKey=uvg_cifrados_proyecto2
+projectKey=uvg_cifrados_proyecto2_backend
 serverUrl=http://localhost:9000
 serverVersion=25.10.0.114319
-dashboardUrl=http://localhost:9000/dashboard?id=uvg_cifrados_proyecto2
-ceTaskId=6d5d8287-71f9-4818-858f-98aded40ca76
-ceTaskUrl=http://localhost:9000/api/ce/task?id=6d5d8287-71f9-4818-858f-98aded40ca76
+dashboardUrl=http://localhost:9000/dashboard?id=uvg_cifrados_proyecto2_backend
+ceTaskId=914fae7d-215d-4eb0-a9d8-e178ab6ba8ca
+ceTaskUrl=http://localhost:9000/api/ce/task?id=914fae7d-215d-4eb0-a9d8-e178ab6ba8ca

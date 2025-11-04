@@ -1,5 +1,4 @@
 import React from 'react';
-// import PropTypes from 'prop-types';
 import { NavLink } from 'react-router-dom';
 import banner from '@assets/banner/not-found-banner.svg';
 import styles from './NotFoundPage.module.css';

@@ -16,8 +16,9 @@ const executeQuery = (query, params) => {
     connection.execute(query, params, (error, results, fields) => {
       if (error) {
         // Manejo de errores con errorSender
-        errorSender({ res: null, ex: error });
-        return reject(error);
+        const err = error instanceof Error ? error : new Error(String(error));
+        errorSender({ res: null, ex: err });
+        return reject(err);
       }
       resolve([results, fields]);
     });

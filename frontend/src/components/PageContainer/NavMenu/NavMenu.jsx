@@ -79,21 +79,17 @@ function NavMenu({
 }
 
 NavMenu.propTypes = {
-  idUser: PropTypes.string,
   name: PropTypes.string.isRequired,
   className: PropTypes.string,
   toggler: PropTypes.func,
   roles: PropTypes.arrayOf(PropTypes.string),
-  hasImage: PropTypes.bool,
   menuRef: PropTypes.any,
 };
 
 NavMenu.defaultProps = {
-  idUser: null,
   className: undefined,
   toggler: undefined,
   roles: null,
-  hasImage: false,
   menuRef: null,
 };
 
